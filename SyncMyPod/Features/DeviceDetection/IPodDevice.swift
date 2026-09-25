@@ -27,6 +27,13 @@ nonisolated struct IPodDevice: Identifiable, Equatable, Sendable {
         return firmwareVersion.flatMap(IPodModelCatalog.classicGeneration(forFirmwareVersion:))
     }
 
+    /// Falls back to the USB product ID, which settles the question even when the exact
+    /// generation can't be pinned down (e.g. a 5G/5.5G with an empty SysInfo).
+    var requiresDatabaseHash: Bool? {
+        generation?.requiresDatabaseHash
+            ?? usbIdentity?.productID.flatMap(IPodModelCatalog.requiresDatabaseHash(forProductID:))
+    }
+
     var generationDescription: String? {
         generation?.displayName ?? usbIdentity?.productID.flatMap(IPodModelCatalog.familyName(forProductID:))
     }

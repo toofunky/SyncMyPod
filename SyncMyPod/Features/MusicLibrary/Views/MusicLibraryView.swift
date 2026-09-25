@@ -4,9 +4,11 @@ import UniformTypeIdentifiers
 
 struct MusicLibraryView: View {
     @Environment(\.modelContext) private var context
+    @Environment(IPodMountWatcher.self) private var watcher
     @Query private var folders: [LibraryFolder]
     @Query private var tracks: [LibraryTrack]
     @State private var model = MusicLibraryModel()
+    @State private var syncModel = IPodSyncModel()
     @State private var isChoosingFolder = false
 
     var body: some View {
@@ -15,6 +17,21 @@ struct MusicLibraryView: View {
             .fileImporter(isPresented: $isChoosingFolder, allowedContentTypes: [.folder]) { result in
                 if case .success(let url) = result { model.chooseFolder(url, in: context) }
             }
+            .alert(syncModel.result?.title ?? "", isPresented: isShowingSyncResult,
+                   presenting: syncModel.result) { _ in
+                Button("OK") {}
+            } message: { result in
+                Text(result.message)
+            }
+    }
+
+    private var isShowingSyncResult: Binding<Bool> {
+        Binding(get: { syncModel.result != nil }, set: { if !$0 { syncModel.result = nil } })
+    }
+
+    private var addToIPod: (([LibraryTrack]) -> Void)? {
+        guard let device = watcher.connectedDevice, !syncModel.isSyncing else { return nil }
+        return { syncModel.add($0, to: device, in: context) }
     }
 
     @ViewBuilder
@@ -24,7 +41,7 @@ struct MusicLibraryView: View {
                 LibraryScanStatusView(folderPath: folder.path, trackCount: tracks.count,
                                       lastScanDate: folder.lastScanDate, state: model.state,
                                       onCancel: model.cancelScan)
-                LibraryTrackTableView(tracks: tracks)
+                LibraryTrackTableView(tracks: tracks, addToIPod: addToIPod)
             }
         } else {
             ContentUnavailableView {
@@ -40,6 +57,10 @@ struct MusicLibraryView: View {
     @ToolbarContentBuilder
     private var toolbarContent: some ToolbarContent {
         ToolbarItemGroup {
+            if syncModel.isSyncing {
+                ProgressView()
+                    .controlSize(.small)
+            }
             Button("Choose Folder…", systemImage: "folder.badge.plus") { isChoosingFolder = true }
                 .disabled(model.isScanning)
             Button("Rescan", systemImage: "arrow.clockwise") { model.rescan(in: context) }
@@ -50,10 +71,12 @@ struct MusicLibraryView: View {
 
 #Preview("Library") {
     MusicLibraryView()
+        .environment(IPodMountWatcher.preview(connectedDevice: .preview))
         .modelContainer(.preview)
 }
 
 #Preview("Empty") {
     MusicLibraryView()
+        .environment(IPodMountWatcher.preview())
         .modelContainer(.emptyPreview)
 }

@@ -13,6 +13,15 @@ nonisolated enum IPodModelCatalog {
         }
     }
 
+    /// Whether every generation sharing this product ID needs a signed iTunesDB, or `nil` if unknown.
+    static func requiresDatabaseHash(forProductID productID: Int) -> Bool? {
+        switch productID {
+        case videoProductID: false
+        case classicProductID: true
+        default: nil
+        }
+    }
+
     /// Accepts "MA146", "xA146" (SysInfo form) or "MA146LL/A"; the first letter is ignored.
     static func generation(forModelNumber modelNumber: String) -> IPodGeneration? {
         let key = String(modelNumber.dropFirst().prefix(4)).uppercased()

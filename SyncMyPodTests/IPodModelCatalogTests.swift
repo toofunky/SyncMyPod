@@ -1,3 +1,4 @@
+import Foundation
 import Testing
 @testable import SyncMyPod
 
@@ -42,6 +43,22 @@ struct IPodModelCatalogTests {
     ])
     func infersClassicGenerationFromFirmware(version: String, generation: IPodGeneration) {
         #expect(IPodModelCatalog.classicGeneration(forFirmwareVersion: version) == generation)
+    }
+
+    @Test func decidesDatabaseHashFromProductID() {
+        #expect(IPodModelCatalog.requiresDatabaseHash(forProductID: 0x1209) == false)
+        #expect(IPodModelCatalog.requiresDatabaseHash(forProductID: 0x1261) == true)
+        #expect(IPodModelCatalog.requiresDatabaseHash(forProductID: 0x1234) == nil)
+    }
+
+    @Test func videoIPodWithEmptySysInfoDoesNotRequireHash() {
+        let device = IPodDevice(id: "1", volumeURL: URL(filePath: "/Volumes/iPod"), volumeName: "iPod",
+                                capacityBytes: nil, availableBytes: nil, sysInfo: .empty,
+                                usbIdentity: IPodUSBIdentity(vendorString: "Apple", productString: "iPod",
+                                                             serialNumber: "000A27001234ABCD",
+                                                             vendorID: 0x05AC, productID: 0x1209))
+        #expect(device.generation == nil)
+        #expect(device.requiresDatabaseHash == false)
     }
 
     @Test func namesFamilyFromProductID() {

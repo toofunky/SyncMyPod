@@ -3,11 +3,13 @@ import SwiftUI
 
 struct LibraryTrackTableView: View {
     let tracks: [LibraryTrack]
+    var addToIPod: (([LibraryTrack]) -> Void)?
 
     @State private var sortOrder = [KeyPathComparator(\LibraryTrack.artist)]
+    @State private var selection = Set<LibraryTrack.ID>()
 
     var body: some View {
-        Table(tracks.sorted(using: sortOrder), sortOrder: $sortOrder) {
+        Table(tracks.sorted(using: sortOrder), selection: $selection, sortOrder: $sortOrder) {
             TableColumn("Title", value: \.title)
             TableColumn("Artist", value: \.artist)
             TableColumn("Album", value: \.album)
@@ -21,10 +23,16 @@ struct LibraryTrackTableView: View {
                     .monospacedDigit()
             }
         }
+        .contextMenu(forSelectionType: LibraryTrack.ID.self) { ids in
+            Button("Add to iPod", systemImage: "ipod") {
+                addToIPod?(tracks.filter { ids.contains($0.id) })
+            }
+            .disabled(addToIPod == nil || ids.isEmpty)
+        }
     }
 }
 
 #Preview {
-    LibraryTrackTableView(tracks: LibraryTrack.previewTracks)
+    LibraryTrackTableView(tracks: LibraryTrack.previewTracks, addToIPod: { _ in })
         .modelContainer(.emptyPreview)
 }
