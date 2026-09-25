@@ -4,6 +4,8 @@ import Foundation
 nonisolated struct IPodTrackSyncer {
     let volumeURL: URL
     var formats = ArtworkFormat.videoIPod
+    /// Required by iPod classic firmware; `nil` for models that read an unsigned iTunesDB.
+    var signer: Hash58?
 
     /// Skips requests already on the iPod. Cancelling stops copying but still saves the removals
     /// and the tracks already copied.
@@ -12,7 +14,7 @@ nonisolated struct IPodTrackSyncer {
               progress: @escaping @Sendable (IPodSyncProgress) async -> Void = { _ in }) async throws -> IPodSyncOutcome {
         let store = DatabaseFileStore.iTunesDB(onVolume: volumeURL)
         let files = IPodControlFiles(volumeURL: volumeURL)
-        var editor = try ITunesDBEditor(root: store.loadRecords())
+        var editor = try openEditor(store)
         let mergedPlayCounts = files.playCounts().map { editor.mergePlayCounts($0) } ?? false
         let removedLocations = editor.removeTracks(databaseIDs: removals)
         let device = try ITunesDBParser(data: editor.serialized()).parse()
@@ -28,7 +30,7 @@ nonisolated struct IPodTrackSyncer {
             try await copyAndRecord(batch, into: &editor, artwork: &artwork, copied: &copied, outcome: &outcome)
             await progress(IPodSyncProgress(completed: outcome.addedCount, total: pending.count, currentTitle: nil))
             try artwork.save()
-            try store.save(editor.serialized())
+            try store.save(signer?.sign(editor.serialized()) ?? editor.serialized())
         } catch {
             copied.forEach { try? FileManager.default.removeItem(at: $0) }
             artwork.rollBack()
@@ -37,6 +39,15 @@ nonisolated struct IPodTrackSyncer {
         files.cleanUp(removedLocations: removedLocations, playCountsMerged: mergedPlayCounts)
         artwork.compactIfWasteful()
         return outcome
+    }
+
+    /// Refuses to touch a signed database whose signature our key can't reproduce.
+    private func openEditor(_ store: DatabaseFileStore) throws -> ITunesDBEditor {
+        if let signer, let current = try? Data(contentsOf: store.fileURL), Hash58.isSigned(current),
+           !signer.isValid(current) {
+            throw IPodSyncError.signatureMismatch
+        }
+        return try ITunesDBEditor(root: store.loadRecords())
     }
 
     private func newRequests(in requests: [IPodSyncRequest], notIn device: ITunesDatabase) -> [IPodSyncRequest] {

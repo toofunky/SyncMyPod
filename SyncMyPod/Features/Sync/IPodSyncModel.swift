@@ -15,13 +15,15 @@ final class IPodSyncModel {
 
     func sync(_ requests: [IPodSyncRequest], removing removals: Set<UInt64> = [], to device: IPodDevice) {
         guard !isSyncing, !requests.isEmpty || !removals.isEmpty else { return }
-        guard device.requiresDatabaseHash == false else {
-            let name = device.generationDescription ?? "this iPod"
-            result = .failed(IPodSyncError.unsupportedDevice(name).localizedDescription)
+        let syncer: IPodTrackSyncer
+        do {
+            syncer = try IPodTrackSyncer(device: device)
+        } catch {
+            result = .failed(error.localizedDescription)
             return
         }
         progress = IPodSyncProgress(completed: 0, total: requests.count, currentTitle: nil)
-        syncTask = Task { await run(requests, removing: removals, on: device.volumeURL) }
+        syncTask = Task { await run(requests, removing: removals, with: syncer) }
     }
 
     func cancel() {
@@ -29,9 +31,9 @@ final class IPodSyncModel {
         syncTask?.cancel()
     }
 
-    private func run(_ requests: [IPodSyncRequest], removing removals: Set<UInt64>, on volumeURL: URL) async {
+    private func run(_ requests: [IPodSyncRequest], removing removals: Set<UInt64>,
+                     with syncer: IPodTrackSyncer) async {
         do {
-            let syncer = IPodTrackSyncer(volumeURL: volumeURL)
             let outcome = try await syncer.sync(adding: requests, removing: removals) { [weak self] update in
                 await self?.report(update)
             }
