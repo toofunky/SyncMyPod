@@ -2,7 +2,7 @@
 
 ## Project Context
 - **Language/Tooling**: Swift 6+, Xcode 26+
-- **Target Platforms**: macOS 14.0+
+- **Target Platforms**: macOS 27.0+
 - **UI Framework**: Pure SwiftUI (Strictly no UIKit or Storyboards unless requested)
 - **Dependency Management**: Swift Package Manager (SPM) only (No CocoaPods/Carthage)
 - **Concurrency**: Swift Concurrency (async/await, Actors)

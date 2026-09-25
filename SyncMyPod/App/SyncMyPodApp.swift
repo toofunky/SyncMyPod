@@ -1,3 +1,4 @@
+import SwiftData
 import SwiftUI
 
 @main
@@ -9,5 +10,6 @@ struct SyncMyPodApp: App {
             ContentView()
                 .environment(mountWatcher)
         }
+        .modelContainer(for: MusicLibrarySchema.models)
     }
 }
