@@ -27,6 +27,15 @@ struct LibraryScannerTests {
         #expect(try tracks().map(\.codec) == [.aac, .mp3, .alac])
     }
 
+    @Test func tracksSavedWithoutACodecReadAsAAC() throws {
+        let context = ModelContext(container)
+        let track = LibraryTrack(filePath: "/Music/old.m4a")
+        track.codecRawValue = nil
+        context.insert(track)
+        try context.save()
+        #expect(try ModelContext(container).fetch(FetchDescriptor<LibraryTrack>()).map(\.codec) == [.aac])
+    }
+
     @Test func rescanDetectsUnchangedModifiedAndRemovedFiles() async throws {
         defer { try? FileManager.default.removeItem(at: folder) }
         let one = try AudioFixtureWriter.writeSilence(to: folder.appending(path: "one.m4a"))

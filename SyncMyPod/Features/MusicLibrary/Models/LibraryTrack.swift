@@ -7,7 +7,8 @@ nonisolated final class LibraryTrack {
     static let currentScanVersion = 1
 
     @Attribute(.unique) var filePath: String
-    var codec = AudioCodec.aac
+    /// Optional because rows scanned before codecs were recorded hold `NULL`; those were all AAC.
+    @Attribute(originalName: "codec") var codecRawValue: String?
     var fileSize = 0
     var modificationDate = Date.distantPast
     var title = ""
@@ -29,6 +30,11 @@ nonisolated final class LibraryTrack {
 
     init(filePath: String) {
         self.filePath = filePath
+    }
+
+    var codec: AudioCodec {
+        get { codecRawValue.flatMap(AudioCodec.init(rawValue:)) ?? .aac }
+        set { codecRawValue = newValue.rawValue }
     }
 
     func matches(_ file: ScannedAudioFile) -> Bool {
