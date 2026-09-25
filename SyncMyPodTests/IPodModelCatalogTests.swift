@@ -23,4 +23,24 @@ struct IPodModelCatalogTests {
         let hashed = IPodGeneration.allCases.filter(\.requiresDatabaseHash)
         #expect(hashed == [.classic6G, .classic6_5G, .classic7G])
     }
+
+    @Test(arguments: [
+        ("8K203FK59ZU", "MC297"),
+        ("8K2000009ZS", "MC293"),
+        ("XX00000A2C5", "MB562")
+    ])
+    func mapsSerialSuffixToModelNumber(serialNumber: String, modelNumber: String) {
+        #expect(IPodModelCatalog.modelNumber(forSerialNumber: serialNumber) == modelNumber)
+    }
+
+    @Test(arguments: [
+        ("1.1.2", IPodGeneration.classic6G),
+        ("2.0", .classic6_5G),
+        ("2.0.1", .classic6_5G),
+        ("2.0.2", .classic7G),
+        ("2.0.4", .classic7G)
+    ])
+    func infersClassicGenerationFromFirmware(version: String, generation: IPodGeneration) {
+        #expect(IPodModelCatalog.classicGeneration(forFirmwareVersion: version) == generation)
+    }
 }

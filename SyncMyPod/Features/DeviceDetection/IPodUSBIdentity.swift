@@ -7,7 +7,7 @@ import DiskArbitration
 /// empty (e.g. if iTunes never fully wrote its device-info cache), so this is used
 /// as a fallback/supplement — it's always available as long as the device is
 /// enumerated as a USB mass-storage device, which every mounted iPod is.
-struct IPodUSBIdentity: Equatable, Sendable {
+nonisolated struct IPodUSBIdentity: Equatable, Sendable {
     var vendorString: String?      // kUSBVendorString, e.g. "Apple"
     var productString: String?     // kUSBProductString, e.g. "iPod"
     var serialNumber: String?      // kUSBSerialNumberString — the device's persistent USB serial.
@@ -15,6 +15,7 @@ struct IPodUSBIdentity: Equatable, Sendable {
                                     // would otherwise cache as "FirewireGuid" in SysInfo.
     var vendorID: Int?             // idVendor
     var productID: Int?            // idProduct
+    var locationID: Int?           // USB topology address, used to reach the device for control requests
 
     init?(volumeURL: URL) {
         guard let bsdName = Self.bsdName(forVolumeAt: volumeURL),
@@ -25,6 +26,7 @@ struct IPodUSBIdentity: Equatable, Sendable {
         serialNumber = info["kUSBSerialNumberString"] as? String
         vendorID = info["idVendor"] as? Int
         productID = info["idProduct"] as? Int
+        locationID = info["locationID"] as? Int
 
         if vendorString == nil, productString == nil, serialNumber == nil,
            vendorID == nil, productID == nil {
@@ -33,12 +35,13 @@ struct IPodUSBIdentity: Equatable, Sendable {
     }
 
     init(vendorString: String?, productString: String?, serialNumber: String?,
-         vendorID: Int?, productID: Int?) {
+         vendorID: Int?, productID: Int?, locationID: Int? = nil) {
         self.vendorString = vendorString
         self.productString = productString
         self.serialNumber = serialNumber
         self.vendorID = vendorID
         self.productID = productID
+        self.locationID = locationID
     }
 
     private static func bsdName(forVolumeAt url: URL) -> String? {
