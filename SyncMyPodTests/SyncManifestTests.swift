@@ -122,4 +122,19 @@ struct SyncManifestTests {
         #expect(loaded.strayDatabaseIDs == [20])
         #expect(files.manifest() == loaded.manifest)
     }
+
+    @Test func readsManifestsSavedBeforePlaylistsSynced() throws {
+        let volume = try TemporaryIPodVolume(database: nil)
+        let files = IPodControlFiles(volumeURL: volume.url)
+        let legacy = ["entries": ["/Music/One.m4a": ["databaseID": 7]]]
+        try PropertyListSerialization.data(fromPropertyList: legacy, format: .binary, options: 0)
+            .write(to: files.manifestURL)
+        #expect(files.manifest().entries["/Music/One.m4a"]?.databaseID == 7)
+        #expect(files.manifest().playlistIDs.isEmpty)
+    }
+
+    @Test func keepsPlaylistIDsWhenDroppingStaleEntries() {
+        let manifest = SyncManifest().managingPlaylists([77]).valid(for: [])
+        #expect(manifest.playlistIDs == [77])
+    }
 }

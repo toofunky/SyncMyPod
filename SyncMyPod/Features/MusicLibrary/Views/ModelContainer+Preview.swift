@@ -6,6 +6,7 @@ extension ModelContainer {
         let container = makeInMemory()
         container.mainContext.insert(LibraryFolder.preview)
         LibraryTrack.previewTracks.forEach(container.mainContext.insert)
+        container.mainContext.insert(LibraryPlaylist.preview)
         return container
     }()
 

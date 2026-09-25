@@ -9,8 +9,10 @@ nonisolated struct IPodTrackSyncer {
 
     /// Adds requests that aren't on the iPod and updates those whose file changed since the manifest recorded
     /// it; the rest are skipped. Cancelling stops copying but still saves the removals and the songs already copied.
+    /// Non-`nil` `playlists` replace the playlists earlier syncs wrote.
     @concurrent
     func sync(adding requests: [IPodSyncRequest], removing removals: Set<UInt64> = [],
+              playlists: [IPodPlaylistRequest]? = nil,
               progress: @escaping @Sendable (IPodSyncProgress) async -> Void = { _ in }) async throws -> IPodSyncOutcome {
         let store = DatabaseFileStore.iTunesDB(onVolume: volumeURL)
         let files = IPodControlFiles(volumeURL: volumeURL)
@@ -19,16 +21,17 @@ nonisolated struct IPodTrackSyncer {
         let removedLocations = editor.removeTracks(databaseIDs: removals)
         let device = try ITunesDBParser(data: editor.serialized()).parse()
         let manifest = files.manifest().valid(for: Set(device.tracks.map(\.databaseID)))
-        let batch = Self.batch(for: requests, device: device, manifest: manifest, progress: progress)
+        let batch = Self.batch(for: requests, playlists: playlists, device: device, manifest: manifest,
+                               progress: progress)
         let outcome = IPodSyncOutcome(skipped: requests.count - batch.items.count, removed: removedLocations.count)
-        guard !batch.items.isEmpty || !removedLocations.isEmpty else { return outcome }
+        guard !batch.isEmpty || !removedLocations.isEmpty else { return outcome }
         try ensureFreeSpace(for: batch.items, freeing: files.totalSize(of: removedLocations))
         var artwork = try ArtworkSyncSession(volumeURL: volumeURL, formats: formats)
         artwork.removeImages(forTracks: removals)
         var writer = IPodBatchWriter(editor: editor, artwork: artwork, outcome: outcome,
                                      copier: IPodMusicFileCopier(volumeURL: volumeURL), albumTracks: batch.albumTracks)
         try await commit(batch, with: &writer, store: store)
-        try? files.save(manifest.recording(batch.items.map(\.request), as: writer.outcome.syncedDatabaseIDs))
+        try? files.save(batch.manifest(after: writer.outcome))
         files.cleanUp(removedLocations: removedLocations, replacedLocations: writer.replacedLocations,
                       playCountsMerged: mergedPlayCounts)
         writer.artwork.compactIfWasteful()
@@ -39,6 +42,7 @@ nonisolated struct IPodTrackSyncer {
     private func commit(_ batch: SyncBatch, with writer: inout IPodBatchWriter, store: DatabaseFileStore) async throws {
         do {
             try await write(batch, with: &writer)
+            if let playlists = batch.playlists { writer.writePlaylists(playlists, resolver: batch.resolver) }
             let done = writer.outcome.addedCount + writer.outcome.updatedCount
             await batch.progress(IPodSyncProgress(completed: done, total: batch.items.count, currentTitle: nil))
             try writer.artwork.save()
@@ -63,14 +67,17 @@ nonisolated struct IPodTrackSyncer {
     }
 
     /// Updates first, then additions, each file and each iPod track at most once.
-    private static func batch(for requests: [IPodSyncRequest], device: ITunesDatabase, manifest: SyncManifest,
+    private static func batch(for requests: [IPodSyncRequest], playlists: [IPodPlaylistRequest]?,
+                              device: ITunesDatabase, manifest: SyncManifest,
                               progress: @escaping @Sendable (IPodSyncProgress) async -> Void) -> SyncBatch {
         let plan = SyncPlanner(manifest: manifest, onDevice: device.tracks).plan(selected: requests, unselected: [])
         var updatedIDs: Set<UInt64> = []
         var seenKeys: Set<IPodTrackMatchKey> = []
         let updates = plan.updates.filter { updatedIDs.insert($0.databaseID).inserted }.map(SyncBatchItem.update)
         let additions = plan.requests.filter { seenKeys.insert($0.matchKey).inserted }.map(SyncBatchItem.add)
-        return SyncBatch(items: updates + additions, albumTracks: albumTracks(in: device), progress: progress)
+        return SyncBatch(items: updates + additions, albumTracks: albumTracks(in: device), playlists: playlists,
+                         resolver: PlaylistTrackResolver(manifest: manifest, onDevice: device.tracks),
+                         progress: progress)
     }
 
     /// Refuses to touch a signed database whose signature our key can't reproduce.

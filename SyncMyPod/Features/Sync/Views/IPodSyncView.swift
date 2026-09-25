@@ -9,8 +9,9 @@ struct IPodSyncView: View {
     @Environment(IPodSyncModel.self) private var syncModel
     @Query private var tracks: [LibraryTrack]
     @Query private var folders: [LibraryFolder]
+    @Query(sort: \LibraryPlaylist.createdAt) private var playlists: [LibraryPlaylist]
     @State private var settings: IPodSyncSettings?
-    @State private var onDevice: [ITunesTrack]?
+    @State private var onDevice: ITunesDatabase?
     @State private var manifest = LoadedSyncManifest()
     @State private var freeBytes: Int64?
     @State private var loadError: String?
@@ -30,9 +31,10 @@ struct IPodSyncView: View {
             ContentUnavailableView("Couldn't Read iPod", systemImage: "exclamationmark.triangle",
                                    description: Text(loadError))
         } else if let settings, let onDevice {
-            SyncSettingsForm(settings: settings, tracks: tracks, onDevice: onDevice, manifest: manifest,
-                             freeBytes: freeBytes ?? device.availableBytes, isSyncing: syncModel.isSyncing) {
-                syncModel.sync($0.syncRequests, removing: $0.removalIDs, to: device)
+            SyncSettingsForm(settings: settings, tracks: tracks, playlists: playlists, onDevice: onDevice,
+                             manifest: manifest, freeBytes: freeBytes ?? device.availableBytes,
+                             isSyncing: syncModel.isSyncing) {
+                syncModel.sync($0.syncRequests, removing: $0.removalIDs, playlists: $0.playlists, to: device)
             }
         } else {
             ProgressView("Reading iPod…")
@@ -43,11 +45,11 @@ struct IPodSyncView: View {
     private func reload() async {
         settings = IPodSyncSettings.settings(for: device.id, in: context)
         do {
-            let deviceTracks = try await loader.load(device.volumeURL).tracks
+            let database = try await loader.load(device.volumeURL)
             manifest = await IPodControlFiles(volumeURL: device.volumeURL)
-                .manifest(adopting: tracks.map(\.syncRequest), onDevice: deviceTracks,
+                .manifest(adopting: tracks.map(\.syncRequest), onDevice: database.tracks,
                           libraryFolder: folders.first?.path)
-            onDevice = deviceTracks
+            onDevice = database
             loadError = nil
         } catch {
             loadError = error.localizedDescription

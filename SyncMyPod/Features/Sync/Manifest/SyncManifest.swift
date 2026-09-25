@@ -4,6 +4,8 @@ import Foundation
 nonisolated struct SyncManifest: Codable, Equatable, Sendable {
     /// Keyed by the library file's path.
     private(set) var entries: [String: SyncManifestEntry] = [:]
+    /// Playlists this app wrote to the iPod, so it can replace or remove them without touching others.
+    private(set) var playlistIDs: Set<UInt64> = []
 
     var claimedDatabaseIDs: Set<UInt64> { Set(entries.values.map(\.databaseID)) }
 
@@ -13,7 +15,15 @@ nonisolated struct SyncManifest: Codable, Equatable, Sendable {
 
     /// Drops entries whose track is gone, e.g. removed by another app.
     func valid(for databaseIDs: Set<UInt64>) -> SyncManifest {
-        SyncManifest(entries: entries.filter { databaseIDs.contains($0.value.databaseID) })
+        var valid = self
+        valid.entries = entries.filter { databaseIDs.contains($0.value.databaseID) }
+        return valid
+    }
+
+    func managingPlaylists(_ ids: Set<UInt64>) -> SyncManifest {
+        var updated = self
+        updated.playlistIDs = ids
+        return updated
     }
 
     /// Adds entries for tracks just copied to the iPod, keyed like `IPodSyncOutcome.addedDatabaseIDs`.
@@ -63,5 +73,14 @@ nonisolated struct SyncManifest: Codable, Equatable, Sendable {
             adopted = true
         }
         return adopted
+    }
+}
+
+nonisolated extension SyncManifest {
+    /// Manifests saved before playlists were synced have no `playlistIDs`.
+    init(from decoder: any Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        entries = try container.decode([String: SyncManifestEntry].self, forKey: .entries)
+        playlistIDs = try container.decodeIfPresent(Set<UInt64>.self, forKey: .playlistIDs) ?? []
     }
 }

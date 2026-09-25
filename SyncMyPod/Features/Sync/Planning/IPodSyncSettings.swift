@@ -7,6 +7,8 @@ nonisolated final class IPodSyncSettings {
     @Attribute(.unique) var deviceID: String
     var modeRawValue = SyncMode.allSongs.rawValue
     var selectedAlbumKeys: [String] = []
+    /// Optional because settings saved before playlists synced hold `NULL`.
+    var selectedPlaylistKeys: [String]?
 
     init(deviceID: String) {
         self.deviceID = deviceID
@@ -20,6 +22,11 @@ nonisolated final class IPodSyncSettings {
     var selectedAlbums: Set<String> {
         get { Set(selectedAlbumKeys) }
         set { selectedAlbumKeys = newValue.sorted() }
+    }
+
+    var selectedPlaylists: Set<String> {
+        get { Set(selectedPlaylistKeys ?? []) }
+        set { selectedPlaylistKeys = newValue.sorted() }
     }
 
     @MainActor

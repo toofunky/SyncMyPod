@@ -7,6 +7,7 @@ nonisolated struct IPodSyncOutcome: Equatable, Sendable {
     var updatedDatabaseIDs: [String: UInt64] = [:]
     var skipped = 0
     var removed = 0
+    var syncedPlaylistCount = 0
     var wasCancelled = false
 
     var addedCount: Int { addedDatabaseIDs.count }

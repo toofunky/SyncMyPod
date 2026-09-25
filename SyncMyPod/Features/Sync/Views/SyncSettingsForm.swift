@@ -6,7 +6,8 @@ struct SyncSettingsForm: View {
 
     @Bindable var settings: IPodSyncSettings
     let tracks: [LibraryTrack]
-    let onDevice: [ITunesTrack]
+    let playlists: [LibraryPlaylist]
+    let onDevice: ITunesDatabase
     let manifest: LoadedSyncManifest
     let freeBytes: Int64?
     let isSyncing: Bool
@@ -16,7 +17,8 @@ struct SyncSettingsForm: View {
 
     private var plan: SyncPlan {
         SyncPlan.make(tracks: tracks, mode: settings.mode, selectedAlbums: settings.selectedAlbums,
-                      onDevice: onDevice, manifest: manifest.manifest,
+                      playlists: LibraryPlaylist.syncRequests(playlists, tracks: tracks, settings: settings),
+                      onDevice: onDevice.tracks, devicePlaylists: onDevice.playlists, manifest: manifest.manifest,
                       strayDatabaseIDs: manifest.strayDatabaseIDs)
     }
 
@@ -46,9 +48,12 @@ struct SyncSettingsForm: View {
         switch settings.mode {
         case .allSongs:
             ContentUnavailableView("All Songs", systemImage: "music.note.list",
-                                   description: Text("Every song in your music library will be copied to the iPod."))
+                                   description: Text("Every song and playlist in your music library will be copied "
+                                                     + "to the iPod."))
         case .custom:
-            SyncSelectionTreeView(artists: SyncTreeBuilder.artists(from: tracks),
+            SyncSelectionTreeView(playlists: SyncTreeBuilder.playlists(from: playlists),
+                                  artists: SyncTreeBuilder.artists(from: tracks),
+                                  playlistSelection: $settings.selectedPlaylists,
                                   selection: $settings.selectedAlbums)
         }
     }
@@ -78,7 +83,7 @@ struct SyncSettingsForm: View {
 
 #Preview {
     SyncSettingsForm(settings: IPodSyncSettings(deviceID: "preview"), tracks: LibraryTrack.previewTracks,
-                     onDevice: [], manifest: LoadedSyncManifest(), freeBytes: 38_000_000_000, isSyncing: false,
+                     playlists: [.preview], onDevice: .preview, manifest: LoadedSyncManifest(), freeBytes: 38_000_000_000, isSyncing: false,
                      onSync: { _ in })
         .modelContainer(.preview)
 }

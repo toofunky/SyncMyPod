@@ -6,12 +6,18 @@ struct ContentView: View {
 
     var body: some View {
         NavigationSplitView {
-            List(SidebarItem.allCases, selection: $selection) { item in
-                Label(item.title, systemImage: item.systemImage)
+            List(selection: $selection) {
+                Section("Library") {
+                    ForEach(SidebarItem.fixedItems) { item in
+                        Label(item.title, systemImage: item.systemImage)
+                    }
+                }
+                PlaylistSidebarSection(selection: $selection)
             }
         } detail: {
             switch selection {
             case .device: DeviceDetectionView()
+            case .playlist(let id): PlaylistDetailView(playlistID: id)
             case .library, nil: MusicLibraryView()
             }
         }

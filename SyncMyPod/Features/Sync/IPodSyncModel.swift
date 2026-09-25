@@ -13,8 +13,10 @@ final class IPodSyncModel {
 
     var isSyncing: Bool { syncTask != nil }
 
-    func sync(_ requests: [IPodSyncRequest], removing removals: Set<UInt64> = [], to device: IPodDevice) {
-        guard !isSyncing, !requests.isEmpty || !removals.isEmpty else { return }
+    /// Non-`nil` `playlists` replace every playlist earlier syncs wrote.
+    func sync(_ requests: [IPodSyncRequest], removing removals: Set<UInt64> = [],
+              playlists: [IPodPlaylistRequest]? = nil, to device: IPodDevice) {
+        guard !isSyncing, !requests.isEmpty || !removals.isEmpty || playlists != nil else { return }
         let syncer: IPodTrackSyncer
         do {
             syncer = try IPodTrackSyncer(device: device)
@@ -23,7 +25,7 @@ final class IPodSyncModel {
             return
         }
         progress = IPodSyncProgress(completed: 0, total: requests.count, currentTitle: nil)
-        syncTask = Task { await run(requests, removing: removals, with: syncer) }
+        syncTask = Task { await run(requests, removing: removals, playlists: playlists, with: syncer) }
     }
 
     func cancel() {
@@ -32,9 +34,10 @@ final class IPodSyncModel {
     }
 
     private func run(_ requests: [IPodSyncRequest], removing removals: Set<UInt64>,
-                     with syncer: IPodTrackSyncer) async {
+                     playlists: [IPodPlaylistRequest]?, with syncer: IPodTrackSyncer) async {
         do {
-            let outcome = try await syncer.sync(adding: requests, removing: removals) { [weak self] update in
+            let outcome = try await syncer.sync(adding: requests, removing: removals,
+                                                playlists: playlists) { [weak self] update in
                 await self?.report(update)
             }
             result = .finished(outcome)

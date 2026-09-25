@@ -1,5 +1,7 @@
 import SwiftData
 
 nonisolated enum MusicLibrarySchema {
-    static var models: [any PersistentModel.Type] { [LibraryFolder.self, LibraryTrack.self, IPodSyncSettings.self] }
+    static var models: [any PersistentModel.Type] {
+        [LibraryFolder.self, LibraryTrack.self, LibraryPlaylist.self, IPodSyncSettings.self]
+    }
 }

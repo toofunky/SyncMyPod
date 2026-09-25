@@ -62,6 +62,12 @@ nonisolated struct ITunesDBEditor {
                                            builder: trackBuilder, in: &root)
     }
 
+    /// Writes the playlists, replacing any with the same ID and removing those in `removing`.
+    mutating func replacePlaylists(_ drafts: [ITunesPlaylistDraft], removing ids: Set<UInt64>) {
+        ITunesDBPlaylistWriter.replace(drafts, removing: ids, in: &root, allocator: &self.ids)
+        hasChanges = true
+    }
+
     /// Folds the iPod's Play Counts into the tracks; `false` if the entries don't match the track list.
     mutating func mergePlayCounts(_ entries: [PlayCountEntry]) -> Bool {
         guard PlayCountsMerger.merge(entries, into: &root) else { return false }

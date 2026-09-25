@@ -23,13 +23,20 @@ nonisolated enum IPodSyncResult: Equatable, Sendable {
         var parts = ["Added \(songs(outcome.addedCount))."]
         if outcome.updatedCount > 0 { parts.append("Updated \(songs(outcome.updatedCount)).") }
         if outcome.removed > 0 { parts.append("Removed \(songs(outcome.removed)).") }
+        if outcome.syncedPlaylistCount > 0 {
+            parts.append("Synced \(count(outcome.syncedPlaylistCount, "playlist")).")
+        }
         if outcome.skipped > 0 { parts.append("\(outcome.skipped) already on the iPod.") }
-        let changed = outcome.addedCount + outcome.updatedCount + outcome.removed
+        let changed = outcome.addedCount + outcome.updatedCount + outcome.removed + outcome.syncedPlaylistCount
         if changed > 0 { parts.append("Eject the iPod before unplugging it.") }
         return parts.joined(separator: " ")
     }
 
     private static func songs(_ count: Int) -> String {
-        "\(count) \(count == 1 ? "song" : "songs")"
+        Self.count(count, "song")
+    }
+
+    private static func count(_ count: Int, _ noun: String) -> String {
+        "\(count) \(noun)\(count == 1 ? "" : "s")"
     }
 }

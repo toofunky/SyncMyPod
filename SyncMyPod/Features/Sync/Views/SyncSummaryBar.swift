@@ -40,6 +40,10 @@ struct SyncSummaryBar: View {
         if !plan.removals.isEmpty {
             parts.append("\(songs(plan.removals.count)) to remove · \(bytes(plan.removedByteCount))")
         }
+        if plan.playlistChangeCount > 0 {
+            let count = plan.playlistChangeCount
+            parts.append("\(count) \(count == 1 ? "playlist" : "playlists") to update")
+        }
         return parts.joined(separator: " · ")
     }
 

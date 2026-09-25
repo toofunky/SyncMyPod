@@ -195,4 +195,48 @@ struct SyncPlanTests {
         #expect(plan.updates.map(\.databaseID) == [10])
         #expect(plan.updates.first?.artworkChanged == true)
     }
+
+    private func playlist(_ tracks: [LibraryTrack], id: UInt64 = 77, name: String = "Mix") -> IPodPlaylistRequest {
+        IPodPlaylistRequest(id: id, name: name, createdAt: .now, tracks: tracks.map(\.syncRequest))
+    }
+
+    @Test func customSyncIncludesPlaylistSongs() {
+        let tracks = library
+        let plan = SyncPlan.make(tracks: tracks, mode: .custom, selectedAlbums: [], playlists: [playlist([tracks[2]])],
+                                 onDevice: [])
+        #expect(plan.requests.map(\.draft.title) == ["Hey Ya!"])
+        #expect(plan.playlistChangeCount == 1)
+    }
+
+    @Test func matchingPlaylistOnTheIPodNeedsNoSync() {
+        let clocks = track("Clocks", artist: "Coldplay", album: "A Rush of Blood")
+        let onDevice = [deviceTrack(for: clocks, id: 1)]
+        let copy = ITunesPlaylist(id: 77, name: "Mix", isMaster: false, createdAt: nil, trackIDs: [1])
+        let plan = SyncPlan.make(tracks: [clocks], mode: .allSongs, selectedAlbums: [], playlists: [playlist([clocks])],
+                                 onDevice: onDevice, devicePlaylists: [copy])
+        #expect(plan.isEmpty)
+    }
+
+    @Test func renamedOrReorderedPlaylistNeedsSync() {
+        let tracks = [track("Clocks", artist: "Coldplay", album: "A"), track("Yellow", artist: "Coldplay", album: "B")]
+        let onDevice = [deviceTrack(for: tracks[0], id: 1), deviceTrack(for: tracks[1], id: 2)]
+        let copy = ITunesPlaylist(id: 77, name: "Mix", isMaster: false, createdAt: nil, trackIDs: [1, 2])
+        let renamed = SyncPlan.make(tracks: tracks, mode: .allSongs, selectedAlbums: [],
+                                    playlists: [playlist(tracks, name: "Renamed")], onDevice: onDevice,
+                                    devicePlaylists: [copy])
+        let reordered = SyncPlan.make(tracks: tracks, mode: .allSongs, selectedAlbums: [],
+                                      playlists: [playlist(tracks.reversed())], onDevice: onDevice,
+                                      devicePlaylists: [copy])
+        #expect(renamed.playlistChangeCount == 1)
+        #expect(reordered.playlistChangeCount == 1)
+    }
+
+    @Test func removedPlaylistThisAppWroteNeedsSync() {
+        let copy = ITunesPlaylist(id: 77, name: "Mix", isMaster: false, createdAt: nil, trackIDs: [])
+        let other = ITunesPlaylist(id: 88, name: "On-The-Go", isMaster: false, createdAt: nil, trackIDs: [])
+        let manifest = SyncManifest().managingPlaylists([77])
+        let plan = SyncPlan.make(tracks: [], mode: .allSongs, selectedAlbums: [], onDevice: [],
+                                 devicePlaylists: [copy, other], manifest: manifest)
+        #expect(plan.playlistChangeCount == 1)
+    }
 }
