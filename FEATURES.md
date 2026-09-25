@@ -7,6 +7,6 @@
 - [ ] Create playlists
 - [ ] Sync playlists
 - [ ] Append track artist to title
-- [ ] Detect meta-data/artwork changes
+- [x] Detect meta-data/artwork changes
 - [ ] Backup/restore database
 
