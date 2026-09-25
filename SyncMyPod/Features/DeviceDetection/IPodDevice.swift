@@ -27,6 +27,10 @@ nonisolated struct IPodDevice: Identifiable, Equatable, Sendable {
         return firmwareVersion.flatMap(IPodModelCatalog.classicGeneration(forFirmwareVersion:))
     }
 
+    var generationDescription: String? {
+        generation?.displayName ?? usbIdentity?.productID.flatMap(IPodModelCatalog.familyName(forProductID:))
+    }
+
     @concurrent
     static func scan(volumeAt url: URL) async -> IPodDevice? {
         IPodDevice(scanningVolumeAt: url)

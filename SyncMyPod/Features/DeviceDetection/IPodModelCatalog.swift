@@ -1,7 +1,17 @@
 import Foundation
 
 nonisolated enum IPodModelCatalog {
+    static let videoProductID = 0x1209
     static let classicProductID = 0x1261
+
+    /// Used when the exact generation can't be determined; a product ID spans several generations.
+    static func familyName(forProductID productID: Int) -> String? {
+        switch productID {
+        case videoProductID: "iPod (5th or 5.5th Generation)"
+        case classicProductID: "iPod classic"
+        default: nil
+        }
+    }
 
     /// Accepts "MA146", "xA146" (SysInfo form) or "MA146LL/A"; the first letter is ignored.
     static func generation(forModelNumber modelNumber: String) -> IPodGeneration? {

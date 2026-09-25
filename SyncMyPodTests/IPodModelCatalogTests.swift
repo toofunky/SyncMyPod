@@ -43,4 +43,10 @@ struct IPodModelCatalogTests {
     func infersClassicGenerationFromFirmware(version: String, generation: IPodGeneration) {
         #expect(IPodModelCatalog.classicGeneration(forFirmwareVersion: version) == generation)
     }
+
+    @Test func namesFamilyFromProductID() {
+        #expect(IPodModelCatalog.familyName(forProductID: 0x1209) == "iPod (5th or 5.5th Generation)")
+        #expect(IPodModelCatalog.familyName(forProductID: 0x1261) == "iPod classic")
+        #expect(IPodModelCatalog.familyName(forProductID: 0x1234) == nil)
+    }
 }
