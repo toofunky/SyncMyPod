@@ -5,9 +5,11 @@ nonisolated struct TrackRecordBuilder {
     static let minimumHeaderLength = 0x184
     private static let m4aFileType: UInt32 = 0x4D34_4120
     private static let audioMediaType: UInt32 = 1
+    private static let hasArtwork: UInt8 = 1
     private static let noArtwork: UInt8 = 2
     private static let aacFormatMarker: UInt16 = 0x0033
     private static let albumIDOffset = 0x120
+    private static let artworkIDOffset = 0x160
 
     let headerLength: Int
 
@@ -19,6 +21,7 @@ nonisolated struct TrackRecordBuilder {
         writeIdentity(into: &mhit, id: id, databaseID: databaseID, albumID: albumID)
         writeTags(into: &mhit, from: draft)
         writeFormat(into: &mhit, from: draft)
+        writeArtwork(into: &mhit, draft.artwork)
         return mhit
     }
 
@@ -36,7 +39,6 @@ nonisolated struct TrackRecordBuilder {
         mhit.set(id, at: 0x10)
         mhit.set(UInt32(1), at: 0x14)
         mhit.set(databaseID, at: 0x70)
-        mhit.set(Self.noArtwork, at: 0xA4)
         mhit.set(databaseID, at: 0xA8)
         mhit.set(Self.audioMediaType, at: 0xD0)
         mhit.set(albumID, at: Self.albumIDOffset)
@@ -51,6 +53,18 @@ nonisolated struct TrackRecordBuilder {
         mhit.set(UInt32(clamping: draft.discNumber), at: 0x5C)
         mhit.set(UInt32(clamping: draft.discCount), at: 0x60)
         mhit.set(ITunesTimestamp.seconds(from: draft.dateAdded), at: 0x68)
+    }
+
+    /// Sets both the legacy count/size fields and the iTunes 7.1+ `mhii` link, so either firmware style finds it.
+    private func writeArtwork(into mhit: inout ITunesDBRecord, _ artwork: ITunesTrackArtwork?) {
+        guard let artwork else {
+            mhit.set(Self.noArtwork, at: 0xA4)
+            return
+        }
+        mhit.set(UInt16(1), at: 0x7C)
+        mhit.set(UInt32(clamping: artwork.sourceByteCount), at: 0x80)
+        mhit.set(Self.hasArtwork, at: 0xA4)
+        mhit.set(artwork.imageID, at: Self.artworkIDOffset)
     }
 
     private func writeFormat(into mhit: inout ITunesDBRecord, from draft: ITunesTrackDraft) {

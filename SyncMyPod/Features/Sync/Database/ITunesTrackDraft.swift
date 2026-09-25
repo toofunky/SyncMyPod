@@ -19,6 +19,7 @@ nonisolated struct ITunesTrackDraft: Equatable, Sendable {
     var sampleRate = 0
     var dateAdded = Date.now
     var lastModified = Date.now
+    var artwork: ITunesTrackArtwork?
 
     var albumListArtist: String { albumArtist.isEmpty ? artist : albumArtist }
 }

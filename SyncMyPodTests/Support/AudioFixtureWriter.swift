@@ -26,4 +26,16 @@ nonisolated enum AudioFixtureWriter {
         try file.write(from: buffer)
         return url
     }
+
+    /// Re-exports `source` with `imageData` embedded as its iTunes cover art.
+    static func embedCoverArt(_ imageData: Data, from source: URL, to destination: URL) async throws {
+        let item = AVMutableMetadataItem()
+        item.identifier = .iTunesMetadataCoverArt
+        item.value = imageData as NSData
+        item.dataType = kCMMetadataBaseDataType_PNG as String
+        let asset = AVURLAsset(url: source)
+        let session = try #require(AVAssetExportSession(asset: asset, presetName: AVAssetExportPresetPassthrough))
+        session.metadata = [item]
+        try await session.export(to: destination, as: .m4a)
+    }
 }

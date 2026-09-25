@@ -27,7 +27,7 @@ struct IPodTrackSyncerTests {
     @Test func backsUpThePreviousDatabase() async throws {
         let volume = try TemporaryIPodVolume(database: fixture)
         _ = try await IPodTrackSyncer(volumeURL: volume.url).add([request(try volume.makeSourceFile())])
-        let backup = ITunesDBStore(volumeURL: volume.url).backupURL
+        let backup = DatabaseFileStore.iTunesDB(onVolume: volume.url).backupURL
         #expect(try Data(contentsOf: backup) == fixture)
     }
 

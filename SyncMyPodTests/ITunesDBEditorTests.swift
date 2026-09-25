@@ -98,6 +98,19 @@ struct ITunesDBEditorTests {
         #expect(try indexEntries(in: master, sortType: .artist) == [1, 0])
     }
 
+    @Test func linksTrackToItsArtwork() throws {
+        var withArtwork = clocks
+        withArtwork.artwork = ITunesTrackArtwork(imageID: 101, sourceByteCount: 54_321)
+        let data = try adding([withArtwork, clocks], to: fixture).data
+        let tracks = try #require(ITunesDBRecordParser(data: data).parse().children.first { $0.isSection(.tracks) })
+        let linked = tracks.children[0].children[1]
+        let plain = tracks.children[0].children[2]
+        #expect(linked.uint8(at: 0xA4) == 1 && plain.uint8(at: 0xA4) == 2)
+        #expect(linked.uint32(at: 0x160) == 101 && plain.uint32(at: 0x160) == 0)
+        #expect(linked.header.read(UInt16.self, at: 0x7C) == 1)
+        #expect(linked.uint32(at: 0x80) == 54_321)
+    }
+
     @Test func rejectsDatabaseWithoutMasterPlaylist() throws {
         let data = ITunesDBFixtureBuilder(tracks: [vertigo]).build()
         #expect(throws: IPodSyncError.missingMasterPlaylist) {

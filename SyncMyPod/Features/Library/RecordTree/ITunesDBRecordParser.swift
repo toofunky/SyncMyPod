@@ -1,19 +1,17 @@
 import Foundation
 
-/// Parses an iTunesDB into an `ITunesDBRecord` tree that serializes back byte for byte.
+/// Parses an iTunesDB or ArtworkDB into an `ITunesDBRecord` tree that serializes back byte for byte.
 nonisolated struct ITunesDBRecordParser {
-    private static let listTags: Set<String> = ["mhlt", "mhlp", "mhla", "mhli"]
-    private static let containerTags: Set<String> = ["mhbd", "mhsd", "mhit", "mhyp", "mhip", "mhia", "mhii"]
-    private static let opaqueTags: Set<String> = ["mhod"]
-
     private let reader: BinaryReader
+    private let layout: RecordTreeLayout
 
-    init(data: Data) {
+    init(data: Data, layout: RecordTreeLayout = .iTunesDB) {
         reader = BinaryReader(data: data)
+        self.layout = layout
     }
 
     func parse() throws -> ITunesDBRecord {
-        try reader.expectTag("mhbd", at: 0)
+        try reader.expectTag(layout.rootTag, at: 0)
         let (root, end) = try parseRecord(at: 0)
         guard end == reader.count else { throw ITunesDBError.invalidLength(offset: 0) }
         return root
@@ -23,12 +21,12 @@ nonisolated struct ITunesDBRecordParser {
         let tag = try reader.tag(at: offset)
         let headerLength = try reader.int(at: offset + 0x04)
         let header = Data(try reader.bytes(at: offset, count: headerLength))
-        if Self.listTags.contains(tag) {
+        if layout.listTags.contains(tag) {
             return try parseList(header: header, at: offset)
         }
         let end = offset + (try reader.recordLength(at: offset))
         guard offset + headerLength <= end else { throw ITunesDBError.invalidLength(offset: offset) }
-        let body = Self.containerTags.contains(tag)
+        let body = layout.containerTags.contains(tag)
             ? try parseContainerBody(from: offset + headerLength, to: end)
             : .opaque(Data(try reader.bytes(at: offset + headerLength, count: end - offset - headerLength)))
         return (ITunesDBRecord(header: header, body: body), end)
@@ -59,7 +57,6 @@ nonisolated struct ITunesDBRecordParser {
 
     private func isKnownTag(at offset: Int, before end: Int) throws -> Bool {
         guard offset + 12 <= end else { return false }
-        let tag = try reader.tag(at: offset)
-        return Self.listTags.contains(tag) || Self.containerTags.contains(tag) || Self.opaqueTags.contains(tag)
+        return layout.isKnown(try reader.tag(at: offset))
     }
 }
