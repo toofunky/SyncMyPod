@@ -23,6 +23,14 @@ struct SyncPlanTests {
          track("Untagged", artist: "", album: "")]
     }
 
+    private func deviceTrack(for track: LibraryTrack, id: UInt32 = 1) -> ITunesTrack {
+        ITunesTrack(id: id, databaseID: UInt64(id) * 10, strings: [.title: track.title, .artist: track.artist,
+                                                                   .album: track.album],
+                    duration: 0, fileSize: track.fileSize, trackNumber: 0, trackCount: 0, discNumber: 0,
+                    discCount: 0, year: 0, bitrate: 0, sampleRate: 0, rating: 0, playCount: 0, mediaType: 1,
+                    dateAdded: nil, lastPlayed: nil, lastModified: nil)
+    }
+
     @Test func matchKeyIgnoresCaseAndSurroundingSpaces() {
         let draft = ITunesTrackDraft(title: " Clocks", artist: "COLDPLAY", album: "A Rush", fileSize: 10)
         let onDevice = ITunesTrack.preview(id: 1, title: "clocks", artist: "Coldplay", album: "a rush ", duration: 0)
@@ -41,7 +49,7 @@ struct SyncPlanTests {
 
     @Test func allSongsPlansEveryTrackNotOnTheDevice() {
         let tracks = library
-        let onDevice: Set = [IPodTrackMatchKey(tracks[0].syncRequest.draft)]
+        let onDevice = [deviceTrack(for: tracks[0])]
         let plan = SyncPlan.make(tracks: tracks, mode: .allSongs, selectedAlbums: [], onDevice: onDevice)
         #expect(plan.requests.count == 4)
         #expect(plan.alreadyOnDeviceCount == 1)
@@ -59,5 +67,23 @@ struct SyncPlanTests {
     @Test func customPlanWithNothingSelectedIsEmpty() {
         let plan = SyncPlan.make(tracks: library, mode: .custom, selectedAlbums: [], onDevice: [])
         #expect(plan.requests.isEmpty && plan.selectedCount == 0)
+    }
+
+    @Test func customPlanRemovesUnselectedLibraryTracksOnly() {
+        let tracks = library
+        let stranger = ITunesTrack.preview(id: 9, title: "iTunes Song", artist: "Other", album: "Else", duration: 0)
+        let onDevice = [deviceTrack(for: tracks[0], id: 1), deviceTrack(for: tracks[1], id: 2), stranger]
+        let plan = SyncPlan.make(tracks: tracks, mode: .custom, selectedAlbums: [tracks[0].syncAlbumKey],
+                                 onDevice: onDevice)
+        #expect(plan.removals.map(\.title) == ["Yellow"])
+        #expect(plan.removalIDs == [20])
+        #expect(plan.requests.isEmpty)
+    }
+
+    @Test func allSongsNeverRemoves() {
+        let tracks = library
+        let plan = SyncPlan.make(tracks: tracks, mode: .allSongs, selectedAlbums: [],
+                                 onDevice: [deviceTrack(for: tracks[1])])
+        #expect(plan.removals.isEmpty)
     }
 }

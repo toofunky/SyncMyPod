@@ -18,7 +18,7 @@ struct IPodTrackSyncerTests {
     @Test func copiesFileAndRecordsItInTheDatabase() async throws {
         let volume = try TemporaryIPodVolume(database: fixture)
         let source = try volume.makeSourceFile()
-        let outcome = try await IPodTrackSyncer(volumeURL: volume.url).add([request(source)])
+        let outcome = try await IPodTrackSyncer(volumeURL: volume.url).sync(adding: [request(source)])
 
         let track = try #require(try tracks(on: volume).first)
         #expect(outcome.addedDatabaseIDs[source.path(percentEncoded: false)] == track.databaseID)
@@ -29,7 +29,7 @@ struct IPodTrackSyncerTests {
 
     @Test func backsUpThePreviousDatabase() async throws {
         let volume = try TemporaryIPodVolume(database: fixture)
-        _ = try await IPodTrackSyncer(volumeURL: volume.url).add([request(try volume.makeSourceFile())])
+        _ = try await IPodTrackSyncer(volumeURL: volume.url).sync(adding: [request(try volume.makeSourceFile())])
         let backup = DatabaseFileStore.iTunesDB(onVolume: volume.url).backupURL
         #expect(try Data(contentsOf: backup) == fixture)
     }
@@ -38,8 +38,8 @@ struct IPodTrackSyncerTests {
         let volume = try TemporaryIPodVolume(database: fixture)
         let syncer = IPodTrackSyncer(volumeURL: volume.url)
         let source = try volume.makeSourceFile()
-        _ = try await syncer.add([request(source)])
-        let second = try await syncer.add([request(source)])
+        _ = try await syncer.sync(adding: [request(source)])
+        let second = try await syncer.sync(adding: [request(source)])
         #expect(second.addedCount == 0 && second.skipped == 1)
         #expect(try tracks(on: volume).count == 1)
     }
@@ -47,7 +47,7 @@ struct IPodTrackSyncerTests {
     @Test func skipsDuplicatesWithinOneSync() async throws {
         let volume = try TemporaryIPodVolume(database: fixture)
         let source = try volume.makeSourceFile()
-        let outcome = try await IPodTrackSyncer(volumeURL: volume.url).add([request(source), request(source)])
+        let outcome = try await IPodTrackSyncer(volumeURL: volume.url).sync(adding: [request(source), request(source)])
         #expect(outcome.addedCount == 1 && outcome.skipped == 1)
     }
 
@@ -55,7 +55,7 @@ struct IPodTrackSyncerTests {
         let volume = try TemporaryIPodVolume(database: fixture)
         let requests = try (1...3).map { request(try volume.makeSourceFile(named: "\($0).m4a"), title: "Song \($0)") }
         let recorder = ProgressRecorder()
-        _ = try await IPodTrackSyncer(volumeURL: volume.url).add(requests) { await recorder.record($0) }
+        _ = try await IPodTrackSyncer(volumeURL: volume.url).sync(adding: requests) { await recorder.record($0) }
         let updates = await recorder.updates
         #expect(updates.map(\.completed) == [0, 1, 2, 3])
         #expect(updates.map(\.currentTitle) == ["Song 1", "Song 2", "Song 3", nil])
@@ -66,7 +66,7 @@ struct IPodTrackSyncerTests {
         let requests = try (1...3).map { request(try volume.makeSourceFile(named: "\($0).m4a"), title: "Song \($0)") }
         let syncer = IPodTrackSyncer(volumeURL: volume.url)
         let outcome = try await Task {
-            try await syncer.add(requests) { update in
+            try await syncer.sync(adding: requests) { update in
                 if update.completed == 2 { withUnsafeCurrentTask { $0?.cancel() } }
             }
         }.value
@@ -76,7 +76,7 @@ struct IPodTrackSyncerTests {
 
     @Test func createsAMusicFolderWhenNoneExist() async throws {
         let volume = try TemporaryIPodVolume(database: fixture, musicFolders: [])
-        _ = try await IPodTrackSyncer(volumeURL: volume.url).add([request(try volume.makeSourceFile())])
+        _ = try await IPodTrackSyncer(volumeURL: volume.url).sync(adding: [request(try volume.makeSourceFile())])
         let track = try #require(try tracks(on: volume).first)
         #expect(track.location?.hasPrefix(":iPod_Control:Music:F00:") == true)
     }
@@ -84,7 +84,7 @@ struct IPodTrackSyncerTests {
     @Test func removesCopiedFilesWhenTheDatabaseCannotBeRead() async throws {
         let volume = try TemporaryIPodVolume(database: Data("not a database".utf8))
         await #expect(throws: ITunesDBError.self) {
-            try await IPodTrackSyncer(volumeURL: volume.url).add([request(try volume.makeSourceFile())])
+            try await IPodTrackSyncer(volumeURL: volume.url).sync(adding: [request(try volume.makeSourceFile())])
         }
         let folder = volume.url.appending(path: "iPod_Control/Music/F00").path(percentEncoded: false)
         #expect(try FileManager.default.contentsOfDirectory(atPath: folder).isEmpty)

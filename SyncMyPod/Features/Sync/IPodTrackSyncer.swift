@@ -1,54 +1,67 @@
 import Foundation
 
-/// Copies tracks and their cover art onto a mounted iPod and records them in its databases.
+/// Adds and removes tracks and their cover art on a mounted iPod and updates its databases.
 nonisolated struct IPodTrackSyncer {
     let volumeURL: URL
     var formats = ArtworkFormat.videoIPod
 
-    /// Skips tracks already on the iPod. Cancelling stops copying but still saves the tracks already copied.
+    /// Skips requests already on the iPod. Cancelling stops copying but still saves the removals
+    /// and the tracks already copied.
     @concurrent
-    func add(_ requests: [IPodSyncRequest],
-             progress: @escaping @Sendable (IPodSyncProgress) async -> Void = { _ in }) async throws -> IPodSyncOutcome {
+    func sync(adding requests: [IPodSyncRequest], removing removals: Set<UInt64> = [],
+              progress: @escaping @Sendable (IPodSyncProgress) async -> Void = { _ in }) async throws -> IPodSyncOutcome {
         let store = DatabaseFileStore.iTunesDB(onVolume: volumeURL)
+        let files = IPodControlFiles(volumeURL: volumeURL)
         var editor = try ITunesDBEditor(root: store.loadRecords())
-        let pending = try newRequests(in: requests, notIn: editor)
-        var outcome = IPodSyncOutcome(skipped: requests.count - pending.count)
-        guard !pending.isEmpty else { return outcome }
-        try ensureFreeSpace(for: pending)
+        let mergedPlayCounts = files.playCounts().map { editor.mergePlayCounts($0) } ?? false
+        let removedLocations = editor.removeTracks(databaseIDs: removals)
+        let device = try ITunesDBParser(data: editor.serialized()).parse()
+        let pending = newRequests(in: requests, notIn: device)
+        var outcome = IPodSyncOutcome(skipped: requests.count - pending.count, removed: removedLocations.count)
+        guard !pending.isEmpty || !removedLocations.isEmpty else { return outcome }
+        try ensureFreeSpace(for: pending, freeing: files.totalSize(of: removedLocations))
         var artwork = try ArtworkSyncSession(volumeURL: volumeURL, formats: formats)
+        artwork.removeImages(forTracks: removals)
         var copied: [URL] = []
         do {
-            try await copyAndRecord(pending, into: &editor, artwork: &artwork, copied: &copied,
-                                    outcome: &outcome, progress: progress)
+            let batch = SyncBatch(requests: pending, albumTracks: Self.albumTracks(in: device), progress: progress)
+            try await copyAndRecord(batch, into: &editor, artwork: &artwork, copied: &copied, outcome: &outcome)
             await progress(IPodSyncProgress(completed: outcome.addedCount, total: pending.count, currentTitle: nil))
             try artwork.save()
             try store.save(editor.serialized())
-            return outcome
         } catch {
             copied.forEach { try? FileManager.default.removeItem(at: $0) }
             artwork.rollBack()
             throw error
         }
+        files.cleanUp(removedLocations: removedLocations, playCountsMerged: mergedPlayCounts)
+        artwork.compactIfWasteful()
+        return outcome
     }
 
-    private func newRequests(in requests: [IPodSyncRequest], notIn editor: ITunesDBEditor) throws -> [IPodSyncRequest] {
-        var seen = IPodTrackMatchKey.keys(in: try ITunesDBParser(data: editor.serialized()).parse())
+    private func newRequests(in requests: [IPodSyncRequest], notIn device: ITunesDatabase) -> [IPodSyncRequest] {
+        var seen = IPodTrackMatchKey.keys(in: device)
         return requests.filter { seen.insert($0.matchKey).inserted }
     }
 
-    private func copyAndRecord(_ requests: [IPodSyncRequest], into editor: inout ITunesDBEditor,
-                               artwork: inout ArtworkSyncSession, copied: inout [URL], outcome: inout IPodSyncOutcome,
-                               progress: @Sendable (IPodSyncProgress) async -> Void) async throws {
+    private static func albumTracks(in device: ITunesDatabase) -> [IPodAlbumKey: [UInt64]] {
+        Dictionary(grouping: device.tracks, by: IPodAlbumKey.init).mapValues { $0.map(\.databaseID) }
+    }
+
+    private func copyAndRecord(_ batch: SyncBatch, into editor: inout ITunesDBEditor, artwork: inout ArtworkSyncSession,
+                               copied: inout [URL], outcome: inout IPodSyncOutcome) async throws {
         let copier = IPodMusicFileCopier(volumeURL: volumeURL)
-        for (index, request) in requests.enumerated() {
-            await progress(IPodSyncProgress(completed: index, total: requests.count, currentTitle: request.draft.title))
+        for (index, request) in batch.requests.enumerated() {
+            await batch.progress(IPodSyncProgress(completed: index, total: batch.requests.count,
+                                                  currentTitle: request.draft.title))
             guard !Task.isCancelled else {
                 outcome.wasCancelled = true
                 return
             }
             let file = try copier.copy(request.sourceURL)
             copied.append(file.url)
-            let prepared = try await artwork.prepare(coverFrom: request.sourceURL)
+            let albumTracks = batch.albumTracks[IPodAlbumKey(request.draft)] ?? []
+            let prepared = try await artwork.prepare(coverFrom: request.sourceURL, albumTracks: albumTracks)
             var draft = request.draft
             draft.location = file.location
             draft.artwork = prepared?.trackArtwork
@@ -58,11 +71,11 @@ nonisolated struct IPodTrackSyncer {
         }
     }
 
-    private func ensureFreeSpace(for requests: [IPodSyncRequest]) throws {
+    private func ensureFreeSpace(for requests: [IPodSyncRequest], freeing freedBytes: Int64) throws {
         let artworkBytes = formats.reduce(0) { $0 + $1.byteCount }
         let required = requests.reduce(Int64(0)) { $0 + Int64($1.draft.fileSize + artworkBytes) }
         let values = try volumeURL.resourceValues(forKeys: [.volumeAvailableCapacityKey])
-        let available = Int64(values.volumeAvailableCapacity ?? 0)
+        let available = Int64(values.volumeAvailableCapacity ?? 0) + freedBytes
         guard required < available else {
             throw IPodSyncError.insufficientSpace(required: required, available: available)
         }

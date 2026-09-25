@@ -6,7 +6,7 @@ struct SyncSummaryBar: View {
     let isSyncing: Bool
     let onSync: () -> Void
 
-    private var fits: Bool { freeBytes.map { plan.byteCount < $0 } ?? true }
+    private var fits: Bool { freeBytes.map { plan.byteCount < $0 + plan.removedByteCount } ?? true }
 
     var body: some View {
         HStack {
@@ -19,32 +19,42 @@ struct SyncSummaryBar: View {
             Spacer()
             Button("Sync Now", systemImage: "arrow.triangle.2.circlepath", action: onSync)
                 .buttonStyle(.borderedProminent)
-                .disabled(plan.requests.isEmpty || isSyncing || !fits)
+                .disabled(plan.isEmpty || isSyncing || !fits)
         }
         .padding()
     }
 
     private var headline: String {
-        guard !plan.requests.isEmpty else {
-            return plan.selectedCount == 0 ? "Nothing selected" : "Everything selected is on the iPod"
+        guard !plan.isEmpty else {
+            return plan.selectedCount == 0 ? "Nothing selected" : "The iPod is up to date"
         }
-        let size = plan.byteCount.formatted(.byteCount(style: .file))
-        return "\(plan.requests.count) \(plan.requests.count == 1 ? "song" : "songs") to add · \(size)"
+        var parts: [String] = []
+        if !plan.requests.isEmpty {
+            parts.append("\(songs(plan.requests.count)) to add · \(bytes(plan.byteCount))")
+        }
+        if !plan.removals.isEmpty {
+            parts.append("\(songs(plan.removals.count)) to remove · \(bytes(plan.removedByteCount))")
+        }
+        return parts.joined(separator: " · ")
     }
 
     private var detail: String {
-        let free = freeBytes.map { "\($0.formatted(.byteCount(style: .file))) free" } ?? "Free space unknown"
+        let free = freeBytes.map { "\(bytes($0)) free" } ?? "Free space unknown"
         guard fits else { return "Not enough space on the iPod · \(free)" }
         return "\(plan.alreadyOnDeviceCount) already on the iPod · \(free)"
     }
+
+    private func songs(_ count: Int) -> String { "\(count) \(count == 1 ? "song" : "songs")" }
+    private func bytes(_ count: Int64) -> String { count.formatted(.byteCount(style: .file)) }
 }
 
-#Preview("Ready") {
-    SyncSummaryBar(plan: SyncPlan(requests: [LibraryTrack.previewTracks[0].syncRequest], selectedCount: 3),
+#Preview("Adding and removing") {
+    SyncSummaryBar(plan: SyncPlan(requests: [LibraryTrack.previewTracks[0].syncRequest],
+                                  removals: [ITunesDatabase.preview.tracks[0]], selectedCount: 3),
                    freeBytes: 38_000_000_000, isSyncing: false, onSync: {})
 }
 
 #Preview("Up to date") {
-    SyncSummaryBar(plan: SyncPlan(requests: [], selectedCount: 3), freeBytes: 38_000_000_000,
+    SyncSummaryBar(plan: SyncPlan(requests: [], removals: [], selectedCount: 3), freeBytes: 38_000_000_000,
                    isSyncing: false, onSync: {})
 }

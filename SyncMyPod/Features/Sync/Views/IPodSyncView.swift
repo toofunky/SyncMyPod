@@ -9,7 +9,7 @@ struct IPodSyncView: View {
     @Environment(IPodSyncModel.self) private var syncModel
     @Query private var tracks: [LibraryTrack]
     @State private var settings: IPodSyncSettings?
-    @State private var onDevice: Set<IPodTrackMatchKey>?
+    @State private var onDevice: [ITunesTrack]?
     @State private var freeBytes: Int64?
     @State private var loadError: String?
 
@@ -30,7 +30,7 @@ struct IPodSyncView: View {
         } else if let settings, let onDevice {
             SyncSettingsForm(settings: settings, tracks: tracks, onDevice: onDevice,
                              freeBytes: freeBytes ?? device.availableBytes, isSyncing: syncModel.isSyncing) {
-                syncModel.sync($0.requests, to: device)
+                syncModel.sync($0.requests, removing: $0.removalIDs, to: device)
             }
         } else {
             ProgressView("Reading iPod…")
@@ -41,7 +41,7 @@ struct IPodSyncView: View {
     private func reload() async {
         settings = IPodSyncSettings.settings(for: device.id, in: context)
         do {
-            onDevice = IPodTrackMatchKey.keys(in: try await loader.load(device.volumeURL))
+            onDevice = try await loader.load(device.volumeURL).tracks
             loadError = nil
         } catch {
             loadError = error.localizedDescription

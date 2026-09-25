@@ -32,7 +32,7 @@ struct IPodArtworkSyncTests {
     @Test func createsArtworkForACoveredTrack() async throws {
         let volume = try TemporaryIPodVolume(database: database)
         let request = try await song("red", in: volume, cover: TestImage.color(1, 0, 0))
-        let added = try await IPodTrackSyncer(volumeURL: volume.url).add([request])
+        let added = try await IPodTrackSyncer(volumeURL: volume.url).sync(adding: [request])
 
         let image = try #require(try artworkImages(on: volume).first)
         #expect(image.uint64(at: 0x14) == added.addedDatabaseIDs.values.first)
@@ -48,7 +48,7 @@ struct IPodArtworkSyncTests {
         let first = try await song("one", in: volume, cover: TestImage.color(0, 0, 1))
         let second = try await song("two", in: volume, cover: TestImage.color(0, 0, 1))
         let third = try await song("three", in: volume, cover: TestImage.color(0, 1, 0))
-        _ = try await IPodTrackSyncer(volumeURL: volume.url).add([first, second, third])
+        _ = try await IPodTrackSyncer(volumeURL: volume.url).sync(adding: [first, second, third])
 
         let images = try artworkImages(on: volume)
         #expect(images.count == 3)
@@ -58,7 +58,7 @@ struct IPodArtworkSyncTests {
 
     @Test func leavesArtworkAloneForTracksWithoutCovers() async throws {
         let volume = try TemporaryIPodVolume(database: database)
-        _ = try await IPodTrackSyncer(volumeURL: volume.url).add([try await song("plain", in: volume, cover: nil)])
+        _ = try await IPodTrackSyncer(volumeURL: volume.url).sync(adding: [try await song("plain", in: volume, cover: nil)])
         #expect(!DatabaseFileStore.artworkDB(onVolume: volume.url).exists)
     }
 }

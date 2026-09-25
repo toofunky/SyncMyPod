@@ -1,6 +1,6 @@
 import Foundation
 
-/// Adds tracks to a parsed iTunesDB tree, keeping every record it doesn't touch byte-identical.
+/// Adds and removes tracks in a parsed iTunesDB tree, keeping every record it doesn't touch byte-identical.
 nonisolated struct ITunesDBEditor {
     private static let databaseIDOffset = 0x70
     private static let playlistItemCountOffset = 0x10
@@ -45,7 +45,21 @@ nonisolated struct ITunesDBEditor {
         return databaseID
     }
 
-    /// The database bytes, with the master playlist's browse indexes rebuilt if tracks were added.
+    /// Removes the tracks from the track list, every playlist and the album list, returning their file locations.
+    mutating func removeTracks(databaseIDs: Set<UInt64>) -> [String] {
+        let locations = ITunesDBTrackRemover.remove(databaseIDs, from: &root)
+        if !locations.isEmpty { hasChanges = true }
+        return locations
+    }
+
+    /// Folds the iPod's Play Counts into the tracks; `false` if the entries don't match the track list.
+    mutating func mergePlayCounts(_ entries: [PlayCountEntry]) -> Bool {
+        guard PlayCountsMerger.merge(entries, into: &root) else { return false }
+        hasChanges = true
+        return true
+    }
+
+    /// The database bytes, with the master playlist's browse indexes rebuilt if tracks changed.
     func serialized() throws -> Data {
         guard hasChanges else { return root.serialized() }
         let database = try ITunesDBParser(data: root.serialized()).parse()
