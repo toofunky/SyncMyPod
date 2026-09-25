@@ -1,4 +1,5 @@
 import Foundation
+@testable import SyncMyPod
 
 /// Assembles a minimal but structurally valid iTunesDB, laid out the way iTunes writes it for 5G/classic iPods.
 struct ITunesDBFixtureBuilder {
@@ -6,6 +7,8 @@ struct ITunesDBFixtureBuilder {
     var playlists: [FixturePlaylist] = []
     var usesUTF8Strings = false
     var includesAlbumSection = false
+    var includesRawSection = false
+    var includesPodcastSection = false
 
     func build() -> Data {
         var sections = [
@@ -14,6 +17,13 @@ struct ITunesDBFixtureBuilder {
         ]
         if includesAlbumSection {
             sections.append(section(type: 4, list: list("mhla", headerLength: 0x5C, items: [])))
+        }
+        if includesPodcastSection {
+            sections.append(section(type: 3, list: list("mhlp", headerLength: 0x5C,
+                                                        items: playlists.map(playlistRecord))))
+        }
+        if includesRawSection {
+            sections.append(section(type: 9, list: Data("13b7d9f0c2a4e6f8".utf8)))
         }
         var database = record("mhbd", headerLength: 0xBC, children: sections.reduce(Data(), +))
         database.write(UInt32(1), at: 0x0C)
