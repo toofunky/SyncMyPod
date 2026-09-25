@@ -8,7 +8,7 @@ struct MusicLibraryView: View {
     @Query private var folders: [LibraryFolder]
     @Query private var tracks: [LibraryTrack]
     @State private var model = MusicLibraryModel()
-    @State private var syncModel = IPodSyncModel()
+    @Environment(IPodSyncModel.self) private var syncModel
     @State private var isChoosingFolder = false
 
     var body: some View {
@@ -17,21 +17,12 @@ struct MusicLibraryView: View {
             .fileImporter(isPresented: $isChoosingFolder, allowedContentTypes: [.folder]) { result in
                 if case .success(let url) = result { model.chooseFolder(url, in: context) }
             }
-            .alert(syncModel.result?.title ?? "", isPresented: isShowingSyncResult,
-                   presenting: syncModel.result) { _ in
-                Button("OK") {}
-            } message: { result in
-                Text(result.message)
-            }
-    }
-
-    private var isShowingSyncResult: Binding<Bool> {
-        Binding(get: { syncModel.result != nil }, set: { if !$0 { syncModel.result = nil } })
+            .syncProgressSheet()
     }
 
     private var addToIPod: (([LibraryTrack]) -> Void)? {
         guard let device = watcher.connectedDevice, !syncModel.isSyncing else { return nil }
-        return { syncModel.add($0, to: device, in: context) }
+        return { syncModel.sync($0.map(\.syncRequest), to: device) }
     }
 
     @ViewBuilder
@@ -72,11 +63,13 @@ struct MusicLibraryView: View {
 #Preview("Library") {
     MusicLibraryView()
         .environment(IPodMountWatcher.preview(connectedDevice: .preview))
+        .environment(IPodSyncModel())
         .modelContainer(.preview)
 }
 
 #Preview("Empty") {
     MusicLibraryView()
         .environment(IPodMountWatcher.preview())
+        .environment(IPodSyncModel())
         .modelContainer(.emptyPreview)
 }

@@ -5,23 +5,25 @@ nonisolated struct IPodTrackSyncer {
     let volumeURL: URL
     var formats = ArtworkFormat.videoIPod
 
-    /// Returns the new database ID for each added track, keyed by source path.
+    /// Skips tracks already on the iPod. Cancelling stops copying but still saves the tracks already copied.
     @concurrent
-    func add(_ requests: [IPodSyncRequest]) async throws -> [String: UInt64] {
+    func add(_ requests: [IPodSyncRequest],
+             progress: @escaping @Sendable (IPodSyncProgress) async -> Void = { _ in }) async throws -> IPodSyncOutcome {
         let store = DatabaseFileStore.iTunesDB(onVolume: volumeURL)
         var editor = try ITunesDBEditor(root: store.loadRecords())
-        let pending = requests.filter { request in
-            request.existingDatabaseID.map { !editor.containsTrack(databaseID: $0) } ?? true
-        }
-        guard !pending.isEmpty else { return [:] }
+        let pending = try newRequests(in: requests, notIn: editor)
+        var outcome = IPodSyncOutcome(skipped: requests.count - pending.count)
+        guard !pending.isEmpty else { return outcome }
         try ensureFreeSpace(for: pending)
         var artwork = try ArtworkSyncSession(volumeURL: volumeURL, formats: formats)
         var copied: [URL] = []
         do {
-            let added = try await copyAndRecord(pending, into: &editor, artwork: &artwork, copied: &copied)
+            try await copyAndRecord(pending, into: &editor, artwork: &artwork, copied: &copied,
+                                    outcome: &outcome, progress: progress)
+            await progress(IPodSyncProgress(completed: outcome.addedCount, total: pending.count, currentTitle: nil))
             try artwork.save()
             try store.save(editor.serialized())
-            return added
+            return outcome
         } catch {
             copied.forEach { try? FileManager.default.removeItem(at: $0) }
             artwork.rollBack()
@@ -29,12 +31,21 @@ nonisolated struct IPodTrackSyncer {
         }
     }
 
+    private func newRequests(in requests: [IPodSyncRequest], notIn editor: ITunesDBEditor) throws -> [IPodSyncRequest] {
+        var seen = IPodTrackMatchKey.keys(in: try ITunesDBParser(data: editor.serialized()).parse())
+        return requests.filter { seen.insert($0.matchKey).inserted }
+    }
+
     private func copyAndRecord(_ requests: [IPodSyncRequest], into editor: inout ITunesDBEditor,
-                               artwork: inout ArtworkSyncSession, copied: inout [URL]) async throws -> [String: UInt64] {
+                               artwork: inout ArtworkSyncSession, copied: inout [URL], outcome: inout IPodSyncOutcome,
+                               progress: @Sendable (IPodSyncProgress) async -> Void) async throws {
         let copier = IPodMusicFileCopier(volumeURL: volumeURL)
-        var added: [String: UInt64] = [:]
-        for request in requests {
-            try Task.checkCancellation()
+        for (index, request) in requests.enumerated() {
+            await progress(IPodSyncProgress(completed: index, total: requests.count, currentTitle: request.draft.title))
+            guard !Task.isCancelled else {
+                outcome.wasCancelled = true
+                return
+            }
             let file = try copier.copy(request.sourceURL)
             copied.append(file.url)
             let prepared = try await artwork.prepare(coverFrom: request.sourceURL)
@@ -43,9 +54,8 @@ nonisolated struct IPodTrackSyncer {
             draft.artwork = prepared?.trackArtwork
             let databaseID = editor.addTrack(draft)
             if let prepared { artwork.attach(prepared, toTrack: databaseID) }
-            added[request.sourceURL.path(percentEncoded: false)] = databaseID
+            outcome.addedDatabaseIDs[request.sourceURL.path(percentEncoded: false)] = databaseID
         }
-        return added
     }
 
     private func ensureFreeSpace(for requests: [IPodSyncRequest]) throws {

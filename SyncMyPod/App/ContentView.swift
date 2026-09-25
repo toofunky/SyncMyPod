@@ -22,6 +22,7 @@ struct ContentView: View {
 #Preview {
     ContentView()
         .environment(IPodMountWatcher.preview(connectedDevice: .preview))
+        .environment(IPodSyncModel())
         .environment(\.iTunesDBLoader, .preview)
         .modelContainer(.preview)
 }

@@ -25,10 +25,6 @@ nonisolated struct ITunesDBEditor {
                                                             TrackRecordBuilder.minimumHeaderLength))
     }
 
-    func containsTrack(databaseID: UInt64) -> Bool {
-        databaseIDs.contains(databaseID)
-    }
-
     /// Appends the track to the track list and master playlist, returning its new database ID.
     mutating func addTrack(_ draft: ITunesTrackDraft) -> UInt64 {
         let trackID = ids.allocate()

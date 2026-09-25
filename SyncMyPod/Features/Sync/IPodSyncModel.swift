@@ -1,40 +1,50 @@
 import Foundation
 import Observation
-import SwiftData
 
 @Observable
 @MainActor
 final class IPodSyncModel {
-    private(set) var isSyncing = false
+    private(set) var progress: IPodSyncProgress?
+    private(set) var completedSyncCount = 0
+    private(set) var isCancelling = false
     var result: IPodSyncResult?
 
-    func add(_ tracks: [LibraryTrack], to device: IPodDevice, in context: ModelContext) {
-        guard !isSyncing, !tracks.isEmpty else { return }
+    @ObservationIgnored private var syncTask: Task<Void, Never>?
+
+    var isSyncing: Bool { syncTask != nil }
+
+    func sync(_ requests: [IPodSyncRequest], to device: IPodDevice) {
+        guard !isSyncing, !requests.isEmpty else { return }
         guard device.requiresDatabaseHash == false else {
             let name = device.generationDescription ?? "this iPod"
             result = .failed(IPodSyncError.unsupportedDevice(name).localizedDescription)
             return
         }
-        isSyncing = true
-        let requests = tracks.map(\.syncRequest)
-        Task {
-            defer { isSyncing = false }
-            do {
-                let added = try await IPodTrackSyncer(volumeURL: device.volumeURL).add(requests)
-                record(added, on: tracks, in: context)
-                result = .added(count: added.count, skipped: tracks.count - added.count)
-            } catch {
-                result = .failed(error.localizedDescription)
-            }
-        }
+        progress = IPodSyncProgress(completed: 0, total: requests.count, currentTitle: nil)
+        syncTask = Task { await run(requests, on: device.volumeURL) }
     }
 
-    private func record(_ added: [String: UInt64], on tracks: [LibraryTrack], in context: ModelContext) {
-        for track in tracks {
-            if let databaseID = added[track.filePath] {
-                track.iPodDatabaseID = Int64(bitPattern: databaseID)
+    func cancel() {
+        isCancelling = true
+        syncTask?.cancel()
+    }
+
+    private func run(_ requests: [IPodSyncRequest], on volumeURL: URL) async {
+        do {
+            let outcome = try await IPodTrackSyncer(volumeURL: volumeURL).add(requests) { [weak self] update in
+                await self?.report(update)
             }
+            result = .finished(outcome)
+        } catch {
+            result = .failed(error.localizedDescription)
         }
-        try? context.save()
+        progress = nil
+        isCancelling = false
+        syncTask = nil
+        completedSyncCount += 1
+    }
+
+    private func report(_ update: IPodSyncProgress) {
+        progress = update
     }
 }

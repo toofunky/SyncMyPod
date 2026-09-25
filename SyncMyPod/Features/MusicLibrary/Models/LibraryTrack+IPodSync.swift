@@ -2,8 +2,7 @@ import Foundation
 
 extension LibraryTrack {
     var syncRequest: IPodSyncRequest {
-        IPodSyncRequest(sourceURL: URL(filePath: filePath), draft: draft,
-                        existingDatabaseID: iPodDatabaseID.map { UInt64(bitPattern: $0) })
+        IPodSyncRequest(sourceURL: URL(filePath: filePath), draft: draft)
     }
 
     private var draft: ITunesTrackDraft {

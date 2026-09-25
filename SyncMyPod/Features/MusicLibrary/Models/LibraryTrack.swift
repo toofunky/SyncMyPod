@@ -20,7 +20,6 @@ nonisolated final class LibraryTrack {
     var bitrate = 0
     var sampleRate = 0
     var dateAdded = Date.now
-    var iPodDatabaseID: Int64?
 
     init(filePath: String) {
         self.filePath = filePath

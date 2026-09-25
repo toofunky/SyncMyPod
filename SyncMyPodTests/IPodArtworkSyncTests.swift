@@ -17,8 +17,7 @@ struct IPodArtworkSyncTests {
             try await AudioFixtureWriter.embedCoverArt(TestImage.pngData(image), from: silence, to: source)
         }
         let size = try Data(contentsOf: source).count
-        return IPodSyncRequest(sourceURL: source, draft: ITunesTrackDraft(title: name, fileSize: size),
-                               existingDatabaseID: nil)
+        return IPodSyncRequest(sourceURL: source, draft: ITunesTrackDraft(title: name, fileSize: size))
     }
 
     private func artworkImages(on volume: TemporaryIPodVolume) throws -> [ITunesDBRecord] {
@@ -36,7 +35,7 @@ struct IPodArtworkSyncTests {
         let added = try await IPodTrackSyncer(volumeURL: volume.url).add([request])
 
         let image = try #require(try artworkImages(on: volume).first)
-        #expect(image.uint64(at: 0x14) == added.values.first)
+        #expect(image.uint64(at: 0x14) == added.addedDatabaseIDs.values.first)
         #expect(try ithmbSize(1028, on: volume) == 20_000)
         #expect(try ithmbSize(1029, on: volume) == 80_000)
         let tracks = try DatabaseFileStore.iTunesDB(onVolume: volume.url).loadRecords().children
