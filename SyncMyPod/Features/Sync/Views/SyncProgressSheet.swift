@@ -54,7 +54,10 @@ struct SyncProgressSheet: View {
     }
 
     private func symbol(for result: IPodSyncResult) -> String {
-        if case .failed = result { "exclamationmark.triangle" } else { "checkmark.circle" }
+        switch result {
+        case .finished: "checkmark.circle"
+        case .failed, .overwritten: "exclamationmark.triangle"
+        }
     }
 }
 
@@ -67,6 +70,10 @@ struct SyncProgressSheet: View {
     SyncProgressSheet(progress: nil,
                       result: .finished(IPodSyncOutcome(addedDatabaseIDs: ["/a.m4a": 1, "/b.m4a": 2], skipped: 3)),
                       isCancelling: false, onCancel: {}, onDone: {})
+}
+
+#Preview("Overwritten") {
+    SyncProgressSheet(progress: nil, result: .overwritten, isCancelling: false, onCancel: {}, onDone: {})
 }
 
 #Preview("Failed") {

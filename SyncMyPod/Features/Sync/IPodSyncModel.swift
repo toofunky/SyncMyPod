@@ -10,6 +10,7 @@ final class IPodSyncModel {
     var result: IPodSyncResult?
 
     @ObservationIgnored private var syncTask: Task<Void, Never>?
+    @ObservationIgnored private var verificationTask: Task<Void, Never>?
 
     var isSyncing: Bool { syncTask != nil }
 
@@ -24,6 +25,7 @@ final class IPodSyncModel {
             result = .failed(error.localizedDescription)
             return
         }
+        verificationTask?.cancel()
         progress = IPodSyncProgress(completed: 0, total: requests.count, currentTitle: nil)
         syncTask = Task { await run(requests, removing: removals, playlists: playlists, with: syncer) }
     }
@@ -41,6 +43,8 @@ final class IPodSyncModel {
                 await self?.report(update)
             }
             result = .finished(outcome)
+            verify(IPodSyncExpectation(outcome: outcome, removals: removals, playlists: playlists),
+                   onVolume: syncer.volumeURL)
         } catch {
             result = .failed(error.localizedDescription)
         }
@@ -48,6 +52,17 @@ final class IPodSyncModel {
         isCancelling = false
         syncTask = nil
         completedSyncCount += 1
+    }
+
+    /// Reloads the Sync tab and says so if another app undid the sync.
+    private func verify(_ expectation: IPodSyncExpectation, onVolume volumeURL: URL) {
+        guard !expectation.isEmpty else { return }
+        verificationTask = Task {
+            let overwritten = await IPodSyncVerifier.wasOverwritten(expectation, onVolume: volumeURL)
+            guard overwritten, !Task.isCancelled, !isSyncing else { return }
+            result = .overwritten
+            completedSyncCount += 1
+        }
     }
 
     private func report(_ update: IPodSyncProgress) {
