@@ -1,7 +1,7 @@
 import Foundation
 
 nonisolated struct AudioFileEnumerator {
-    private static let fileExtension = "m4a"
+    private static let fileExtensions: Set = ["m4a", "mp3"]
     private static let resourceKeys: [URLResourceKey] = [
         .isRegularFileKey, .fileSizeKey, .contentModificationDateKey,
     ]
@@ -19,7 +19,7 @@ nonisolated struct AudioFileEnumerator {
     }
 
     private func scannedFile(at url: URL) -> ScannedAudioFile? {
-        guard url.pathExtension.lowercased() == Self.fileExtension,
+        guard Self.fileExtensions.contains(url.pathExtension.lowercased()),
               let values = try? url.resourceValues(forKeys: Set(Self.resourceKeys)),
               values.isRegularFile == true else { return nil }
         return ScannedAudioFile(url: url, fileSize: values.fileSize ?? 0,

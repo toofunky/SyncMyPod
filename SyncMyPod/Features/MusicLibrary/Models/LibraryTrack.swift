@@ -7,6 +7,7 @@ nonisolated final class LibraryTrack {
     static let currentScanVersion = 1
 
     @Attribute(.unique) var filePath: String
+    var codec = AudioCodec.aac
     var fileSize = 0
     var modificationDate = Date.distantPast
     var title = ""
@@ -38,6 +39,7 @@ nonisolated final class LibraryTrack {
     func update(file: ScannedAudioFile, metadata: AudioFileMetadata) {
         fileSize = file.fileSize
         modificationDate = file.modificationDate
+        codec = metadata.codec
         duration = metadata.duration
         bitrate = metadata.bitrate
         sampleRate = metadata.sampleRate

@@ -61,6 +61,19 @@ struct ITunesDBEditorTests {
         #expect(track.id > vertigo.id)
     }
 
+    @Test(arguments: [(AudioCodec.aac, "AAC audio file", 0x4D34_4120 as UInt32, 0x33 as UInt16),
+                      (.alac, "Apple Lossless audio file", 0x4D34_4120, 0x33),
+                      (.mp3, "MPEG audio file", 0x4D50_3320, 0x0C)])
+    func addedTrackDescribesItsCodec(codec: AudioCodec, kind: String, fileType: UInt32, marker: UInt16) throws {
+        var draft = clocks
+        draft.codec = codec
+        let root = try ITunesDBRecordParser(data: adding([draft], to: fixture).data).parse()
+        let mhit = try #require(root.children.first { $0.isSection(.tracks) }?.children.first?.children.last)
+        #expect(mhit.string(ofType: ITunesStringField.fileType.rawValue) == kind)
+        #expect(mhit.uint32(at: 0x18) == fileType)
+        #expect(mhit.header.read(UInt16.self, at: 0x90) == marker)
+    }
+
     @Test func addedTrackJoinsOnlyTheMasterPlaylist() throws {
         let database = try ITunesDBParser(data: adding([clocks], to: fixture).data).parse()
         let newID = try #require(database.tracks.last?.id)

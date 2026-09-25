@@ -16,6 +16,6 @@ extension LibraryTrack {
                          fileSize: fileSize, duration: duration, trackNumber: trackNumber,
                          trackCount: trackCount, discNumber: discNumber, discCount: discCount, year: year,
                          bitrate: bitrate, sampleRate: sampleRate, dateAdded: .now,
-                         lastModified: modificationDate)
+                         lastModified: modificationDate, codec: codec)
     }
 }

@@ -1,13 +1,11 @@
 import Foundation
 
-/// Builds an `mhit` for an AAC file. Offsets follow libgpod's documented layout.
+/// Builds an `mhit` for an AAC, Apple Lossless or MP3 file. Offsets follow libgpod's documented layout.
 nonisolated struct TrackRecordBuilder {
     static let minimumHeaderLength = 0x184
-    private static let m4aFileType: UInt32 = 0x4D34_4120
     private static let audioMediaType: UInt32 = 1
     private static let hasArtwork: UInt8 = 1
     private static let noArtwork: UInt8 = 2
-    private static let aacFormatMarker: UInt16 = 0x0033
     private static let albumIDOffset = 0x120
     private static let artworkIDOffset = 0x160
     private static let dateAddedOffset = 0x68
@@ -35,7 +33,7 @@ nonisolated struct TrackRecordBuilder {
     static func stringRecords(for draft: ITunesTrackDraft) -> [ITunesDBRecord] {
         let fields: [(ITunesStringField, String)] = [
             (.title, draft.title), (.location, draft.location), (.album, draft.album),
-            (.artist, draft.artist), (.genre, draft.genre), (.fileType, "AAC audio file"),
+            (.artist, draft.artist), (.genre, draft.genre), (.fileType, draft.codec.iTunesKind),
             (.albumArtist, draft.albumArtist)
         ]
         return fields.filter { !$0.1.isEmpty }
@@ -77,12 +75,12 @@ nonisolated struct TrackRecordBuilder {
     }
 
     private func writeFormat(into mhit: inout ITunesDBRecord, from draft: ITunesTrackDraft) {
-        mhit.set(Self.m4aFileType, at: 0x18)
+        mhit.set(draft.codec.iTunesFileType, at: 0x18)
         mhit.set(UInt32(clamping: draft.fileSize), at: 0x24)
         mhit.set(UInt32(clamping: draft.bitrate), at: 0x38)
         mhit.set(UInt32(clamping: draft.sampleRate) << 16, at: 0x3C)
         mhit.set(UInt16.max, at: 0x7E)
         mhit.set(Float(draft.sampleRate).bitPattern, at: 0x88)
-        mhit.set(Self.aacFormatMarker, at: 0x90)
+        mhit.set(draft.codec.iTunesFormatMarker, at: 0x90)
     }
 }

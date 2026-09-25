@@ -1,6 +1,6 @@
 import Foundation
 
-/// Everything needed to describe a new AAC track in the iTunesDB.
+/// Everything needed to describe a new track in the iTunesDB.
 nonisolated struct ITunesTrackDraft: Equatable, Sendable {
     var title: String
     var artist = ""
@@ -19,6 +19,7 @@ nonisolated struct ITunesTrackDraft: Equatable, Sendable {
     var sampleRate = 0
     var dateAdded = Date.now
     var lastModified = Date.now
+    var codec = AudioCodec.aac
     var artwork: ITunesTrackArtwork?
 
     var albumListArtist: String { albumArtist.isEmpty ? artist : albumArtist }

@@ -6,7 +6,7 @@ actor LibraryScanner {
     private static let saveInterval = 100
 
     private let enumerator = AudioFileEnumerator()
-    private let reader = AACMetadataReader()
+    private let reader = AudioMetadataReader()
 
     func scan(folderURL: URL,
               progress: @escaping @MainActor @Sendable (LibraryScanProgress) -> Void)
