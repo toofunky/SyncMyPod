@@ -10,4 +10,5 @@ struct ContentView: View {
 #Preview {
     ContentView()
         .environment(IPodMountWatcher.preview(connectedDevice: .preview))
+        .environment(\.iTunesDBLoader, .preview)
 }

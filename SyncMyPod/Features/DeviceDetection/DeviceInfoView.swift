@@ -11,6 +11,7 @@ struct DeviceInfoView: View {
                 LabeledContent("Free Space", value: Self.format(device.availableBytes))
             }
             Section("Device Identity") {
+                LabeledContent("Generation", value: device.generation?.displayName ?? "Unknown")
                 LabeledContent("Model", value: device.modelNumber ?? "Unknown")
                 LabeledContent("Firmware", value: device.firmwareVersion ?? "Unknown")
                 LabeledContent("Hardware Board", value: device.boardHardwareName ?? "Unknown")

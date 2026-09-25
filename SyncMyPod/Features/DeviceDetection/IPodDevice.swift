@@ -17,6 +17,7 @@ struct IPodDevice: Identifiable, Equatable, Sendable {
     var boardHardwareName: String? { sysInfo.boardHardwareName }
     var firewireGUID: String? { sysInfo.firewireGUID ?? usbIdentity?.serialNumber }
     var serialNumber: String? { sysInfo.serialNumber ?? usbIdentity?.serialNumber }
+    var generation: IPodGeneration? { modelNumber.flatMap(IPodModelCatalog.generation(forModelNumber:)) }
 
     init?(scanningVolumeAt url: URL) {
         let controlDir = url.appendingPathComponent("iPod_Control", isDirectory: true)

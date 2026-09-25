@@ -6,7 +6,7 @@ struct DeviceDetectionView: View {
     var body: some View {
         Group {
             if let device = watcher.connectedDevice {
-                DeviceInfoView(device: device)
+                ConnectedDeviceView(device: device)
             } else {
                 NoDeviceView()
             }
@@ -18,6 +18,7 @@ struct DeviceDetectionView: View {
 #Preview("Connected") {
     DeviceDetectionView()
         .environment(IPodMountWatcher.preview(connectedDevice: .preview))
+        .environment(\.iTunesDBLoader, .preview)
 }
 
 #Preview("No Device") {
