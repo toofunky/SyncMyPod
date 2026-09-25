@@ -44,6 +44,33 @@ struct IPodTrackSyncerTests {
         #expect(try tracks(on: volume).count == 1)
     }
 
+    @Test func recordsCopiedTracksInTheManifest() async throws {
+        let volume = try TemporaryIPodVolume(database: fixture)
+        let source = try volume.makeSourceFile()
+        let details = SyncSource(fileSize: 1_024, modificationDate: .now, artworkFingerprint: nil)
+        let request = IPodSyncRequest(sourceURL: source, draft: ITunesTrackDraft(title: "Song", fileSize: 1_024),
+                                      source: details)
+        let outcome = try await IPodTrackSyncer(volumeURL: volume.url).sync(adding: [request])
+
+        let entry = try #require(IPodControlFiles(volumeURL: volume.url).manifest().entry(for: request))
+        #expect(entry.databaseID == outcome.addedDatabaseIDs.values.first)
+        #expect(entry.source == details)
+    }
+
+    @Test func skipsARetaggedFileTheManifestKnows() async throws {
+        let volume = try TemporaryIPodVolume(database: fixture)
+        let source = try volume.makeSourceFile()
+        let details = SyncSource(fileSize: 1_024, modificationDate: .now, artworkFingerprint: nil)
+        let syncer = IPodTrackSyncer(volumeURL: volume.url)
+        _ = try await syncer.sync(adding: [IPodSyncRequest(sourceURL: source, draft: ITunesTrackDraft(title: "Song",
+                                                           fileSize: 1_024), source: details)])
+        let retagged = IPodSyncRequest(sourceURL: source, draft: ITunesTrackDraft(title: "Renamed", fileSize: 1_100),
+                                       source: details)
+        let second = try await syncer.sync(adding: [retagged])
+        #expect(second.addedCount == 0 && second.skipped == 1)
+        #expect(try tracks(on: volume).count == 1)
+    }
+
     @Test func skipsDuplicatesWithinOneSync() async throws {
         let volume = try TemporaryIPodVolume(database: fixture)
         let source = try volume.makeSourceFile()

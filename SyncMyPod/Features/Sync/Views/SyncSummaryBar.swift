@@ -6,7 +6,9 @@ struct SyncSummaryBar: View {
     let isSyncing: Bool
     let onSync: () -> Void
 
-    private var fits: Bool { freeBytes.map { plan.byteCount < $0 + plan.removedByteCount } ?? true }
+    private var fits: Bool {
+        freeBytes.map { plan.byteCount + plan.updatedByteCount < $0 + plan.removedByteCount } ?? true
+    }
 
     var body: some View {
         HStack {
@@ -31,6 +33,9 @@ struct SyncSummaryBar: View {
         var parts: [String] = []
         if !plan.requests.isEmpty {
             parts.append("\(songs(plan.requests.count)) to add · \(bytes(plan.byteCount))")
+        }
+        if !plan.updates.isEmpty {
+            parts.append("\(songs(plan.updates.count)) to update · \(bytes(plan.updatedByteCount))")
         }
         if !plan.removals.isEmpty {
             parts.append("\(songs(plan.removals.count)) to remove · \(bytes(plan.removedByteCount))")

@@ -5,4 +5,5 @@ nonisolated struct AudioFileMetadata: Equatable, Sendable {
     let duration: TimeInterval
     let bitrate: Int
     let sampleRate: Int
+    let artworkFingerprint: String?
 }

@@ -1,6 +1,6 @@
 import Foundation
 
-/// Adds and removes tracks in a parsed iTunesDB tree, keeping every record it doesn't touch byte-identical.
+/// Adds, updates and removes tracks in a parsed iTunesDB tree, keeping every record it doesn't touch byte-identical.
 nonisolated struct ITunesDBEditor {
     private static let databaseIDOffset = 0x70
     private static let playlistItemCountOffset = 0x10
@@ -50,6 +50,16 @@ nonisolated struct ITunesDBEditor {
         let locations = ITunesDBTrackRemover.remove(databaseIDs, from: &root)
         if !locations.isEmpty { hasChanges = true }
         return locations
+    }
+
+    /// Rewrites the track in place, keeping its IDs, play counts and playlist entries. Returns its previous
+    /// file location; `nil` if it had none or isn't in the database.
+    mutating func updateTrack(databaseID: UInt64, with draft: ITunesTrackDraft, keepingArtwork: Bool) -> String? {
+        guard ITunesDBTrackUpdater.contains(databaseID, in: root) else { return nil }
+        let albumID = albumID(for: draft)
+        hasChanges = true
+        return ITunesDBTrackUpdater.update(databaseID, with: draft, albumID: albumID, keepingArtwork: keepingArtwork,
+                                           builder: trackBuilder, in: &root)
     }
 
     /// Folds the iPod's Play Counts into the tracks; `false` if the entries don't match the track list.

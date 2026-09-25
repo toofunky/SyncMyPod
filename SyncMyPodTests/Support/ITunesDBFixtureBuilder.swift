@@ -34,8 +34,9 @@ struct ITunesDBFixtureBuilder {
     }
 
     private func trackRecord(_ track: FixtureTrack) -> Data {
-        let strings = [(1, track.title), (2, track.location), (3, track.album), (4, track.artist)]
-            .map { stringRecord(type: UInt32($0.0), value: $0.1) }
+        let fields = [(1, track.title), (2, track.location), (3, track.album), (4, track.artist)]
+            .map { (UInt32($0.0), $0.1) } + track.extraStrings.sorted { $0.key < $1.key }.map { ($0.key, $0.value) }
+        let strings = fields.map { stringRecord(type: $0.0, value: $0.1) }
         var mhit = record("mhit", headerLength: 0x184, children: strings.reduce(Data(), +))
         mhit.write(UInt32(strings.count), at: 0x0C)
         mhit.write(track.id, at: 0x10)

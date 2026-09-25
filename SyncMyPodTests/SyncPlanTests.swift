@@ -12,6 +12,7 @@ struct SyncPlanTests {
         track.album = album
         track.albumArtist = albumArtist
         track.fileSize = size
+        track.scanVersion = LibraryTrack.currentScanVersion
         return track
     }
 
@@ -85,5 +86,113 @@ struct SyncPlanTests {
         let plan = SyncPlan.make(tracks: tracks, mode: .allSongs, selectedAlbums: [],
                                  onDevice: [deviceTrack(for: tracks[1])])
         #expect(plan.removals.isEmpty)
+    }
+
+    private func adoptedManifest(_ tracks: [LibraryTrack], onDevice: [ITunesTrack]) -> SyncManifest {
+        var manifest = SyncManifest()
+        _ = manifest.adopt(tracks.map(\.syncRequest), onDevice: onDevice)
+        return manifest
+    }
+
+    @Test func retaggedFileIsAnUpdateNotAnAddition() {
+        let clocks = track("Clocks", artist: "Coldplay", album: "A Rush of Blood")
+        let onDevice = [deviceTrack(for: clocks, id: 1)]
+        let manifest = adoptedManifest([clocks], onDevice: onDevice)
+        clocks.title = "Clocks (Remastered)"
+        clocks.fileSize += 12
+        let plan = SyncPlan.make(tracks: [clocks], mode: .allSongs, selectedAlbums: [], onDevice: onDevice,
+                                 manifest: manifest)
+        #expect(plan.requests.isEmpty)
+        #expect(plan.updates.map(\.databaseID) == [10])
+        #expect(plan.updates.first?.artworkChanged == false)
+    }
+
+    @Test func changedCoverIsAnUpdateWithNewArtwork() {
+        let clocks = track("Clocks", artist: "Coldplay", album: "A Rush of Blood")
+        let onDevice = [deviceTrack(for: clocks, id: 1)]
+        let manifest = adoptedManifest([clocks], onDevice: onDevice)
+        clocks.artworkFingerprint = "new cover"
+        let plan = SyncPlan.make(tracks: [clocks], mode: .allSongs, selectedAlbums: [], onDevice: onDevice,
+                                 manifest: manifest)
+        #expect(plan.updates.first?.artworkChanged == true)
+    }
+
+    @Test func unchangedOrUnscannedFilesAreLeftAlone() {
+        let tracks = library
+        let onDevice = [deviceTrack(for: tracks[0], id: 1), deviceTrack(for: tracks[1], id: 2)]
+        let manifest = adoptedManifest(tracks, onDevice: onDevice)
+        tracks[1].scanVersion = 0
+        tracks[1].fileSize += 1
+        let plan = SyncPlan.make(tracks: Array(tracks.prefix(2)), mode: .allSongs, selectedAlbums: [],
+                                 onDevice: onDevice, manifest: manifest)
+        #expect(plan.isEmpty && plan.updates.isEmpty)
+    }
+
+    @Test func entryForAMissingTrackFallsBackToTags() {
+        let clocks = track("Clocks", artist: "Coldplay", album: "A Rush of Blood")
+        let manifest = adoptedManifest([clocks], onDevice: [deviceTrack(for: clocks, id: 1)])
+        let plan = SyncPlan.make(tracks: [clocks], mode: .allSongs, selectedAlbums: [], onDevice: [],
+                                 manifest: manifest)
+        #expect(plan.requests.count == 1 && plan.updates.isEmpty)
+    }
+
+    @Test func unselectedRetaggedFileIsRemovedThroughItsEntry() {
+        let tracks = library
+        let onDevice = [deviceTrack(for: tracks[0], id: 1), deviceTrack(for: tracks[1], id: 2)]
+        let manifest = adoptedManifest(tracks, onDevice: onDevice)
+        tracks[1].title = "Yellow (Live)"
+        let plan = SyncPlan.make(tracks: tracks, mode: .custom, selectedAlbums: [tracks[0].syncAlbumKey],
+                                 onDevice: onDevice, manifest: manifest)
+        #expect(plan.removalIDs == [20])
+    }
+
+    @Test func updatesAreWorkToDo() {
+        let clocks = track("Clocks", artist: "Coldplay", album: "A Rush of Blood")
+        let onDevice = [deviceTrack(for: clocks, id: 1)]
+        let manifest = adoptedManifest([clocks], onDevice: onDevice)
+        clocks.fileSize += 5
+        let plan = SyncPlan.make(tracks: [clocks], mode: .allSongs, selectedAlbums: [], onDevice: onDevice,
+                                 manifest: manifest)
+        #expect(!plan.isEmpty)
+        #expect(plan.alreadyOnDeviceCount == 0)
+        #expect(plan.updatedByteCount == Int64(clocks.fileSize))
+        #expect(plan.syncRequests.map(\.draft.title) == ["Clocks"])
+    }
+
+    @Test func strayTracksAreRemovedEvenWhenSyncingAllSongs() {
+        let tracks = library
+        let onDevice = [deviceTrack(for: tracks[0], id: 1), deviceTrack(for: tracks[1], id: 2)]
+        let manifest = adoptedManifest(tracks, onDevice: onDevice)
+        let plan = SyncPlan.make(tracks: [tracks[0]], mode: .allSongs, selectedAlbums: [], onDevice: onDevice,
+                                 manifest: manifest, strayDatabaseIDs: [20])
+        #expect(plan.removalIDs == [20])
+    }
+
+    @Test func fileWithTheSameTagsAsAnotherFilesCopyIsNotAddedAgain() {
+        let original = track("Clocks", artist: "Coldplay", album: "A Rush of Blood")
+        let copy = track("Clocks", artist: "Coldplay", album: "A Rush of Blood")
+        copy.filePath = "/Elsewhere/Clocks.m4a"
+        let onDevice = [deviceTrack(for: original, id: 1)]
+        let manifest = adoptedManifest([original], onDevice: onDevice)
+        let plan = SyncPlan.make(tracks: [original, copy], mode: .allSongs, selectedAlbums: [], onDevice: onDevice,
+                                 manifest: manifest)
+        #expect(plan.isEmpty)
+    }
+
+    @Test func looselyMatchedTrackIsUpdatedWithItsCover() {
+        let sign = track("The Sign", artist: "Ace of Base Test", album: "The Sign")
+        sign.duration = 192.445
+        let device = ITunesTrack(id: 1, databaseID: 10,
+                                 strings: [.title: "The Sign", .artist: "Ace of Base", .album: "The Sign"],
+                                 duration: 192.445, fileSize: sign.fileSize, trackNumber: 0, trackCount: 0,
+                                 discNumber: 0, discCount: 0, year: 0, bitrate: 0, sampleRate: 0, rating: 0,
+                                 playCount: 0, mediaType: 1, dateAdded: nil, lastPlayed: nil, lastModified: nil)
+        var manifest = SyncManifest()
+        _ = manifest.adoptLoosely([sign.syncRequest], onDevice: [device])
+        let plan = SyncPlan.make(tracks: [sign], mode: .allSongs, selectedAlbums: [], onDevice: [device],
+                                 manifest: manifest)
+        #expect(plan.requests.isEmpty)
+        #expect(plan.updates.map(\.databaseID) == [10])
+        #expect(plan.updates.first?.artworkChanged == true)
     }
 }

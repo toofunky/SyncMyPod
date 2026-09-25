@@ -23,6 +23,7 @@ final class TemporaryIPodVolume {
 
     func makeSourceFile(named name: String = "song.m4a", bytes: Int = 1_024) throws -> URL {
         let source = url.appending(path: name)
+        try FileManager.default.createDirectory(at: source.deletingLastPathComponent(), withIntermediateDirectories: true)
         try Data((0..<bytes).map { UInt8(truncatingIfNeeded: $0) }).write(to: source)
         return source
     }

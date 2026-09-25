@@ -9,12 +9,13 @@ nonisolated struct AACMetadataReader: Sendable {
               let format = try await track.load(.formatDescriptions).first,
               format.mediaSubType == .mpeg4AAC else { return nil }
         let (duration, dataRate) = try await (asset.load(.duration), track.load(.estimatedDataRate))
-        let tags = await AudioTagReader(items: try await asset.loadMetadata(for: .iTunesMetadata)).tags()
+        let items = try await asset.loadMetadata(for: .iTunesMetadata)
         return AudioFileMetadata(
-            tags: tags,
+            tags: await AudioTagReader(items: items).tags(),
             duration: duration.seconds,
             bitrate: Int((dataRate / 1_000).rounded()),
-            sampleRate: Int(format.audioStreamBasicDescription?.mSampleRate ?? 0)
+            sampleRate: Int(format.audioStreamBasicDescription?.mSampleRate ?? 0),
+            artworkFingerprint: await CoverArtFingerprint.of(items)
         )
     }
 }

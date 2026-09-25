@@ -10,4 +10,5 @@ struct FixtureTrack {
     var playCount: UInt32 = 0
     var year: UInt32 = 2005
     var dateAddedMacSeconds: UInt32 = 0
+    var extraStrings: [UInt32: String] = [:]
 }

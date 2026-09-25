@@ -8,6 +8,7 @@ nonisolated struct IPodControlFiles {
 
     private var iTunesURL: URL { volumeURL.appending(path: "iPod_Control/iTunes", directoryHint: .isDirectory) }
     var playCountsURL: URL { iTunesURL.appending(path: "Play Counts", directoryHint: .notDirectory) }
+    var manifestURL: URL { iTunesURL.appending(path: "SyncMyPod.plist", directoryHint: .notDirectory) }
 
     func playCounts() -> [PlayCountEntry]? {
         (try? Data(contentsOf: playCountsURL)).flatMap(PlayCountsFile.parse)
@@ -25,11 +26,13 @@ nonisolated struct IPodControlFiles {
         }
     }
 
-    /// Runs after the new databases are written: deletes removed audio, and the position-indexed
+    /// Runs after the new databases are written: deletes removed and replaced audio, and the position-indexed
     /// Play Counts and On-The-Go files that no longer line up with the track list.
-    func cleanUp(removedLocations: [String], playCountsMerged: Bool) {
+    func cleanUp(removedLocations: [String], replacedLocations: [String] = [], playCountsMerged: Bool) {
         let manager = FileManager.default
-        removedLocations.forEach { try? manager.removeItem(at: fileURL(forLocation: $0)) }
+        for location in removedLocations + replacedLocations where !location.isEmpty {
+            try? manager.removeItem(at: fileURL(forLocation: location))
+        }
         if playCountsMerged || !removedLocations.isEmpty { try? manager.removeItem(at: playCountsURL) }
         guard !removedLocations.isEmpty else { return }
         let names = (try? manager.contentsOfDirectory(atPath: iTunesURL.path(percentEncoded: false))) ?? []

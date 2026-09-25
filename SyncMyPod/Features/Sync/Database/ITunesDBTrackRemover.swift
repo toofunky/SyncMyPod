@@ -4,7 +4,6 @@ import Foundation
 /// and album-list entries that no remaining track uses.
 nonisolated enum ITunesDBTrackRemover {
     private static let databaseIDOffset = 0x70
-    private static let albumIDOffset = 0x120
     private static let playlistSections: [ITunesDBSectionType] = [.playlists, .podcasts, .smartPlaylists]
 
     /// Returns the iPod location strings of the removed tracks' audio files.
@@ -20,13 +19,8 @@ nonisolated enum ITunesDBTrackRemover {
         for index in root.children.indices where playlistSections.contains(where: root.children[index].isSection) {
             modifyPlaylists(in: &root.children[index]) { removeItems(from: &$0, trackIDs: removedTrackIDs) }
         }
-        let orphanedAlbums = Set(removed.map(albumID)).subtracting(kept.map(albumID))
-        removeAlbums(orphanedAlbums, from: &root)
+        AlbumListPruner.prune(Set(removed.map(AlbumListPruner.albumID)), in: &root)
         return removed.compactMap { $0.string(ofType: ITunesStringField.location.rawValue) }
-    }
-
-    private static func albumID(_ mhit: ITunesDBRecord) -> UInt32 {
-        mhit.uint32(at: albumIDOffset)
     }
 
     private static func modifyPlaylists(in section: inout ITunesDBRecord, _ change: (inout ITunesDBRecord) -> Void) {
@@ -42,13 +36,5 @@ nonisolated enum ITunesDBTrackRemover {
         let removedCount = UInt32(before - playlist.children.count)
         guard removedCount > 0 else { return }
         playlist.set(playlist.uint32(at: 0x10) - removedCount, at: 0x10)
-    }
-
-    private static func removeAlbums(_ albumIDs: Set<UInt32>, from root: inout ITunesDBRecord) {
-        let unused = albumIDs.subtracting([0])
-        guard !unused.isEmpty,
-              let section = root.children.firstIndex(where: { $0.isSection(.albums) }),
-              !root.children[section].children.isEmpty else { return }
-        root.children[section].children[0].children.removeAll { unused.contains($0.uint32(at: 0x10)) }
     }
 }

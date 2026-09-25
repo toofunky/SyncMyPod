@@ -2,7 +2,13 @@ import Foundation
 
 extension LibraryTrack {
     var syncRequest: IPodSyncRequest {
-        IPodSyncRequest(sourceURL: URL(filePath: filePath), draft: draft)
+        IPodSyncRequest(sourceURL: URL(filePath: filePath), draft: draft, source: syncSource)
+    }
+
+    private var syncSource: SyncSource? {
+        guard scanVersion == Self.currentScanVersion else { return nil }
+        return SyncSource(fileSize: fileSize, modificationDate: modificationDate,
+                          artworkFingerprint: artworkFingerprint)
     }
 
     private var draft: ITunesTrackDraft {

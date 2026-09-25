@@ -21,9 +21,11 @@ nonisolated enum IPodSyncResult: Equatable, Sendable {
 
     private static func summary(of outcome: IPodSyncOutcome) -> String {
         var parts = ["Added \(songs(outcome.addedCount))."]
+        if outcome.updatedCount > 0 { parts.append("Updated \(songs(outcome.updatedCount)).") }
         if outcome.removed > 0 { parts.append("Removed \(songs(outcome.removed)).") }
         if outcome.skipped > 0 { parts.append("\(outcome.skipped) already on the iPod.") }
-        if outcome.addedCount + outcome.removed > 0 { parts.append("Eject the iPod before unplugging it.") }
+        let changed = outcome.addedCount + outcome.updatedCount + outcome.removed
+        if changed > 0 { parts.append("Eject the iPod before unplugging it.") }
         return parts.joined(separator: " ")
     }
 

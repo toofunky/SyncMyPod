@@ -7,6 +7,7 @@ struct SyncSettingsForm: View {
     @Bindable var settings: IPodSyncSettings
     let tracks: [LibraryTrack]
     let onDevice: [ITunesTrack]
+    let manifest: LoadedSyncManifest
     let freeBytes: Int64?
     let isSyncing: Bool
     let onSync: (SyncPlan) -> Void
@@ -15,7 +16,8 @@ struct SyncSettingsForm: View {
 
     private var plan: SyncPlan {
         SyncPlan.make(tracks: tracks, mode: settings.mode, selectedAlbums: settings.selectedAlbums,
-                      onDevice: onDevice)
+                      onDevice: onDevice, manifest: manifest.manifest,
+                      strayDatabaseIDs: manifest.strayDatabaseIDs)
     }
 
     var body: some View {
@@ -68,13 +70,15 @@ struct SyncSettingsForm: View {
         let listed = plan.removals.prefix(Self.listedRemovalLimit).map { "\($0.title) — \($0.artist)" }
         let remainder = plan.removals.count - listed.count
         let more = remainder > 0 ? ["and \(remainder) more"] : []
-        return (listed + more + ["They're no longer selected. Your music library isn't affected."])
-            .joined(separator: "\n")
+        let reason = "They're no longer selected, their file was deleted, or they duplicate another song on the iPod. "
+            + "Your music library isn't affected."
+        return (listed + more + [reason]).joined(separator: "\n")
     }
 }
 
 #Preview {
     SyncSettingsForm(settings: IPodSyncSettings(deviceID: "preview"), tracks: LibraryTrack.previewTracks,
-                     onDevice: [], freeBytes: 38_000_000_000, isSyncing: false, onSync: { _ in })
+                     onDevice: [], manifest: LoadedSyncManifest(), freeBytes: 38_000_000_000, isSyncing: false,
+                     onSync: { _ in })
         .modelContainer(.preview)
 }

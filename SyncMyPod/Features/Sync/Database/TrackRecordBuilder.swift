@@ -10,22 +10,29 @@ nonisolated struct TrackRecordBuilder {
     private static let aacFormatMarker: UInt16 = 0x0033
     private static let albumIDOffset = 0x120
     private static let artworkIDOffset = 0x160
+    private static let dateAddedOffset = 0x68
 
     let headerLength: Int
 
     func build(_ draft: ITunesTrackDraft, id: UInt32, databaseID: UInt64, albumID: UInt32) -> ITunesDBRecord {
-        let strings = stringRecords(for: draft)
+        let strings = Self.stringRecords(for: draft)
         var mhit = ITunesDBRecordFactory.record("mhit", headerLength: headerLength,
                                                 body: .container(strings, trailer: Data()))
         mhit.set(UInt32(strings.count), at: 0x0C)
         writeIdentity(into: &mhit, id: id, databaseID: databaseID, albumID: albumID)
-        writeTags(into: &mhit, from: draft)
-        writeFormat(into: &mhit, from: draft)
-        writeArtwork(into: &mhit, draft.artwork)
+        mhit.set(ITunesTimestamp.seconds(from: draft.dateAdded), at: Self.dateAddedOffset)
+        apply(draft, to: &mhit, includingArtwork: true)
         return mhit
     }
 
-    private func stringRecords(for draft: ITunesTrackDraft) -> [ITunesDBRecord] {
+    /// Writes the draft's tags, format and optionally artwork link, leaving IDs, date added and play statistics.
+    func apply(_ draft: ITunesTrackDraft, to mhit: inout ITunesDBRecord, includingArtwork: Bool) {
+        writeTags(into: &mhit, from: draft)
+        writeFormat(into: &mhit, from: draft)
+        if includingArtwork { writeArtwork(into: &mhit, draft.artwork) }
+    }
+
+    static func stringRecords(for draft: ITunesTrackDraft) -> [ITunesDBRecord] {
         let fields: [(ITunesStringField, String)] = [
             (.title, draft.title), (.location, draft.location), (.album, draft.album),
             (.artist, draft.artist), (.genre, draft.genre), (.fileType, "AAC audio file"),
@@ -52,13 +59,15 @@ nonisolated struct TrackRecordBuilder {
         mhit.set(UInt32(clamping: draft.year), at: 0x34)
         mhit.set(UInt32(clamping: draft.discNumber), at: 0x5C)
         mhit.set(UInt32(clamping: draft.discCount), at: 0x60)
-        mhit.set(ITunesTimestamp.seconds(from: draft.dateAdded), at: 0x68)
     }
 
     /// Sets both the legacy count/size fields and the iTunes 7.1+ `mhii` link, so either firmware style finds it.
     private func writeArtwork(into mhit: inout ITunesDBRecord, _ artwork: ITunesTrackArtwork?) {
         guard let artwork else {
+            mhit.set(UInt16(0), at: 0x7C)
+            mhit.set(UInt32(0), at: 0x80)
             mhit.set(Self.noArtwork, at: 0xA4)
+            mhit.set(UInt32(0), at: Self.artworkIDOffset)
             return
         }
         mhit.set(UInt16(1), at: 0x7C)

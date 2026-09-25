@@ -3,6 +3,9 @@ import SwiftData
 
 @Model
 nonisolated final class LibraryTrack {
+    /// Bumped when scanning starts reading something new, so older rows get re-read.
+    static let currentScanVersion = 1
+
     @Attribute(.unique) var filePath: String
     var fileSize = 0
     var modificationDate = Date.distantPast
@@ -20,13 +23,16 @@ nonisolated final class LibraryTrack {
     var bitrate = 0
     var sampleRate = 0
     var dateAdded = Date.now
+    var artworkFingerprint: String?
+    var scanVersion = 0
 
     init(filePath: String) {
         self.filePath = filePath
     }
 
     func matches(_ file: ScannedAudioFile) -> Bool {
-        fileSize == file.fileSize && modificationDate == file.modificationDate
+        scanVersion == Self.currentScanVersion && fileSize == file.fileSize
+            && modificationDate == file.modificationDate
     }
 
     func update(file: ScannedAudioFile, metadata: AudioFileMetadata) {
@@ -35,6 +41,8 @@ nonisolated final class LibraryTrack {
         duration = metadata.duration
         bitrate = metadata.bitrate
         sampleRate = metadata.sampleRate
+        artworkFingerprint = metadata.artworkFingerprint
+        scanVersion = Self.currentScanVersion
         apply(metadata.tags, fallbackTitle: file.url.deletingPathExtension().lastPathComponent)
     }
 

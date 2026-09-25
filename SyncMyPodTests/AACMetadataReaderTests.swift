@@ -21,4 +21,21 @@ struct AACMetadataReaderTests {
                                                       format: kAudioFormatAppleLossless)
         #expect(try await AACMetadataReader().read(url) == nil)
     }
+
+    @Test func fingerprintsTheEmbeddedCover() async throws {
+        let folder = try AudioFixtureWriter.makeTemporaryFolder()
+        defer { try? FileManager.default.removeItem(at: folder) }
+        let plain = try AudioFixtureWriter.writeSilence(to: folder.appending(path: "plain.m4a"))
+        let covers = [TestImage.color(1, 0, 0), TestImage.color(1, 0, 0), TestImage.color(0, 0, 1)]
+        var fingerprints: [String?] = []
+        for (index, color) in covers.enumerated() {
+            let url = folder.appending(path: "\(index).m4a")
+            let png = TestImage.pngData(TestImage.make(width: 64, height: 64, top: color))
+            try await AudioFixtureWriter.embedCoverArt(png, from: plain, to: url)
+            fingerprints.append(try #require(try await AACMetadataReader().read(url)).artworkFingerprint)
+        }
+        #expect(try #require(try await AACMetadataReader().read(plain)).artworkFingerprint == nil)
+        #expect(fingerprints[0] != nil && fingerprints[0] == fingerprints[1])
+        #expect(fingerprints[0] != fingerprints[2])
+    }
 }
