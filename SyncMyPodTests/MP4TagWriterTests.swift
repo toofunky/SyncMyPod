@@ -106,11 +106,11 @@ struct MP4TagWriterTests {
         let track = try #require(try await asset.loadTracks(withMediaType: .audio).first)
         let reader = try AVAssetReader(asset: asset)
         let output = AVAssetReaderTrackOutput(track: track, outputSettings: nil)
-        reader.add(output)
-        reader.startReading()
+        let provider = reader.outputProvider(for: output)
+        try reader.start()
         var data = Data()
-        while let buffer = output.copyNextSampleBuffer() {
-            if let block = buffer.dataBuffer { data.append(try block.dataBytes()) }
+        while let sample = try await provider.next() {
+            if case .dataBuffer(let block) = sample.content { data.append(contentsOf: block) }
         }
         #expect(reader.status == .completed)
         return data
