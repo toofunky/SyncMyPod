@@ -4,10 +4,11 @@ import SwiftData
 @Model
 nonisolated final class LibraryTrack {
     /// Bumped when scanning starts reading something new, so older rows get re-read.
-    static let currentScanVersion = 1
+    /// 2: the `codec` → `codecRawValue` rename left older rows `NULL`, so they must be re-read.
+    static let currentScanVersion = 2
 
     @Attribute(.unique) var filePath: String
-    /// Optional because rows scanned before codecs were recorded hold `NULL`; those were all AAC.
+    /// Optional because rows from before a rescan can hold `NULL`; those read as AAC.
     @Attribute(originalName: "codec") var codecRawValue: String?
     var fileSize = 0
     var modificationDate = Date.distantPast
