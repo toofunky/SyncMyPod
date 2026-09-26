@@ -4,6 +4,7 @@ struct AboutView: View {
     static let windowID = "about"
 
     @Environment(\.openURL) private var openURL
+    @State private var isShowingAcknowledgements = false
 
     private static let websiteURL = URL(string: "https://github.com/toofunky/SyncMyPod")
     private static let releaseNotesURL = URL(string: "https://github.com/toofunky/SyncMyPod/blob/main/RELEASES.md")
@@ -43,14 +44,15 @@ struct AboutView: View {
                     }
                 }
                 Button("Acknowledgements") {
-                    if let url = Bundle.main.url(forResource: "Credits", withExtension: "html") {
-                        openURL(url)
-                    }
+                    isShowingAcknowledgements = true
                 }
             }
         }
         .padding()
         .frame(minWidth: 280)
+        .sheet(isPresented: $isShowingAcknowledgements) {
+            AcknowledgementsView()
+        }
     }
 }
 
