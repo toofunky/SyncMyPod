@@ -12,4 +12,5 @@
 - [x] Sync by genre
 - [x] Multithreaded library scan
 - [x] Light/dark mode
+- [ ] Tag editor
 
