@@ -18,7 +18,7 @@ nonisolated struct AudioFileEnumerator {
         return enumerator.compactMap { ($0 as? URL).flatMap(scannedFile) }
     }
 
-    private func scannedFile(at url: URL) -> ScannedAudioFile? {
+    func scannedFile(at url: URL) -> ScannedAudioFile? {
         guard Self.fileExtensions.contains(url.pathExtension.lowercased()),
               let values = try? url.resourceValues(forKeys: Set(Self.resourceKeys)),
               values.isRegularFile == true else { return nil }

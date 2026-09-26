@@ -3,12 +3,12 @@ import SwiftUI
 
 struct LibraryTrackTableView: View {
     let tracks: [LibraryTrack]
+    @Binding var selection: Set<LibraryTrack.ID>
     var addToIPod: (([LibraryTrack]) -> Void)?
 
     @Environment(\.modelContext) private var context
     @Query(sort: \LibraryPlaylist.createdAt) private var playlists: [LibraryPlaylist]
     @State private var sortOrder = [KeyPathComparator(\LibraryTrack.albumArtist)]
-    @State private var selection = Set<LibraryTrack.ID>()
     @State private var sortedTracks: [LibraryTrack] = []
     @State private var sortKeys: [LibraryTrackSortKey] = []
     @State private var sortedBy: KeyPathComparator<LibraryTrack>?
@@ -73,6 +73,6 @@ struct LibraryTrackTableView: View {
 }
 
 #Preview {
-    LibraryTrackTableView(tracks: LibraryTrack.previewTracks, addToIPod: { _ in })
+    LibraryTrackTableView(tracks: LibraryTrack.previewTracks, selection: .constant([]), addToIPod: { _ in })
         .modelContainer(.emptyPreview)
 }
