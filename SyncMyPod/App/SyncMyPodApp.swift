@@ -17,7 +17,14 @@ struct SyncMyPodApp: App {
         }
         .modelContainer(for: MusicLibrarySchema.models)
         .commands {
+            AboutCommand()
             CheckForUpdatesCommand(updater: updater)
         }
+
+        Window("About SyncMyPod", id: AboutView.windowID) {
+            AboutView()
+        }
+        .windowResizability(.contentSize)
+        .restorationBehavior(.disabled)
     }
 }
