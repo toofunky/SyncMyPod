@@ -7,6 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		4C44E123306888CF004976AE /* RELEASES.md in Resources */ = {isa = PBXBuildFile; fileRef = 4C44E122306888CF004976AE /* RELEASES.md */; };
+		4C44E125306888D9004976AE /* LICENSE in Resources */ = {isa = PBXBuildFile; fileRef = 4C44E124306888D9004976AE /* LICENSE */; };
+		4C44E128306888E7004976AE /* FEATURES.md in Resources */ = {isa = PBXBuildFile; fileRef = 4C44E127306888E7004976AE /* FEATURES.md */; };
+		4C44E129306888E7004976AE /* CLAUDE.md in Resources */ = {isa = PBXBuildFile; fileRef = 4C44E126306888E7004976AE /* CLAUDE.md */; };
+		4C44E12B306888F0004976AE /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = 4C44E12A306888F0004976AE /* README.md */; };
 		4C8F1BA130680BBC00B8E31A /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = 4C8F1BA030680BBC00B8E31A /* Sparkle */; };
 /* End PBXBuildFile section */
 
@@ -23,6 +28,11 @@
 /* Begin PBXFileReference section */
 		000000000000000000000120 /* SyncMyPod.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SyncMyPod.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		4C2E35AA306601760020DC5A /* SyncMyPodTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SyncMyPodTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		4C44E122306888CF004976AE /* RELEASES.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = RELEASES.md; sourceTree = "<group>"; };
+		4C44E124306888D9004976AE /* LICENSE */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
+		4C44E126306888E7004976AE /* CLAUDE.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = CLAUDE.md; sourceTree = "<group>"; };
+		4C44E127306888E7004976AE /* FEATURES.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = FEATURES.md; sourceTree = "<group>"; };
+		4C44E12A306888F0004976AE /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -71,6 +81,11 @@
 			children = (
 				000000000000000000000010 /* SyncMyPod */,
 				4C2E35AB306601760020DC5A /* SyncMyPodTests */,
+				4C44E122306888CF004976AE /* RELEASES.md */,
+				4C44E124306888D9004976AE /* LICENSE */,
+				4C44E126306888E7004976AE /* CLAUDE.md */,
+				4C44E127306888E7004976AE /* FEATURES.md */,
+				4C44E12A306888F0004976AE /* README.md */,
 				000000000000000000000020 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -175,6 +190,11 @@
 		000000000000000140000000 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			files = (
+				4C44E123306888CF004976AE /* RELEASES.md in Resources */,
+				4C44E125306888D9004976AE /* LICENSE in Resources */,
+				4C44E12B306888F0004976AE /* README.md in Resources */,
+				4C44E128306888E7004976AE /* FEATURES.md in Resources */,
+				4C44E129306888E7004976AE /* CLAUDE.md in Resources */,
 			);
 		};
 		4C2E35A8306601760020DC5A /* Resources */ = {

@@ -4,3 +4,4 @@ SyncMyPod-1.0
 SyncMyPod-1.1
 - Add app icon.
 - Add Website, Release Notes, and Acknowledgements to About dialog.
+- Add Help menu.
