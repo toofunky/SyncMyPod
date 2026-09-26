@@ -7,8 +7,11 @@ struct LibraryTrackTableView: View {
 
     @Environment(\.modelContext) private var context
     @Query(sort: \LibraryPlaylist.createdAt) private var playlists: [LibraryPlaylist]
-    @State private var sortOrder = [KeyPathComparator(\LibraryTrack.artist)]
+    @State private var sortOrder = [KeyPathComparator(\LibraryTrack.albumArtist)]
     @State private var selection = Set<LibraryTrack.ID>()
+    @State private var sortedTracks: [LibraryTrack] = []
+    @State private var sortKeys: [LibraryTrackSortKey] = []
+    @State private var sortedBy: KeyPathComparator<LibraryTrack>?
 
     var body: some View {
         Table(sortedTracks, selection: $selection, sortOrder: $sortOrder) {
@@ -35,6 +38,8 @@ struct LibraryTrackTableView: View {
             }
             TableColumn("Codec", value: \.codecName)
         }
+        // A fresh table lays out only visible rows; diffing a full reorder builds a row view for every track.
+        .id(sortedBy)
         .contextMenu(forSelectionType: LibraryTrack.ID.self) { ids in
             Button("Add to iPod", systemImage: "ipod") {
                 addToIPod?(tracks.filter { ids.contains($0.id) })
@@ -43,9 +48,18 @@ struct LibraryTrackTableView: View {
             AddToPlaylistMenu(playlists: playlists) { add(ids, to: $0) }
                 .disabled(ids.isEmpty)
         }
+        .onChange(of: tracks, initial: true) {
+            sortKeys = LibraryTrack.sortKeys(for: tracks)
+            resort()
+        }
+        .onChange(of: sortOrder) { resort() }
     }
 
-    private var sortedTracks: [LibraryTrack] { tracks.sorted(using: sortOrder) }
+    private func resort() {
+        sortedBy = sortOrder.first
+        guard let primary = sortedBy else { return sortedTracks = tracks }
+        sortedTracks = LibraryTrack.sorted(tracks, keys: sortKeys, by: primary)
+    }
 
     /// Adds in the order shown; `nil` makes a new playlist of them.
     private func add(_ ids: Set<LibraryTrack.ID>, to playlist: LibraryPlaylist?) {
