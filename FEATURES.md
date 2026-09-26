@@ -9,4 +9,7 @@
 - [x] Append track artist to title
 - [x] Detect meta-data/artwork changes
 - [ ] Backup/restore database
+- [x] Sync by genre
+- [x] Multithreaded library scan
+- [x] Light/dark mode
 

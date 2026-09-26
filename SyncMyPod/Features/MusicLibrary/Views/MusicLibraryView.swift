@@ -10,6 +10,8 @@ struct MusicLibraryView: View {
     @State private var model = MusicLibraryModel()
     @Environment(IPodSyncModel.self) private var syncModel
     @State private var isChoosingFolder = false
+    @AppStorage(AppAppearance.storageKey) private var appearance = AppAppearance.system
+    @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
         content
@@ -59,6 +61,10 @@ struct MusicLibraryView: View {
                 .disabled(model.isScanning)
             Button("Rescan", systemImage: "arrow.clockwise") { model.rescan(in: context) }
                 .disabled(model.isScanning || folders.isEmpty)
+            Button(AppAppearance.toggleTitle(for: colorScheme),
+                   systemImage: AppAppearance.toggleSymbolName(for: colorScheme)) {
+                appearance = AppAppearance.toggled(from: colorScheme)
+            }
         }
     }
 }
