@@ -8,8 +8,8 @@ nonisolated enum SyncMode: String, CaseIterable, Codable, Identifiable, Sendable
 
     var title: String {
         switch self {
-        case .allSongs: "All Songs"
-        case .custom: "Selected Playlists & Albums"
+        case .allSongs: "Sync All Songs"
+        case .custom: "Custom Sync"
         }
     }
 }

@@ -30,15 +30,16 @@ nonisolated struct SyncPlan: Equatable, Sendable {
     var removedByteCount: Int64 { removals.reduce(0) { $0 + Int64($1.fileSize) } }
     var removalIDs: Set<UInt64> { Set(removals.map(\.databaseID)) }
 
-    /// Songs in `playlists` are synced whatever the mode and album selection.
+    /// Songs in `playlists` are synced whatever the mode, album and genre selection.
     @MainActor
-    static func make(tracks: [LibraryTrack], mode: SyncMode, selectedAlbums: Set<String>,
+    static func make(tracks: [LibraryTrack], mode: SyncMode, selectedAlbums: Set<String>, selectedGenres: Set<String> = [],
                      preservingAlbumArtist: Bool = false, playlists: [IPodPlaylistRequest] = [], onDevice: [ITunesTrack],
                      devicePlaylists: [ITunesPlaylist] = [], manifest: SyncManifest = SyncManifest(),
                      strayDatabaseIDs: Set<UInt64> = []) -> SyncPlan {
         let playlistPaths = Set(playlists.flatMap { $0.tracks.map(\.sourcePath) })
         let isSelected = { (track: LibraryTrack) in
-            mode == .allSongs || selectedAlbums.contains(track.syncAlbumKey) || playlistPaths.contains(track.filePath)
+            mode == .allSongs || selectedAlbums.contains(track.syncAlbumKey)
+                || selectedGenres.contains(track.syncGenre) || playlistPaths.contains(track.filePath)
         }
         let request = { (track: LibraryTrack) in track.syncRequest(preservingAlbumArtist: preservingAlbumArtist) }
         let plan = SyncPlanner(manifest: manifest, onDevice: onDevice, strayDatabaseIDs: strayDatabaseIDs)

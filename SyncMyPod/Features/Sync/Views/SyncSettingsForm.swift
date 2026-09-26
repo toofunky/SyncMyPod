@@ -17,6 +17,7 @@ struct SyncSettingsForm: View {
 
     private var plan: SyncPlan {
         SyncPlan.make(tracks: tracks, mode: settings.mode, selectedAlbums: settings.selectedAlbums,
+                      selectedGenres: settings.selectedGenres,
                       preservingAlbumArtist: settings.preservesAlbumArtist,
                       playlists: LibraryPlaylist.syncRequests(playlists, tracks: tracks, settings: settings),
                       onDevice: onDevice.tracks, devicePlaylists: onDevice.playlists, manifest: manifest.manifest,
@@ -33,8 +34,10 @@ struct SyncSettingsForm: View {
             Picker("Sync", selection: $settings.mode) {
                 ForEach(SyncMode.allCases) { Text($0.title).tag($0) }
             }
-            .pickerStyle(.segmented)
+            .pickerStyle(.radioGroup)
+            .horizontalRadioGroupLayout()
             .labelsHidden()
+            .frame(maxWidth: .infinity, alignment: .leading)
             .padding()
             Divider()
             selection
@@ -57,10 +60,13 @@ struct SyncSettingsForm: View {
                                    description: Text("Every song and playlist in your music library will be copied "
                                                      + "to the iPod."))
         case .custom:
-            SyncSelectionTreeView(playlists: SyncTreeBuilder.playlists(from: playlists),
-                                  artists: SyncTreeBuilder.artists(from: tracks),
-                                  playlistSelection: $settings.selectedPlaylists,
-                                  selection: $settings.selectedAlbums)
+            SyncCustomSelectionView(artists: SyncTreeBuilder.artists(from: tracks),
+                                    genres: SyncTreeBuilder.genres(from: tracks),
+                                    playlists: SyncTreeBuilder.playlists(from: playlists),
+                                    albumSelection: $settings.selectedAlbums,
+                                    genreSelection: $settings.selectedGenres,
+                                    playlistSelection: $settings.selectedPlaylists)
+                .padding(.top)
         }
     }
 

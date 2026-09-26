@@ -5,22 +5,23 @@ import Testing
 @MainActor
 struct SyncPlanTests {
     private func track(_ title: String, artist: String, album: String, albumArtist: String = "",
-                       size: Int = 1_000) -> LibraryTrack {
+                       genre: String = "", size: Int = 1_000) -> LibraryTrack {
         let track = LibraryTrack(filePath: "/Music/\(artist)/\(album)/\(title).m4a")
         track.title = title
         track.artist = artist
         track.album = album
         track.albumArtist = albumArtist
+        track.genre = genre
         track.fileSize = size
         track.scanVersion = LibraryTrack.currentScanVersion
         return track
     }
 
     private var library: [LibraryTrack] {
-        [track("Clocks", artist: "Coldplay", album: "A Rush of Blood", size: 7_000),
-         track("Yellow", artist: "Coldplay", album: "Parachutes", size: 5_000),
-         track("Hey Ya!", artist: "OutKast", album: "Speakerboxxx", size: 6_000),
-         track("Crazy", artist: "Gnarls Barkley", album: "Now 24", albumArtist: "Various Artists"),
+        [track("Clocks", artist: "Coldplay", album: "A Rush of Blood", genre: "Rock", size: 7_000),
+         track("Yellow", artist: "Coldplay", album: "Parachutes", genre: "Rock ", size: 5_000),
+         track("Hey Ya!", artist: "OutKast", album: "Speakerboxxx", genre: "Hip-Hop", size: 6_000),
+         track("Crazy", artist: "Gnarls Barkley", album: "Now 24", albumArtist: "Various Artists", genre: "Soul"),
          track("Untagged", artist: "", album: "")]
     }
 
@@ -63,6 +64,19 @@ struct SyncPlanTests {
         let plan = SyncPlan.make(tracks: tracks, mode: .custom, selectedAlbums: selected, onDevice: [])
         #expect(plan.requests.map(\.draft.title) == ["Clocks", "Hey Ya!"])
         #expect(plan.byteCount == 13_000)
+    }
+
+    @Test func genresGroupTrimmedNamesAndNameUntaggedSongs() {
+        let genres = SyncTreeBuilder.genres(from: library)
+        #expect(genres.map(\.name) == ["Hip-Hop", "Rock", "Soul", "Unknown Genre"])
+        #expect(genres[1].trackCount == 2 && genres[1].byteCount == 12_000)
+    }
+
+    @Test func customPlansSelectedGenresAlongsideAlbums() {
+        let tracks = library
+        let plan = SyncPlan.make(tracks: tracks, mode: .custom, selectedAlbums: [tracks[2].syncAlbumKey],
+                                 selectedGenres: ["Rock", "Hip-Hop"], onDevice: [])
+        #expect(plan.requests.map(\.draft.title) == ["Clocks", "Yellow", "Hey Ya!"])
     }
 
     @Test func customPlanWithNothingSelectedIsEmpty() {
