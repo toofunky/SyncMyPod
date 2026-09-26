@@ -86,6 +86,7 @@ struct MusicLibraryView: View {
     }
 }
 
+#if DEBUG
 #Preview("Library") {
     MusicLibraryView()
         .environment(IPodMountWatcher.preview(connectedDevice: .preview))
@@ -99,3 +100,4 @@ struct MusicLibraryView: View {
         .environment(IPodSyncModel())
         .modelContainer(.emptyPreview)
 }
+#endif

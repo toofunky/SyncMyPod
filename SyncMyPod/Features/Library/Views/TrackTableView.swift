@@ -26,6 +26,8 @@ struct TrackTableView: View {
     }
 }
 
+#if DEBUG
 #Preview {
     TrackTableView(tracks: ITunesDatabase.preview.tracks)
 }
+#endif

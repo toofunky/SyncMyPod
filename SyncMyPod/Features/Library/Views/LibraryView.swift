@@ -39,6 +39,7 @@ struct LibraryView: View {
     }
 }
 
+#if DEBUG
 #Preview("Loaded") {
     LibraryView(device: .preview)
         .environment(\.iTunesDBLoader, .preview)
@@ -48,3 +49,4 @@ struct LibraryView: View {
     LibraryView(device: .preview)
         .environment(\.iTunesDBLoader, .missingDatabase)
 }
+#endif

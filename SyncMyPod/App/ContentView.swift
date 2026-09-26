@@ -25,6 +25,7 @@ struct ContentView: View {
     }
 }
 
+#if DEBUG
 #Preview {
     ContentView()
         .environment(IPodMountWatcher.preview(connectedDevice: .preview))
@@ -32,3 +33,4 @@ struct ContentView: View {
         .environment(\.iTunesDBLoader, .preview)
         .modelContainer(.preview)
 }
+#endif

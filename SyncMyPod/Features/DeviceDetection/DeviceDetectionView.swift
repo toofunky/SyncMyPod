@@ -16,6 +16,7 @@ struct DeviceDetectionView: View {
     }
 }
 
+#if DEBUG
 #Preview("Connected") {
     DeviceDetectionView()
         .environment(IPodMountWatcher.preview(connectedDevice: .preview))
@@ -28,3 +29,4 @@ struct DeviceDetectionView: View {
     DeviceDetectionView()
         .environment(IPodMountWatcher.preview())
 }
+#endif

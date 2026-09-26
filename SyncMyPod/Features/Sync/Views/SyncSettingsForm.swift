@@ -93,9 +93,11 @@ struct SyncSettingsForm: View {
     }
 }
 
+#if DEBUG
 #Preview {
     SyncSettingsForm(settings: IPodSyncSettings(deviceID: "preview"), tracks: LibraryTrack.previewTracks,
                      playlists: [.preview], onDevice: .preview, manifest: LoadedSyncManifest(), freeBytes: 38_000_000_000, isSyncing: false,
                      onSync: { _ in })
         .modelContainer(.preview)
 }
+#endif

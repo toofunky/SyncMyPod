@@ -72,7 +72,9 @@ struct LibraryTrackTableView: View {
     }
 }
 
+#if DEBUG
 #Preview {
     LibraryTrackTableView(tracks: LibraryTrack.previewTracks, selection: .constant([]), addToIPod: { _ in })
         .modelContainer(.emptyPreview)
 }
+#endif

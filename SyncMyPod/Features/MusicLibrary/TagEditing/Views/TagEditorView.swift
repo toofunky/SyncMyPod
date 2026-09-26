@@ -24,6 +24,7 @@ struct TagEditorView: View {
     }
 }
 
+#if DEBUG
 #Preview("Selection") {
     TagEditorView(tracks: LibraryTrack.previewTracks)
         .modelContainer(.preview)
@@ -33,3 +34,4 @@ struct TagEditorView: View {
     TagEditorView(tracks: [])
         .modelContainer(.emptyPreview)
 }
+#endif

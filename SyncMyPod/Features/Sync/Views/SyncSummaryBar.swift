@@ -57,6 +57,7 @@ struct SyncSummaryBar: View {
     private func bytes(_ count: Int64) -> String { count.formatted(.byteCount(style: .file)) }
 }
 
+#if DEBUG
 #Preview("Adding and removing") {
     SyncSummaryBar(plan: SyncPlan(requests: [LibraryTrack.previewTracks[0].syncRequest(preservingAlbumArtist: false)],
                                   removals: [ITunesDatabase.preview.tracks[0]], selectedCount: 3),
@@ -67,3 +68,4 @@ struct SyncSummaryBar: View {
     SyncSummaryBar(plan: SyncPlan(requests: [], removals: [], selectedCount: 3), freeBytes: 38_000_000_000,
                    isSyncing: false, onSync: {})
 }
+#endif

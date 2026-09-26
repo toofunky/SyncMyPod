@@ -5,6 +5,7 @@ import SwiftUI
 struct SyncMyPodApp: App {
     @State private var mountWatcher = IPodMountWatcher()
     @State private var syncModel = IPodSyncModel()
+    @State private var updater = AppUpdater()
     @AppStorage(AppAppearance.storageKey) private var appearance = AppAppearance.system
 
     var body: some Scene {
@@ -15,5 +16,8 @@ struct SyncMyPodApp: App {
                 .preferredColorScheme(appearance.colorScheme)
         }
         .modelContainer(for: MusicLibrarySchema.models)
+        .commands {
+            CheckForUpdatesCommand(updater: updater)
+        }
     }
 }

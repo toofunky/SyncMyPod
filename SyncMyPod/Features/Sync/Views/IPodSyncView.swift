@@ -61,9 +61,11 @@ struct IPodSyncView: View {
     }
 }
 
+#if DEBUG
 #Preview {
     IPodSyncView(device: .preview)
         .environment(\.iTunesDBLoader, .preview)
         .environment(IPodSyncModel())
         .modelContainer(.preview)
 }
+#endif

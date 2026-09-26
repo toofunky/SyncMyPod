@@ -29,8 +29,10 @@ struct PlaylistHeaderView: View {
     }
 }
 
+#if DEBUG
 #Preview {
     let playlist = LibraryPlaylist.preview
     PlaylistHeaderView(playlist: playlist,
                        entries: PlaylistEntry.entries(of: playlist, in: LibraryTrack.previewTracks))
 }
+#endif

@@ -39,6 +39,7 @@ struct PlaylistSidebarSection: View {
     }
 }
 
+#if DEBUG
 #Preview {
     @Previewable @State var selection: SidebarItem? = .library
     List(selection: $selection) {
@@ -46,3 +47,4 @@ struct PlaylistSidebarSection: View {
     }
     .modelContainer(.preview)
 }
+#endif

@@ -28,6 +28,7 @@ struct PlaylistTrackRow: View {
     }
 }
 
+#if DEBUG
 #Preview {
     List {
         PlaylistTrackRow(entry: PlaylistEntry(id: 0, path: LibraryTrack.previewTracks[0].filePath,
@@ -35,3 +36,4 @@ struct PlaylistTrackRow: View {
         PlaylistTrackRow(entry: PlaylistEntry(id: 1, path: "/Music/Gone/Missing.m4a", track: nil))
     }
 }
+#endif

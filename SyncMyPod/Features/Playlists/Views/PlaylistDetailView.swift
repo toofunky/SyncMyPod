@@ -18,7 +18,9 @@ struct PlaylistDetailView: View {
     }
 }
 
+#if DEBUG
 #Preview {
     PlaylistDetailView(playlistID: LibraryPlaylist.preview.playlistID)
         .modelContainer(.preview)
 }
+#endif

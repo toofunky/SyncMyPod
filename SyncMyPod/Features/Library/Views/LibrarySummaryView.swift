@@ -16,6 +16,8 @@ struct LibrarySummaryView: View {
     }
 }
 
+#if DEBUG
 #Preview {
     LibrarySummaryView(database: .preview)
 }
+#endif

@@ -40,6 +40,8 @@ struct DeviceInfoView: View {
     }
 }
 
+#if DEBUG
 #Preview {
     DeviceInfoView(device: .preview)
 }
+#endif

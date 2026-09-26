@@ -41,9 +41,11 @@ struct PlaylistTrackListView: View {
     }
 }
 
+#if DEBUG
 #Preview {
     let playlist = LibraryPlaylist.preview
     PlaylistTrackListView(playlist: playlist,
                           entries: PlaylistEntry.entries(of: playlist, in: LibraryTrack.previewTracks))
         .modelContainer(.emptyPreview)
 }
+#endif

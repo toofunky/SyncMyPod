@@ -18,7 +18,9 @@ struct AddToPlaylistMenu: View {
     }
 }
 
+#if DEBUG
 #Preview {
     AddToPlaylistMenu(playlists: [.preview], onAdd: { _ in })
         .padding()
 }
+#endif

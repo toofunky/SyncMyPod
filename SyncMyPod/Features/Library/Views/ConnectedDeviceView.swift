@@ -20,9 +20,11 @@ struct ConnectedDeviceView: View {
     }
 }
 
+#if DEBUG
 #Preview {
     ConnectedDeviceView(device: .preview)
         .environment(\.iTunesDBLoader, .preview)
         .environment(IPodSyncModel())
         .modelContainer(.preview)
 }
+#endif

@@ -79,7 +79,9 @@ struct TagEditorForm: View {
     }
 }
 
+#if DEBUG
 #Preview {
     TagEditorForm(model: TagEditorModel(tracks: LibraryTrack.previewTracks))
         .modelContainer(.preview)
 }
+#endif
