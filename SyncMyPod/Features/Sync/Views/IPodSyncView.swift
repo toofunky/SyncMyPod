@@ -43,11 +43,13 @@ struct IPodSyncView: View {
     }
 
     private func reload() async {
-        settings = IPodSyncSettings.settings(for: device.id, in: context)
+        let settings = IPodSyncSettings.settings(for: device.id, in: context)
+        self.settings = settings
+        let requests = tracks.map { $0.syncRequest(preservingAlbumArtist: settings.preservesAlbumArtist) }
         do {
             let database = try await loader.load(device.volumeURL)
             manifest = await IPodControlFiles(volumeURL: device.volumeURL)
-                .manifest(adopting: tracks.map(\.syncRequest), onDevice: database.tracks,
+                .manifest(adopting: requests, onDevice: database.tracks,
                           libraryFolder: folders.first?.path)
             onDevice = database
             loadError = nil

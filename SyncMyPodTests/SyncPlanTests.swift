@@ -90,7 +90,7 @@ struct SyncPlanTests {
 
     private func adoptedManifest(_ tracks: [LibraryTrack], onDevice: [ITunesTrack]) -> SyncManifest {
         var manifest = SyncManifest()
-        _ = manifest.adopt(tracks.map(\.syncRequest), onDevice: onDevice)
+        _ = manifest.adopt(tracks.map { $0.syncRequest(preservingAlbumArtist: false) }, onDevice: onDevice)
         return manifest
     }
 
@@ -188,7 +188,7 @@ struct SyncPlanTests {
                                  discNumber: 0, discCount: 0, year: 0, bitrate: 0, sampleRate: 0, rating: 0,
                                  playCount: 0, mediaType: 1, dateAdded: nil, lastPlayed: nil, lastModified: nil)
         var manifest = SyncManifest()
-        _ = manifest.adoptLoosely([sign.syncRequest], onDevice: [device])
+        _ = manifest.adoptLoosely([sign.syncRequest(preservingAlbumArtist: false)], onDevice: [device])
         let plan = SyncPlan.make(tracks: [sign], mode: .allSongs, selectedAlbums: [], onDevice: [device],
                                  manifest: manifest)
         #expect(plan.requests.isEmpty)
@@ -197,7 +197,7 @@ struct SyncPlanTests {
     }
 
     private func playlist(_ tracks: [LibraryTrack], id: UInt64 = 77, name: String = "Mix") -> IPodPlaylistRequest {
-        IPodPlaylistRequest(id: id, name: name, createdAt: .now, tracks: tracks.map(\.syncRequest))
+        IPodPlaylistRequest(id: id, name: name, createdAt: .now, tracks: tracks.map { $0.syncRequest(preservingAlbumArtist: false) })
     }
 
     @Test func customSyncIncludesPlaylistSongs() {

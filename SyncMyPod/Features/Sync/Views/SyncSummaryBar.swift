@@ -58,7 +58,7 @@ struct SyncSummaryBar: View {
 }
 
 #Preview("Adding and removing") {
-    SyncSummaryBar(plan: SyncPlan(requests: [LibraryTrack.previewTracks[0].syncRequest],
+    SyncSummaryBar(plan: SyncPlan(requests: [LibraryTrack.previewTracks[0].syncRequest(preservingAlbumArtist: false)],
                                   removals: [ITunesDatabase.preview.tracks[0]], selectedCount: 3),
                    freeBytes: 38_000_000_000, isSyncing: false, onSync: {})
 }

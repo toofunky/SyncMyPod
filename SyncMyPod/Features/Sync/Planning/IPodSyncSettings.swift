@@ -9,6 +9,8 @@ nonisolated final class IPodSyncSettings {
     var selectedAlbumKeys: [String] = []
     /// Optional because settings saved before playlists synced hold `NULL`.
     var selectedPlaylistKeys: [String]?
+    /// Optional because settings saved before this option existed hold `NULL`.
+    var preserveAlbumArtistValue: Bool?
 
     init(deviceID: String) {
         self.deviceID = deviceID
@@ -17,6 +19,11 @@ nonisolated final class IPodSyncSettings {
     var mode: SyncMode {
         get { SyncMode(rawValue: modeRawValue) ?? .allSongs }
         set { modeRawValue = newValue.rawValue }
+    }
+
+    var preservesAlbumArtist: Bool {
+        get { preserveAlbumArtistValue ?? false }
+        set { preserveAlbumArtistValue = newValue }
     }
 
     var selectedAlbums: Set<String> {

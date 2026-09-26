@@ -22,7 +22,10 @@ struct MusicLibraryView: View {
 
     private var addToIPod: (([LibraryTrack]) -> Void)? {
         guard let device = watcher.connectedDevice, !syncModel.isSyncing else { return nil }
-        return { syncModel.sync($0.map(\.syncRequest), to: device) }
+        return { tracks in
+            let preserves = IPodSyncSettings.settings(for: device.id, in: context).preservesAlbumArtist
+            syncModel.sync(tracks.map { $0.syncRequest(preservingAlbumArtist: preserves) }, to: device)
+        }
     }
 
     @ViewBuilder

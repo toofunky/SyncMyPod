@@ -17,6 +17,7 @@ struct SyncSettingsForm: View {
 
     private var plan: SyncPlan {
         SyncPlan.make(tracks: tracks, mode: settings.mode, selectedAlbums: settings.selectedAlbums,
+                      preservingAlbumArtist: settings.preservesAlbumArtist,
                       playlists: LibraryPlaylist.syncRequests(playlists, tracks: tracks, settings: settings),
                       onDevice: onDevice.tracks, devicePlaylists: onDevice.playlists, manifest: manifest.manifest,
                       strayDatabaseIDs: manifest.strayDatabaseIDs)
@@ -24,6 +25,11 @@ struct SyncSettingsForm: View {
 
     var body: some View {
         VStack(spacing: 0) {
+            Toggle("Preserve Album Artist?", isOn: $settings.preservesAlbumArtist)
+                .help("When a song's artist differs from its album artist, add the artist to the title and use "
+                      + "the album artist as the artist on the iPod. Your music files aren't changed.")
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding([.horizontal, .top])
             Picker("Sync", selection: $settings.mode) {
                 ForEach(SyncMode.allCases) { Text($0.title).tag($0) }
             }

@@ -1,14 +1,19 @@
 import Foundation
 
 extension LibraryTrack {
-    var syncRequest: IPodSyncRequest {
-        IPodSyncRequest(sourceURL: URL(filePath: filePath), draft: draft, source: syncSource)
+    /// `preservingAlbumArtist` changes only the tags written to the iPod, never the file.
+    func syncRequest(preservingAlbumArtist: Bool) -> IPodSyncRequest {
+        let preserves = preservingAlbumArtist && draft.artistDiffersFromAlbumArtist
+        return IPodSyncRequest(sourceURL: URL(filePath: filePath),
+                               draft: preserves ? draft.preservingAlbumArtist() : draft,
+                               source: syncSource(preservedAlbumArtist: preserves))
     }
 
-    private var syncSource: SyncSource? {
+    private func syncSource(preservedAlbumArtist: Bool) -> SyncSource? {
         guard scanVersion == Self.currentScanVersion else { return nil }
         return SyncSource(fileSize: fileSize, modificationDate: modificationDate,
-                          artworkFingerprint: artworkFingerprint)
+                          artworkFingerprint: artworkFingerprint,
+                          preservedAlbumArtist: preservedAlbumArtist ? true : nil)
     }
 
     private var draft: ITunesTrackDraft {
