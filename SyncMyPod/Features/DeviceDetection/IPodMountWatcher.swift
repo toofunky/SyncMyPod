@@ -59,8 +59,11 @@ final class IPodMountWatcher {
     }
 
     private func handleVolumeAppeared(at url: URL) {
-        guard let device = IPodDevice(scanningVolumeAt: url) else { return }
-        connectedDevice = device   // last-attached wins for this slice
+        Task {
+            guard let device = await IPodDevice.scan(volumeAt: url),
+                  FileManager.default.fileExists(atPath: url.path) else { return }
+            connectedDevice = device   // last-attached wins for this slice
+        }
     }
 
     private func handleVolumeDisappeared(at url: URL) {

@@ -1,0 +1,49 @@
+import Foundation
+
+nonisolated enum IPodSyncResult: Equatable, Sendable {
+    case finished(IPodSyncOutcome)
+    case failed(String)
+    /// Another app replaced the iPod's database after the sync finished.
+    case overwritten
+
+    var title: String {
+        switch self {
+        case .finished(let outcome) where outcome.wasCancelled: "Sync Cancelled"
+        case .finished: "Sync Complete"
+        case .failed: "Couldn't Sync iPod"
+        case .overwritten: "iPod Changes Were Undone"
+        }
+    }
+
+    var message: String {
+        switch self {
+        case .finished(let outcome): Self.summary(of: outcome)
+        case .failed(let message): message
+        case .overwritten:
+            "Finder or Music replaced the iPod's database right after the sync. To stop this, turn on "
+                + "“Prevent iPods, iPhones, and iPads from syncing automatically” in Music › Settings › Devices, "
+                + "then sync again."
+        }
+    }
+
+    private static func summary(of outcome: IPodSyncOutcome) -> String {
+        var parts = ["Added \(songs(outcome.addedCount))."]
+        if outcome.updatedCount > 0 { parts.append("Updated \(songs(outcome.updatedCount)).") }
+        if outcome.removed > 0 { parts.append("Removed \(songs(outcome.removed)).") }
+        if outcome.syncedPlaylistCount > 0 {
+            parts.append("Synced \(count(outcome.syncedPlaylistCount, "playlist")).")
+        }
+        if outcome.skipped > 0 { parts.append("\(outcome.skipped) already on the iPod.") }
+        let changed = outcome.addedCount + outcome.updatedCount + outcome.removed + outcome.syncedPlaylistCount
+        if changed > 0 { parts.append("Eject the iPod before unplugging it.") }
+        return parts.joined(separator: " ")
+    }
+
+    private static func songs(_ count: Int) -> String {
+        Self.count(count, "song")
+    }
+
+    private static func count(_ count: Int, _ noun: String) -> String {
+        "\(count) \(noun)\(count == 1 ? "" : "s")"
+    }
+}

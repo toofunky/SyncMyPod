@@ -1,6 +1,6 @@
 import Foundation
 
-struct IPodDevice: Identifiable, Equatable, Sendable {
+nonisolated struct IPodDevice: Identifiable, Equatable, Sendable {
     let id: String                 // FirewireGuid if present, else the volume path
     let volumeURL: URL
     let volumeName: String
@@ -12,11 +12,36 @@ struct IPodDevice: Identifiable, Equatable, Sendable {
     // SysInfo is the authoritative source when iTunes has populated it, but it can be an
     // empty placeholder file (e.g. on a device iTunes never fully synced); the USB
     // descriptor read from IOKit is always available as a fallback.
-    var modelNumber: String? { sysInfo.modelNumber }
+    var modelNumber: String? {
+        sysInfo.modelNumber ?? serialNumber.flatMap(IPodModelCatalog.modelNumber(forSerialNumber:))
+    }
     var firmwareVersion: String? { sysInfo.firmwareVersion }
     var boardHardwareName: String? { sysInfo.boardHardwareName }
     var firewireGUID: String? { sysInfo.firewireGUID ?? usbIdentity?.serialNumber }
     var serialNumber: String? { sysInfo.serialNumber ?? usbIdentity?.serialNumber }
+    var generation: IPodGeneration? {
+        if let generation = modelNumber.flatMap(IPodModelCatalog.generation(forModelNumber:)) {
+            return generation
+        }
+        guard usbIdentity?.productID == IPodModelCatalog.classicProductID else { return nil }
+        return firmwareVersion.flatMap(IPodModelCatalog.classicGeneration(forFirmwareVersion:))
+    }
+
+    /// Falls back to the USB product ID, which settles the question even when the exact
+    /// generation can't be pinned down (e.g. a 5G/5.5G with an empty SysInfo).
+    var requiresDatabaseHash: Bool? {
+        generation?.requiresDatabaseHash
+            ?? usbIdentity?.productID.flatMap(IPodModelCatalog.requiresDatabaseHash(forProductID:))
+    }
+
+    var generationDescription: String? {
+        generation?.displayName ?? usbIdentity?.productID.flatMap(IPodModelCatalog.familyName(forProductID:))
+    }
+
+    @concurrent
+    static func scan(volumeAt url: URL) async -> IPodDevice? {
+        IPodDevice(scanningVolumeAt: url)
+    }
 
     init?(scanningVolumeAt url: URL) {
         let controlDir = url.appendingPathComponent("iPod_Control", isDirectory: true)
@@ -31,8 +56,8 @@ struct IPodDevice: Identifiable, Equatable, Sendable {
         volumeName = values?.volumeName ?? url.lastPathComponent
         capacityBytes = values?.volumeTotalCapacity.map(Int64.init)
         availableBytes = values?.volumeAvailableCapacity.map(Int64.init)
-        sysInfo = IPodSysInfo(loadingFrom: controlDir) ?? .empty
         usbIdentity = IPodUSBIdentity(volumeURL: url)
+        sysInfo = Self.loadSysInfo(controlDirectory: controlDir, usbIdentity: usbIdentity)
         id = sysInfo.firewireGUID ?? usbIdentity?.serialNumber ?? url.path
     }
 
@@ -46,10 +71,20 @@ struct IPodDevice: Identifiable, Equatable, Sendable {
         self.sysInfo = sysInfo
         self.usbIdentity = usbIdentity
     }
+
+    private static func loadSysInfo(controlDirectory: URL, usbIdentity: IPodUSBIdentity?) -> IPodSysInfo {
+        var sysInfo = IPodSysInfo(loadingFrom: controlDirectory) ?? .empty
+        if sysInfo.isMissingExtendedFields,
+           let locationID = usbIdentity?.locationID,
+           let xml = IPodUSBSysInfoReader.readSysInfoExtended(locationID: locationID) {
+            sysInfo.mergeExtended(SysInfoExtendedParser.scalarValues(in: xml))
+        }
+        return sysInfo
+    }
 }
 
 #if DEBUG
-extension IPodDevice {
+nonisolated extension IPodDevice {
     static let preview = IPodDevice(
         id: "000A270015D4335D",
         volumeURL: URL(fileURLWithPath: "/Volumes/iPod"),

@@ -1,3 +1,4 @@
+import SwiftData
 import SwiftUI
 
 struct DeviceDetectionView: View {
@@ -6,7 +7,7 @@ struct DeviceDetectionView: View {
     var body: some View {
         Group {
             if let device = watcher.connectedDevice {
-                DeviceInfoView(device: device)
+                ConnectedDeviceView(device: device)
             } else {
                 NoDeviceView()
             }
@@ -15,12 +16,17 @@ struct DeviceDetectionView: View {
     }
 }
 
+#if DEBUG
 #Preview("Connected") {
     DeviceDetectionView()
         .environment(IPodMountWatcher.preview(connectedDevice: .preview))
+        .environment(\.iTunesDBLoader, .preview)
+        .environment(IPodSyncModel())
+        .modelContainer(.preview)
 }
 
 #Preview("No Device") {
     DeviceDetectionView()
         .environment(IPodMountWatcher.preview())
 }
+#endif

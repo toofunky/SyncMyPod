@@ -1,6 +1,6 @@
 import Foundation
 
-struct IPodSysInfo: Equatable, Sendable {
+nonisolated struct IPodSysInfo: Equatable, Sendable {
     var modelNumber: String?          // ModelNumStr
     var firewireGUID: String?         // FirewireGuid (legacy key name; still populated on USB-only models)
     var firmwareVersion: String?      // visibleBuildID
@@ -32,12 +32,21 @@ struct IPodSysInfo: Equatable, Sendable {
             }
         }
 
-        // Optional, newer-generation-only richer info; tolerate absence entirely.
         let extendedURL = controlDirectory.appendingPathComponent("Device/SysInfoExtended")
-        if let extData = try? Data(contentsOf: extendedURL),
-           let plist = try? PropertyListSerialization.propertyList(from: extData, format: nil) as? [String: Any] {
-            result.serialNumber = plist["SerialNumber"] as? String
+        if let extendedXML = try? String(contentsOf: extendedURL, encoding: .utf8) {
+            result.mergeExtended(SysInfoExtendedParser.scalarValues(in: extendedXML))
         }
         self = result
+    }
+
+    var isMissingExtendedFields: Bool {
+        firmwareVersion == nil || serialNumber == nil || firewireGUID == nil
+    }
+
+    /// Fills gaps from SysInfoExtended values without overriding anything SysInfo provided.
+    mutating func mergeExtended(_ values: [String: String]) {
+        serialNumber = serialNumber ?? values["SerialNumber"]
+        firmwareVersion = firmwareVersion ?? values["VisibleBuildID"]
+        firewireGUID = firewireGUID ?? values["FireWireGUID"]
     }
 }

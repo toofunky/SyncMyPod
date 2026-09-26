@@ -11,9 +11,12 @@ struct DeviceInfoView: View {
                 LabeledContent("Free Space", value: Self.format(device.availableBytes))
             }
             Section("Device Identity") {
+                LabeledContent("Generation", value: device.generationDescription ?? "Unknown")
                 LabeledContent("Model", value: device.modelNumber ?? "Unknown")
                 LabeledContent("Firmware", value: device.firmwareVersion ?? "Unknown")
-                LabeledContent("Hardware Board", value: device.boardHardwareName ?? "Unknown")
+                if let boardHardwareName = device.boardHardwareName {
+                    LabeledContent("Hardware Board", value: boardHardwareName)
+                }
                 LabeledContent("Serial Number", value: device.serialNumber ?? "Unknown")
                 LabeledContent("FireWire GUID", value: device.firewireGUID ?? "Unknown")
             }
@@ -37,6 +40,8 @@ struct DeviceInfoView: View {
     }
 }
 
+#if DEBUG
 #Preview {
     DeviceInfoView(device: .preview)
 }
+#endif
