@@ -19,4 +19,9 @@ extension LibraryTrack {
         let name = genre.trimmingCharacters(in: .whitespaces)
         return name.isEmpty ? Self.unknownGenre : name
     }
+
+    func syncSnapshot(preservingAlbumArtist: Bool) -> SyncTrackSnapshot {
+        SyncTrackSnapshot(filePath: filePath, artist: syncArtist, album: syncAlbum, albumKey: syncAlbumKey,
+                          genre: syncGenre, request: syncRequest(preservingAlbumArtist: preservingAlbumArtist))
+    }
 }

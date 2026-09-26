@@ -31,7 +31,10 @@ struct IPodSyncView: View {
             ContentUnavailableView("Couldn't Read iPod", systemImage: "exclamationmark.triangle",
                                    description: Text(loadError))
         } else if let settings, let onDevice {
-            SyncSettingsForm(settings: settings, tracks: tracks, playlists: playlists, onDevice: onDevice,
+            SyncSettingsForm(settings: settings,
+                             library: SyncLibrarySnapshot(tracks: tracks, playlists: playlists,
+                                                          preservingAlbumArtist: settings.preservesAlbumArtist),
+                             onDevice: onDevice,
                              manifest: manifest, freeBytes: freeBytes ?? device.availableBytes,
                              isSyncing: syncModel.isSyncing) {
                 syncModel.sync($0.syncRequests, removing: $0.removalIDs, playlists: $0.playlists, to: device)

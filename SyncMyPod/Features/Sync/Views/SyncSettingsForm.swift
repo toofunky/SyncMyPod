@@ -5,23 +5,21 @@ struct SyncSettingsForm: View {
     private static let listedRemovalLimit = 8
 
     @Bindable var settings: IPodSyncSettings
-    let tracks: [LibraryTrack]
-    let playlists: [LibraryPlaylist]
+    let library: SyncLibrarySnapshot
     let onDevice: ITunesDatabase
     let manifest: LoadedSyncManifest
     let freeBytes: Int64?
     let isSyncing: Bool
     let onSync: (SyncPlan) -> Void
 
+    @State private var plan: SyncPlan?
+    @State private var plannedInput: SyncPlanInput?
     @State private var pendingRemoval: SyncPlan?
 
-    private var plan: SyncPlan {
-        SyncPlan.make(tracks: tracks, mode: settings.mode, selectedAlbums: settings.selectedAlbums,
-                      selectedGenres: settings.selectedGenres,
-                      preservingAlbumArtist: settings.preservesAlbumArtist,
-                      playlists: LibraryPlaylist.syncRequests(playlists, tracks: tracks, settings: settings),
-                      onDevice: onDevice.tracks, devicePlaylists: onDevice.playlists, manifest: manifest.manifest,
-                      strayDatabaseIDs: manifest.strayDatabaseIDs)
+    private var planInput: SyncPlanInput {
+        SyncPlanInput(library: library, mode: settings.mode, selectedAlbums: settings.selectedAlbums,
+                      selectedGenres: settings.selectedGenres, selectedPlaylists: settings.selectedPlaylists,
+                      onDevice: onDevice, manifest: manifest)
     }
 
     var body: some View {
@@ -42,8 +40,10 @@ struct SyncSettingsForm: View {
             Divider()
             selection
             Divider()
-            let plan = plan
-            SyncSummaryBar(plan: plan, freeBytes: freeBytes, isSyncing: isSyncing) { start(plan) }
+            let input = planInput
+            SyncSummaryBar(plan: plan, isCalculating: plannedInput != input, freeBytes: freeBytes,
+                           isSyncing: isSyncing) { plan.map(start) }
+                .task(id: input) { await replan(input) }
         }
         .confirmationDialog(removalTitle, isPresented: isConfirmingRemoval, presenting: pendingRemoval) { plan in
             Button("Sync and Remove", role: .destructive) { onSync(plan) }
@@ -60,14 +60,20 @@ struct SyncSettingsForm: View {
                                    description: Text("Every song and playlist in your music library will be copied "
                                                      + "to the iPod."))
         case .custom:
-            SyncCustomSelectionView(artists: SyncTreeBuilder.artists(from: tracks),
-                                    genres: SyncTreeBuilder.genres(from: tracks),
-                                    playlists: SyncTreeBuilder.playlists(from: playlists),
+            SyncCustomSelectionView(artists: library.artists, genres: library.genres,
+                                    playlists: library.playlistNodes,
                                     albumSelection: $settings.selectedAlbums,
                                     genreSelection: $settings.selectedGenres,
                                     playlistSelection: $settings.selectedPlaylists)
                 .padding(.top)
         }
+    }
+
+    private func replan(_ input: SyncPlanInput) async {
+        let newPlan = await input.plan()
+        guard !Task.isCancelled else { return }
+        plan = newPlan
+        plannedInput = input
     }
 
     private func start(_ plan: SyncPlan) {
@@ -95,8 +101,10 @@ struct SyncSettingsForm: View {
 
 #if DEBUG
 #Preview {
-    SyncSettingsForm(settings: IPodSyncSettings(deviceID: "preview"), tracks: LibraryTrack.previewTracks,
-                     playlists: [.preview], onDevice: .preview, manifest: LoadedSyncManifest(), freeBytes: 38_000_000_000, isSyncing: false,
+    SyncSettingsForm(settings: IPodSyncSettings(deviceID: "preview"),
+                     library: SyncLibrarySnapshot(tracks: LibraryTrack.previewTracks, playlists: [.preview],
+                                                  preservingAlbumArtist: false),
+                     onDevice: .preview, manifest: LoadedSyncManifest(), freeBytes: 38_000_000_000, isSyncing: false,
                      onSync: { _ in })
         .modelContainer(.preview)
 }
