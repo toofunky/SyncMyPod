@@ -21,7 +21,7 @@ final class AppUpdater {
             options: [.initial, .new]
         ) { [weak self] updater, _ in
             let canCheck = updater.canCheckForUpdates
-            Task { @MainActor in
+            Task { @MainActor [weak self] in
                 self?.canCheckForUpdates = canCheck
             }
         }

@@ -77,6 +77,10 @@ SyncMyPod/
 SyncMyPodTests/      Unit tests and fixture builders
 ```
 
+## How SyncMyPod Was Built
+
+Almost all of SyncMyPod's code was written by [Claude Code](https://claude.com/claude-code), Anthropic's AI coding assistant. I directed the design and features, reviewed the changes and tested the app on real iPods. Commits Claude helped write list it as a co-author.
+
 ## Acknowledgements
 
 SyncMyPod doesn't link to or bundle [libgpod](https://sourceforge.net/projects/gtkpod/), but SyncMyPod's iPod syncing code draws heavily on what libgpod documents. Many thanks to the libgpod contributors for years of work documenting how the iPod stores music.
@@ -87,6 +91,8 @@ SyncMyPod doesn't link to or bundle [libgpod](https://sourceforge.net/projects/g
 ## License
 
 SyncMyPod is released under the [MIT License](LICENSE). Copyright © 2026 Major Talent Studios, LLC.
+
+The [toofunky](https://github.com/toofunky) GitHub account belongs to Major Talent Studios, LLC, so the account and the company that holds the copyright are the same.
 
 `Hash58.swift` is excluded and stays under its original BSD-style license (see [Acknowledgements](#acknowledgements)).
 
