@@ -19,12 +19,19 @@ struct SyncMyPodApp: App {
         .commands {
             AboutCommand()
             CheckForUpdatesCommand(updater: updater)
+            HelpCommand()
         }
 
         Window("About SyncMyPod", id: AboutView.windowID) {
             AboutView()
         }
         .windowResizability(.contentSize)
+        .restorationBehavior(.disabled)
+
+        Window("SyncMyPod Help", id: HelpView.windowID) {
+            HelpView()
+                .preferredColorScheme(appearance.colorScheme)
+        }
         .restorationBehavior(.disabled)
     }
 }
