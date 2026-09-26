@@ -13,4 +13,6 @@ nonisolated enum AudioCodec: String, Codable, Sendable {
         default: return nil
         }
     }
+
+    var displayName: String { rawValue.uppercased() }
 }

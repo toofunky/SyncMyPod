@@ -12,8 +12,17 @@ struct LibraryTrackTableView: View {
 
     var body: some View {
         Table(sortedTracks, selection: $selection, sortOrder: $sortOrder) {
+            TableColumn("Track #", value: \.trackNumber) { track in
+                Text(track.trackPosition.displayText)
+                    .monospacedDigit()
+            }
+            TableColumn("Disc #", value: \.discNumber) { track in
+                Text(track.discPosition.displayText)
+                    .monospacedDigit()
+            }
             TableColumn("Title", value: \.title)
             TableColumn("Artist", value: \.artist)
+            TableColumn("Album Artist", value: \.albumArtist)
             TableColumn("Album", value: \.album)
             TableColumn("Genre", value: \.genre)
             TableColumn("Time", value: \.duration) { track in
@@ -24,6 +33,7 @@ struct LibraryTrackTableView: View {
                 Text("\(track.bitrate) kbps")
                     .monospacedDigit()
             }
+            TableColumn("Codec", value: \.codecName)
         }
         .contextMenu(forSelectionType: LibraryTrack.ID.self) { ids in
             Button("Add to iPod", systemImage: "ipod") {

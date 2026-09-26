@@ -23,4 +23,10 @@ nonisolated struct TagNumberPair: Equatable, Sendable {
         number = parts.first ?? 0
         count = parts.count > 1 ? parts[1] : 0
     }
+
+    /// `"3 of 12"`, `"3"` when the count is unknown, or empty when the number is.
+    var displayText: String {
+        guard number > 0 else { return "" }
+        return count > 0 ? "\(number) of \(count)" : "\(number)"
+    }
 }
