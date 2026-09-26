@@ -6,7 +6,7 @@
 - [x] Sync partial library (select artist/album)
 - [x] Create playlists
 - [x] Sync playlists
-- [ ] Append track artist to title
+- [x] Append track artist to title
 - [x] Detect meta-data/artwork changes
 - [ ] Backup/restore database
 
