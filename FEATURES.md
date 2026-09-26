@@ -13,4 +13,4 @@
 - [x] Multithreaded library scan
 - [x] Light/dark mode
 - [x] Tag editor
-
+- [ ] Help system
