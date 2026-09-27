@@ -16,5 +16,5 @@
 - [x] Help system
 - [x] Eject button
 - [x] iTunes-style sorting (ignore "A", "An", and "The")
-- [x] Show in Finder
-- [x] Show in Playlist
+- [x] Show in Finder context menu item
+- [x] Show in Playlist context menu item
