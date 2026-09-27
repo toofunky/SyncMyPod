@@ -8,7 +8,12 @@ nonisolated struct LibraryTrackSortKey: Sendable {
     let albumArtist: String
     let composer: String
     let album: String
-    let genre: String
+    let sortTitle: String
+    let sortArtist: String
+    let sortAlbumArtist: String
+    let sortComposer: String
+    let sortAlbum: String
+    let sortGenre: String
     let trackNumber: Int
     let discNumber: Int
     let duration: TimeInterval
@@ -22,7 +27,12 @@ nonisolated struct LibraryTrackSortKey: Sendable {
         albumArtist = track.albumArtist
         composer = track.composer
         album = track.album
-        genre = track.genre
+        sortTitle = title.sortName
+        sortArtist = artist.sortName
+        sortAlbumArtist = albumArtist.sortName
+        sortComposer = composer.sortName
+        sortAlbum = album.sortName
+        sortGenre = track.genre.sortName
         trackNumber = track.trackNumber
         discNumber = track.discNumber
         duration = track.duration

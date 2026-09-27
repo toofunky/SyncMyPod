@@ -5,7 +5,7 @@ nonisolated enum SyncTreeBuilder {
     static func artists(from tracks: [SyncTrackSnapshot]) -> [SyncArtistNode] {
         Dictionary(grouping: tracks, by: \.artist)
             .map { name, tracks in SyncArtistNode(name: name, albums: albums(from: tracks)) }
-            .sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
+            .sorted { $0.name.sortName.localizedStandardCompare($1.name.sortName) == .orderedAscending }
     }
 
     @MainActor
@@ -19,7 +19,7 @@ nonisolated enum SyncTreeBuilder {
             .map { name, tracks in
                 SyncGenreNode(name: name, trackCount: tracks.count, byteCount: tracks.reduce(0) { $0 + $1.byteCount })
             }
-            .sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
+            .sorted { $0.name.sortName.localizedStandardCompare($1.name.sortName) == .orderedAscending }
     }
 
     private static func albums(from tracks: [SyncTrackSnapshot]) -> [SyncAlbumNode] {
@@ -30,6 +30,6 @@ nonisolated enum SyncTreeBuilder {
                                   byteCount: tracks.reduce(0) { $0 + $1.byteCount })
                 }
             }
-            .sorted { $0.title.localizedStandardCompare($1.title) == .orderedAscending }
+            .sorted { $0.title.sortName.localizedStandardCompare($1.title.sortName) == .orderedAscending }
     }
 }

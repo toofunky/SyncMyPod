@@ -33,12 +33,12 @@ nonisolated enum LibraryTrackSortField: Sendable {
 
     func compare(_ lhs: LibraryTrackSortKey, _ rhs: LibraryTrackSortKey) -> ComparisonResult {
         switch self {
-        case .title: lhs.title.localizedStandardCompare(rhs.title)
-        case .artist: lhs.artist.localizedStandardCompare(rhs.artist)
-        case .albumArtist: lhs.albumArtist.localizedStandardCompare(rhs.albumArtist)
-        case .album: lhs.album.localizedStandardCompare(rhs.album)
-        case .composer: lhs.composer.localizedStandardCompare(rhs.composer)
-        case .genre: lhs.genre.localizedStandardCompare(rhs.genre)
+        case .title: lhs.sortTitle.localizedStandardCompare(rhs.sortTitle)
+        case .artist: lhs.sortArtist.localizedStandardCompare(rhs.sortArtist)
+        case .albumArtist: lhs.sortAlbumArtist.localizedStandardCompare(rhs.sortAlbumArtist)
+        case .album: lhs.sortAlbum.localizedStandardCompare(rhs.sortAlbum)
+        case .composer: lhs.sortComposer.localizedStandardCompare(rhs.sortComposer)
+        case .genre: lhs.sortGenre.localizedStandardCompare(rhs.sortGenre)
         case .trackNumber: Self.compare(lhs.trackNumber, rhs.trackNumber)
         case .discNumber: Self.compare(lhs.discNumber, rhs.discNumber)
         case .duration: Self.compare(lhs.duration, rhs.duration)

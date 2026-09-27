@@ -4,23 +4,23 @@ struct TrackTableView: View {
     let tracks: [ITunesTrack]
     var searchText = ""
 
-    @State private var sortOrder = [KeyPathComparator(\ITunesTrack.artist)]
+    @State private var sortOrder = [KeyPathComparator(\ITunesTrack.artist, comparator: SortNameComparator())]
     @State private var sortedTracks: [ITunesTrack] = []
     @State private var filteredBy = ""
     @AppStorage("iPodTableColumns") private var columnCustomization = TableColumnCustomization<ITunesTrack>()
 
     var body: some View {
         Table(sortedTracks, sortOrder: $sortOrder, columnCustomization: $columnCustomization) {
-            TableColumn("Title", value: \.title)
+            TableColumn("Title", value: \.title, comparator: SortNameComparator()) { Text($0.title) }
                 .customizationID("title")
                 .disabledCustomizationBehavior(.visibility)
-            TableColumn("Artist", value: \.artist)
+            TableColumn("Artist", value: \.artist, comparator: SortNameComparator()) { Text($0.artist) }
                 .customizationID("artist")
-            TableColumn("Album Artist", value: \.albumArtist)
+            TableColumn("Album Artist", value: \.albumArtist, comparator: SortNameComparator()) { Text($0.albumArtist) }
                 .customizationID("albumArtist")
-            TableColumn("Album", value: \.album)
+            TableColumn("Album", value: \.album, comparator: SortNameComparator()) { Text($0.album) }
                 .customizationID("album")
-            TableColumn("Composer", value: \.composer)
+            TableColumn("Composer", value: \.composer, comparator: SortNameComparator()) { Text($0.composer) }
                 .customizationID("composer")
                 .defaultVisibility(.hidden)
             TableColumn("Time", value: \.duration) { track in

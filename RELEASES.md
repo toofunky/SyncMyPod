@@ -20,3 +20,4 @@ SyncMyPod-1.2
 
 SyncMyPod-1.3
 - Reduce how often you are asked to confirm accessing an external/removable volume.
+- Sorting ignores A, An, and The at start of name.
