@@ -67,6 +67,10 @@ extension HelpTopic {
         HelpSection(heading: "Cover Art",
                     body: "Drag a JPEG or PNG image onto the artwork well, or click **Choose…** to pick one. "
                         + "Click **Remove** to delete the artwork."),
+        HelpSection(heading: "Sort Order",
+                    body: "The **Sorting** tab sets the names a song sorts by, such as sorting David Bowie as "
+                        + "\"Bowie, David\". When a field is empty, the song sorts by its name without a leading "
+                        + "\"A\", \"An\" or \"The\", as iTunes does."),
         HelpSection(heading: "Saving Changes",
                     body: "Click **Save** to write your changes to the music files, or **Revert** to discard them. "
                         + "If a scan or sync is running, saving resumes once it finishes. On the next sync, "

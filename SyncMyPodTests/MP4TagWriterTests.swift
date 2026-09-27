@@ -47,6 +47,21 @@ struct MP4TagWriterTests {
         #expect(tags.track == TagNumberPair(number: 4, count: 16))
     }
 
+    @Test func writesAndRemovesSortTags() async throws {
+        defer { try? FileManager.default.removeItem(at: folder) }
+        let url = try AudioFixtureWriter.writeSilence(to: folder.appending(path: "song.m4a"))
+
+        try MP4TagWriter().write(TagChanges(sortTitle: "Song", sortArtist: "Killers", sortAlbumArtist: "Bowie, David",
+                                        sortAlbum: "Hot Fuss", sortComposer: "Flowers"), to: url)
+        let tags = try #require(try await AudioMetadataReader().read(url)).tags
+        #expect(tags.sortTitle == "Song" && tags.sortArtist == "Killers" && tags.sortAlbumArtist == "Bowie, David")
+        #expect(tags.sortAlbum == "Hot Fuss" && tags.sortComposer == "Flowers")
+
+        try MP4TagWriter().write(TagChanges(sortArtist: ""), to: url)
+        let cleared = try #require(try await AudioMetadataReader().read(url)).tags
+        #expect(cleared.sortArtist == nil && cleared.sortTitle == "Song")
+    }
+
     @Test func setsReplacesAndRemovesArtwork() async throws {
         defer { try? FileManager.default.removeItem(at: folder) }
         let url = try AudioFixtureWriter.writeSilence(to: folder.appending(path: "song.m4a"))

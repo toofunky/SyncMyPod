@@ -35,6 +35,18 @@ struct TagEditorModelTests {
         #expect(changes == TagChanges(album: "Record (Deluxe)", track: TagNumberPair(number: 2, count: 12)))
     }
 
+    @Test func emptySortFieldsShowTheGeneratedNameWithoutSavingIt() {
+        let track = Self.track("One", album: "The Record", number: 1, count: 0)
+        let model = TagEditorModel(tracks: [track])
+        #expect(model.values[.sortAlbum] == "" && model.placeholder(for: .sortAlbum) == "Record")
+        #expect(model.placeholder(for: .sortTitle) == "One")
+        #expect(!model.hasChanges)
+
+        model.values[.sortAlbum] = "Record, The"
+        let changes = TagChanges(edits: model.edits, artwork: model.artworkChange, applyingTo: track)
+        #expect(changes == TagChanges(sortAlbum: "Record, The"))
+    }
+
     @Test func revertDiscardsEditsAndArtwork() {
         let model = TagEditorModel(tracks: tracks)
         model.values[.genre] = "Rock"

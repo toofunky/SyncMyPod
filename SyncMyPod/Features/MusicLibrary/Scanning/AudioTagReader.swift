@@ -14,7 +14,12 @@ nonisolated struct AudioTagReader {
             year: await string([.iTunesMetadataReleaseDate, .id3MetadataRecordingTime, .id3MetadataYear])
                 .flatMap { Int($0.prefix(4)) },
             track: await numberPair([.iTunesMetadataTrackNumber, .id3MetadataTrackNumber]),
-            disc: await numberPair([.iTunesMetadataDiscNumber, .id3MetadataPartOfASet])
+            disc: await numberPair([.iTunesMetadataDiscNumber, .id3MetadataPartOfASet]),
+            sortTitle: await string([.iTunesSortName, .id3MetadataTitleSortOrder]),
+            sortArtist: await string([.iTunesSortArtist, .id3MetadataPerformerSortOrder]),
+            sortAlbumArtist: await string([.iTunesSortAlbumArtist, .id3SortAlbumArtist]),
+            sortAlbum: await string([.iTunesSortAlbum, .id3MetadataAlbumSortOrder]),
+            sortComposer: await string([.iTunesSortComposer, .id3SortComposer])
         )
     }
 

@@ -4,7 +4,9 @@ import Foundation
 nonisolated struct SyncTrackSnapshot: Equatable, Sendable {
     let filePath: String
     let artist: String
+    let artistSortName: String
     let album: String
+    let albumSortName: String
     let albumKey: String
     let genre: String
     let request: IPodSyncRequest

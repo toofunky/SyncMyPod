@@ -10,4 +10,18 @@ nonisolated extension String {
         }
         return self
     }
+
+    /// The file's sort tag when it has one, otherwise `sortName`.
+    func sortName(tagged tag: String?) -> String {
+        guard let tag, !tag.isEmpty else { return sortName }
+        return tag
+    }
+
+    /// The sort string iTunes would write to the iPod: the file's sort tag, or one generated without a leading
+    /// article, or `""` when the plain value already sorts correctly.
+    func iPodSortValue(tagged tag: String?) -> String {
+        if let tag, !tag.isEmpty { return tag }
+        let generated = sortName
+        return generated == self ? "" : generated
+    }
 }

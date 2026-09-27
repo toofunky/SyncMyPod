@@ -26,6 +26,9 @@ nonisolated struct ID3TagWriter {
             (.id3Title, changes.title), (.id3Artist, changes.artist), (.id3Album, changes.album),
             (.id3AlbumArtist, changes.albumArtist), (.id3Composer, changes.composer), (.id3Genre, changes.genre),
             (yearID, changes.year.map { $0 > 0 ? String($0) : "" }),
+            (.id3SortTitle, changes.sortTitle), (.id3SortArtist, changes.sortArtist),
+            (.id3SortAlbumArtist, changes.sortAlbumArtist), (.id3SortAlbum, changes.sortAlbum),
+            (.id3SortComposer, changes.sortComposer),
         ]
         for case let (id, value?) in texts {
             let replaced: Set<FourCC> = id == yearID ? [.id3Year, .id3RecordingTime] : [id]

@@ -14,6 +14,8 @@ nonisolated extension ITunesTrackDraft {
         var draft = self
         draft.title = "\(title) — \(artist)"
         draft.artist = albumArtist
+        if !sortTitle.isEmpty { draft.sortTitle = "\(sortTitle) — \(artist)" }
+        draft.sortArtist = sortAlbumArtist
         return draft
     }
 }

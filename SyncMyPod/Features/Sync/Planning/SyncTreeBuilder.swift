@@ -4,8 +4,11 @@ import Foundation
 nonisolated enum SyncTreeBuilder {
     static func artists(from tracks: [SyncTrackSnapshot]) -> [SyncArtistNode] {
         Dictionary(grouping: tracks, by: \.artist)
-            .map { name, tracks in SyncArtistNode(name: name, albums: albums(from: tracks)) }
-            .sorted { $0.name.sortName.localizedStandardCompare($1.name.sortName) == .orderedAscending }
+            .map { name, tracks in
+                (SyncArtistNode(name: name, albums: albums(from: tracks)), tracks.first?.artistSortName ?? name)
+            }
+            .sorted { $0.1.localizedStandardCompare($1.1) == .orderedAscending }
+            .map(\.0)
     }
 
     @MainActor
@@ -26,10 +29,11 @@ nonisolated enum SyncTreeBuilder {
         Dictionary(grouping: tracks, by: \.albumKey)
             .compactMap { key, tracks in
                 tracks.first.map { first in
-                    SyncAlbumNode(key: key, title: first.album, trackCount: tracks.count,
-                                  byteCount: tracks.reduce(0) { $0 + $1.byteCount })
+                    (SyncAlbumNode(key: key, title: first.album, trackCount: tracks.count,
+                                   byteCount: tracks.reduce(0) { $0 + $1.byteCount }), first.albumSortName)
                 }
             }
-            .sorted { $0.title.sortName.localizedStandardCompare($1.title.sortName) == .orderedAscending }
+            .sorted { $0.1.localizedStandardCompare($1.1) == .orderedAscending }
+            .map(\.0)
     }
 }

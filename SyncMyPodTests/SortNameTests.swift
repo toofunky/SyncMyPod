@@ -19,10 +19,25 @@ struct SortNameTests {
         #expect(name.sortName == expected)
     }
 
-    @Test func comparatorIgnoresArticlesInBothOrders() {
-        let names = ["Travis", "The Killers", "Arcade Fire", "A Perfect Circle"]
-        #expect(names.sorted(using: SortNameComparator()) == ["Arcade Fire", "The Killers", "A Perfect Circle", "Travis"])
-        #expect(names.sorted(using: SortNameComparator(order: .reverse))
-            == ["Travis", "A Perfect Circle", "The Killers", "Arcade Fire"])
+    @Test(arguments: [
+        ("The Killers", nil, "Killers"),
+        ("The Killers", "", "Killers"),
+        ("David Bowie", "Bowie, David", "Bowie, David"),
+        ("Modest Mouse", nil, "Modest Mouse"),
+    ] as [(String, String?, String)])
+    func sortTagOverridesGeneratedName(_ name: String, _ tag: String?, _ expected: String) {
+        #expect(name.sortName(tagged: tag) == expected)
+    }
+
+    @Test(arguments: [
+        ("The Killers", nil, "Killers"),
+        ("Modest Mouse", nil, ""),
+        ("Modest Mouse", "", ""),
+        ("David Bowie", "Bowie, David", "Bowie, David"),
+        ("The Beatles", "Beatles, The", "Beatles, The"),
+        ("", nil, ""),
+    ] as [(String, String?, String)])
+    func iPodSortValueIsGeneratedOnlyForLeadingArticles(_ name: String, _ tag: String?, _ expected: String) {
+        #expect(name.iPodSortValue(tagged: tag) == expected)
     }
 }

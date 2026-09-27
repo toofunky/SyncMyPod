@@ -27,6 +27,11 @@ nonisolated extension FourCC {
     static let trackNumber = FourCC("trkn")
     static let discNumber = FourCC("disk")
     static let coverArt = FourCC("covr")
+    static let sortName = FourCC("sonm")
+    static let sortArtist = FourCC("soar")
+    static let sortAlbumArtist = FourCC("soaa")
+    static let sortAlbum = FourCC("soal")
+    static let sortComposer = FourCC("soco")
 
     /// Boxes on the paths to `ilst` and to the chunk offset tables, which get parsed into children.
     static let mp4Containers: Set<FourCC> = [.moov, .trak, .mdia, .minf, .stbl, .udta, .meta, .ilst]

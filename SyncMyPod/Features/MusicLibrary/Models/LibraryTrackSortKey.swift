@@ -27,11 +27,11 @@ nonisolated struct LibraryTrackSortKey: Sendable {
         albumArtist = track.albumArtist
         composer = track.composer
         album = track.album
-        sortTitle = title.sortName
-        sortArtist = artist.sortName
-        sortAlbumArtist = albumArtist.sortName
-        sortComposer = composer.sortName
-        sortAlbum = album.sortName
+        sortTitle = title.sortName(tagged: track.sortTitleTag)
+        sortArtist = artist.sortName(tagged: track.sortArtistTag)
+        sortAlbumArtist = albumArtist.sortName(tagged: track.sortAlbumArtistTag)
+        sortComposer = composer.sortName(tagged: track.sortComposerTag)
+        sortAlbum = album.sortName(tagged: track.sortAlbumTag)
         sortGenre = track.genre.sortName
         trackNumber = track.trackNumber
         discNumber = track.discNumber
