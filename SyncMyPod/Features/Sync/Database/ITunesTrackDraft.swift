@@ -6,6 +6,7 @@ nonisolated struct ITunesTrackDraft: Equatable, Sendable {
     var artist = ""
     var album = ""
     var albumArtist = ""
+    var composer = ""
     var genre = ""
     var location = ""
     var fileSize = 0

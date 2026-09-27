@@ -12,7 +12,7 @@ struct MP4TagWriterTests {
 
     private static let allChanges = TagChanges(
         title: "Float On", artist: "Modest Mouse", album: "Good News", albumArtist: "Modest Mouse",
-        genre: "Indie", year: 2004, track: TagNumberPair(number: 3, count: 16),
+        composer: "Isaac Brock", genre: "Indie", year: 2004, track: TagNumberPair(number: 3, count: 16),
         disc: TagNumberPair(number: 1, count: 2))
 
     @Test func tagsAnUntaggedFile() async throws {
@@ -24,7 +24,8 @@ struct MP4TagWriterTests {
 
         let metadata = try #require(try await AudioMetadataReader().read(url))
         #expect(metadata.tags == AudioTags(title: "Float On", artist: "Modest Mouse", album: "Good News",
-                                           albumArtist: "Modest Mouse", genre: "Indie", year: 2004,
+                                           albumArtist: "Modest Mouse", composer: "Isaac Brock",
+                                           genre: "Indie", year: 2004,
                                            track: TagNumberPair(number: 3, count: 16),
                                            disc: TagNumberPair(number: 1, count: 2)))
         #expect(abs(metadata.duration - 2) < 0.1)

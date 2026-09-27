@@ -34,7 +34,7 @@ nonisolated struct TrackRecordBuilder {
         let fields: [(ITunesStringField, String)] = [
             (.title, draft.title), (.location, draft.location), (.album, draft.album),
             (.artist, draft.artist), (.genre, draft.genre), (.fileType, draft.codec.iTunesKind),
-            (.albumArtist, draft.albumArtist)
+            (.albumArtist, draft.albumArtist), (.composer, draft.composer)
         ]
         return fields.filter { !$0.1.isEmpty }
             .map { ITunesDBRecordFactory.string(type: $0.0.rawValue, value: $0.1) }

@@ -20,6 +20,7 @@ nonisolated extension FourCC {
     static let artist = FourCC("©ART")
     static let album = FourCC("©alb")
     static let albumArtist = FourCC("aART")
+    static let composer = FourCC("©wrt")
     static let userGenre = FourCC("©gen")
     static let standardGenre = FourCC("gnre")
     static let releaseDate = FourCC("©day")
