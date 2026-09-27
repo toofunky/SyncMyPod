@@ -25,3 +25,4 @@ SyncMyPod-1.3
 - Add Show in Finder option to library songs context menu.
 - Add Show in Playlist option to library songs context menu.
 - Drag playlists in the sidebar to reorder them.
+- Fix some formatting issues on the Playlist view.
