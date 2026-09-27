@@ -8,6 +8,7 @@ struct SyncPlaylistListView: View {
         if playlists.isEmpty {
             ContentUnavailableView("No Playlists", systemImage: "music.note.list",
                                    description: Text("Create a playlist in Music Library to sync it."))
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
         } else {
             List(playlists) { playlist in
                 Toggle(isOn: $selection.contains(playlist.key)) {

@@ -59,6 +59,7 @@ struct SyncSettingsForm: View {
             ContentUnavailableView("All Songs", systemImage: "music.note.list",
                                    description: Text("Every song and playlist in your music library will be copied "
                                                      + "to the iPod."))
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
         case .custom:
             SyncCustomSelectionView(artists: library.artists, genres: library.genres,
                                     playlists: library.playlistNodes,
