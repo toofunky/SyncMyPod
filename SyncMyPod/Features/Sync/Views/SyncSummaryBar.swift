@@ -22,7 +22,7 @@ struct SyncSummaryBar: View {
                     .foregroundStyle(fits ? Color.secondary : Color.red)
             }
             Spacer()
-            if isCalculating {
+            if isCalculating || isSyncing {
                 ProgressView()
                     .controlSize(.small)
             }

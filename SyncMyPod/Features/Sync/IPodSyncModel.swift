@@ -7,12 +7,11 @@ final class IPodSyncModel {
     private(set) var progress: IPodSyncProgress?
     private(set) var completedSyncCount = 0
     private(set) var isCancelling = false
+    private(set) var isSyncing = false
     var result: IPodSyncResult?
 
     @ObservationIgnored private var syncTask: Task<Void, Never>?
     @ObservationIgnored private var verificationTask: Task<Void, Never>?
-
-    var isSyncing: Bool { syncTask != nil }
 
     /// Non-`nil` `playlists` replace every playlist earlier syncs wrote.
     func sync(_ requests: [IPodSyncRequest], removing removals: Set<UInt64> = [],
@@ -27,6 +26,7 @@ final class IPodSyncModel {
         }
         verificationTask?.cancel()
         progress = IPodSyncProgress(completed: 0, total: requests.count, currentTitle: nil)
+        isSyncing = true
         syncTask = Task { await run(requests, removing: removals, playlists: playlists, with: syncer) }
     }
 
@@ -51,6 +51,7 @@ final class IPodSyncModel {
         progress = nil
         isCancelling = false
         syncTask = nil
+        isSyncing = false
         completedSyncCount += 1
     }
 
