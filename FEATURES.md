@@ -14,3 +14,4 @@
 - [x] Light/dark mode
 - [x] Tag editor
 - [x] Help system
+- [x] Eject button
