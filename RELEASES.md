@@ -16,3 +16,4 @@ SyncMyPod-1.2
 - Add Composer to tag editor.
 - Sync Composer to iPod.
 - Fix some formatting issues on the Sync view.
+- Add info button beside 
