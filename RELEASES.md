@@ -15,3 +15,5 @@ SyncMyPod-1.2
 - Add Composer column to library table.
 - Add Composer to tag editor.
 - Sync Composer to iPod.
+- Fix some formatting issues on the Sync view.
+- Add info button beside "Preserve Album Artist?" sync option.
