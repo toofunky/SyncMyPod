@@ -24,3 +24,4 @@ SyncMyPod-1.3
 - Support for Sort Track Title, Sort Track Artist, Sort Album Artist, Sort Composer, and Sort Album tags.
 - Add Show in Finder option to library songs context menu.
 - Add Show in Playlist option to library songs context menu.
+- Drag playlists in the sidebar to reorder them.

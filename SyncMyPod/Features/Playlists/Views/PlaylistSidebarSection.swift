@@ -5,7 +5,7 @@ struct PlaylistSidebarSection: View {
     @Binding var selection: SidebarItem?
 
     @Environment(\.modelContext) private var context
-    @Query(sort: \LibraryPlaylist.createdAt) private var playlists: [LibraryPlaylist]
+    @Query(sort: LibraryPlaylist.sidebarOrder) private var playlists: [LibraryPlaylist]
 
     var body: some View {
         Section {
@@ -16,6 +16,7 @@ struct PlaylistSidebarSection: View {
                         Button("Delete Playlist", systemImage: "trash", role: .destructive) { delete(playlist) }
                     }
             }
+            .onMove { LibraryPlaylist.move(playlists, fromOffsets: $0, toOffset: $1) }
         } header: {
             HStack {
                 Text("Playlists")
@@ -29,6 +30,7 @@ struct PlaylistSidebarSection: View {
 
     private func create() {
         let playlist = LibraryPlaylist()
+        playlist.sortIndex = LibraryPlaylist.nextSortIndex(after: playlists)
         context.insert(playlist)
         selection = .playlist(playlist.playlistID)
     }

@@ -10,7 +10,7 @@ struct LibraryTrackTableView: View {
     var showPlaylist: ((LibraryPlaylist) -> Void)?
 
     @Environment(\.modelContext) private var context
-    @Query(sort: \LibraryPlaylist.createdAt) private var playlists: [LibraryPlaylist]
+    @Query(sort: LibraryPlaylist.sidebarOrder) private var playlists: [LibraryPlaylist]
     @State private var sortOrder = [KeyPathComparator(\LibraryTrack.albumArtist)]
     @State private var sortedTracks: [LibraryTrack] = []
     @State private var sortKeys: [LibraryTrackSortKey] = []

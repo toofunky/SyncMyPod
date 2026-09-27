@@ -6,6 +6,7 @@
 - [x] Sync partial library (select artist/album)
 - [x] Create playlists
 - [x] Sync playlists
+- [x] Drag to reorder playlists in sidebar
 - [x] Append track artist to title
 - [x] Detect meta-data/artwork changes
 - [ ] Backup/restore database
