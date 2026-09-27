@@ -17,3 +17,4 @@
 - [x] Eject button
 - [x] iTunes-style sorting (ignore "A", "An", and "The")
 - [x] Show in Finder
+- [x] Show in Playlist

@@ -23,3 +23,4 @@ SyncMyPod-1.3
 - Sorting ignores A, An, and The at start of name.
 - Support for Sort Track Title, Sort Track Artist, Sort Album Artist, Sort Composer, and Sort Album tags.
 - Add Show in Finder option to library songs context menu.
+- Add Show in Playlist option to library songs context menu.

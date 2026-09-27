@@ -7,6 +7,8 @@ struct MusicLibraryView: View {
     private static let tagEditorIdealWidth = 300.0
     private static let tagEditorMaxWidth = 420.0
 
+    var showPlaylist: ((LibraryPlaylist) -> Void)?
+
     @Environment(\.modelContext) private var context
     @Environment(IPodMountWatcher.self) private var watcher
     @Query private var folders: [LibraryFolder]
@@ -55,7 +57,7 @@ struct MusicLibraryView: View {
                                       lastScanDate: folder.lastScanDate, state: model.state,
                                       onCancel: model.cancelScan)
                 LibraryTrackTableView(tracks: tracks, selection: $selection, searchText: searchText,
-                                      addToIPod: addToIPod)
+                                      addToIPod: addToIPod, showPlaylist: showPlaylist)
             }
         } else {
             ContentUnavailableView {

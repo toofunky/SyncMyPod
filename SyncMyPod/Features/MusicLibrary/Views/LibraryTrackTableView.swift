@@ -7,6 +7,7 @@ struct LibraryTrackTableView: View {
     @Binding var selection: Set<LibraryTrack.ID>
     var searchText = ""
     var addToIPod: (([LibraryTrack]) -> Void)?
+    var showPlaylist: ((LibraryPlaylist) -> Void)?
 
     @Environment(\.modelContext) private var context
     @Query(sort: \LibraryPlaylist.createdAt) private var playlists: [LibraryPlaylist]
@@ -36,6 +37,8 @@ struct LibraryTrackTableView: View {
             AddToPlaylistMenu(playlists: playlists) { add(ids, to: $0) }
                 .disabled(ids.isEmpty)
             Divider()
+            ShowInPlaylistMenu(playlists: playlists(containing: ids)) { showPlaylist?($0) }
+                .disabled(showPlaylist == nil || ids.isEmpty)
             Button("Show in Finder", systemImage: "folder") { showInFinder(ids) }
                 .disabled(ids.isEmpty)
         }
@@ -117,6 +120,11 @@ struct LibraryTrackTableView: View {
         } else {
             context.insert(LibraryPlaylist(trackPaths: selected.map(\.filePath)))
         }
+    }
+
+    private func playlists(containing ids: Set<LibraryTrack.ID>) -> [LibraryPlaylist] {
+        let paths = Set(sortedTracks.filter { ids.contains($0.id) }.map(\.filePath))
+        return playlists.filter { !paths.isDisjoint(with: $0.trackPaths) }
     }
 
     private func showInFinder(_ ids: Set<LibraryTrack.ID>) {
