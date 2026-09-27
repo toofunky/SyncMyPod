@@ -1,3 +1,4 @@
+import AppKit
 import SwiftData
 import SwiftUI
 
@@ -33,6 +34,9 @@ struct LibraryTrackTableView: View {
             }
             .disabled(addToIPod == nil || ids.isEmpty)
             AddToPlaylistMenu(playlists: playlists) { add(ids, to: $0) }
+                .disabled(ids.isEmpty)
+            Divider()
+            Button("Show in Finder", systemImage: "folder") { showInFinder(ids) }
                 .disabled(ids.isEmpty)
         }
         .onChange(of: tracks, initial: true) {
@@ -113,6 +117,11 @@ struct LibraryTrackTableView: View {
         } else {
             context.insert(LibraryPlaylist(trackPaths: selected.map(\.filePath)))
         }
+    }
+
+    private func showInFinder(_ ids: Set<LibraryTrack.ID>) {
+        let urls = sortedTracks.filter { ids.contains($0.id) }.map { URL(filePath: $0.filePath) }
+        NSWorkspace.shared.activateFileViewerSelecting(urls)
     }
 }
 

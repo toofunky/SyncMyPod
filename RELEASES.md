@@ -22,3 +22,4 @@ SyncMyPod-1.3
 - Reduce how often you are asked to confirm accessing an external/removable volume.
 - Sorting ignores A, An, and The at start of name.
 - Support for Sort Track Title, Sort Track Artist, Sort Album Artist, Sort Composer, and Sort Album tags.
+- Add Show in Finder option to library songs context menu.
