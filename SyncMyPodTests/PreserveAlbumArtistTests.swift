@@ -22,6 +22,17 @@ struct PreserveAlbumArtistTests {
         #expect(draft.albumArtist == "Lady Gaga")
     }
 
+    @Test func carriesSortNamesIntoTheMovedTitleAndArtist() {
+        let library = track(artist: "The Weeknd", albumArtist: "The Chainsmokers")
+        library.title = "The Song"
+        library.sortAlbumArtistTag = "Chainsmokers, The"
+        let draft = library.syncRequest(preservingAlbumArtist: true).draft
+        #expect(draft.title == "The Song — The Weeknd")
+        #expect(draft.sortTitle == "Song — The Weeknd")
+        #expect(draft.sortArtist == "Chainsmokers, The")
+        #expect(draft.sortAlbumArtist == "Chainsmokers, The")
+    }
+
     @Test func leavesTagsAloneWhenOff() {
         let library = track(artist: "Bruno Mars", albumArtist: "Lady Gaga")
         let draft = library.syncRequest(preservingAlbumArtist: false).draft

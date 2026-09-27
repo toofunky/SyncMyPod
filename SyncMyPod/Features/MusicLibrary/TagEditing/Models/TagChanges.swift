@@ -12,6 +12,11 @@ nonisolated struct TagChanges: Equatable, Sendable {
     var track: TagNumberPair?
     var disc: TagNumberPair?
     var artwork = ArtworkChange.keep
+    var sortTitle: String?
+    var sortArtist: String?
+    var sortAlbumArtist: String?
+    var sortAlbum: String?
+    var sortComposer: String?
 
     var isEmpty: Bool { self == TagChanges() }
 }

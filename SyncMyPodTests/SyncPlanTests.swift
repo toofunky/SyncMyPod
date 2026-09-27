@@ -46,8 +46,8 @@ struct SyncPlanTests {
     @Test func treeGroupsByAlbumArtistAndSortsByName() {
         let artists = SyncTreeBuilder.artists(from: snapshots)
         #expect(artists.map(\.name) == ["Coldplay", "OutKast", "Unknown Artist", "Various Artists"])
-        #expect(artists[0].albums.map(\.title) == ["A Rush of Blood", "Parachutes"])
-        #expect(artists[0].albums[0].byteCount == 7_000)
+        #expect(artists[0].albums.map(\.title) == ["Parachutes", "A Rush of Blood"])
+        #expect(artists[0].albums[1].byteCount == 7_000)
         #expect(artists[2].albums.map(\.title) == ["Unknown Album"])
     }
 

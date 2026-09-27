@@ -10,4 +10,9 @@ nonisolated struct AudioTags: Equatable, Sendable {
     var year: Int?
     var track = TagNumberPair()
     var disc = TagNumberPair()
+    var sortTitle: String?
+    var sortArtist: String?
+    var sortAlbumArtist: String?
+    var sortAlbum: String?
+    var sortComposer: String?
 }

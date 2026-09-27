@@ -10,6 +10,20 @@ struct TagEditorForm: View {
     @Environment(\.modelContext) private var context
 
     var body: some View {
+        TabView {
+            Tab("Details", systemImage: "info.circle") { details }
+            Tab("Sorting", systemImage: "arrow.up.arrow.down") { TagSortingForm(model: model) }
+        }
+        .disabled(model.isSaving)
+        .safeAreaInset(edge: .bottom) { actions }
+        .task { await model.loadArtwork() }
+        .alert("Couldn't Save Tags", isPresented: isShowingError) {
+        } message: {
+            Text(model.errorMessage ?? "")
+        }
+    }
+
+    private var details: some View {
         Form {
             Section {
                 TagArtworkWell(artwork: model.displayedArtwork,
@@ -29,13 +43,6 @@ struct TagEditorForm: View {
             }
         }
         .formStyle(.grouped)
-        .disabled(model.isSaving)
-        .safeAreaInset(edge: .bottom) { actions }
-        .task { await model.loadArtwork() }
-        .alert("Couldn't Save Tags", isPresented: isShowingError) {
-        } message: {
-            Text(model.errorMessage ?? "")
-        }
     }
 
     private var summary: String {

@@ -14,6 +14,7 @@ struct PlaylistTrackListView: View {
             if entries.isEmpty {
                 ContentUnavailableView("No Songs", systemImage: "music.note",
                                        description: Text("Add songs from Music Library with “Add to Playlist”."))
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
                 trackList
             }

@@ -22,6 +22,11 @@ nonisolated struct ITunesTrackDraft: Equatable, Sendable {
     var lastModified = Date.now
     var codec = AudioCodec.aac
     var artwork: ITunesTrackArtwork?
+    var sortTitle = ""
+    var sortArtist = ""
+    var sortAlbumArtist = ""
+    var sortAlbum = ""
+    var sortComposer = ""
 
     var albumListArtist: String { albumArtist.isEmpty ? artist : albumArtist }
 }

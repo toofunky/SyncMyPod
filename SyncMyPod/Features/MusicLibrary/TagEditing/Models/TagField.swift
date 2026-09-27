@@ -12,6 +12,11 @@ enum TagField: CaseIterable, Hashable, Sendable {
     case trackCount
     case discNumber
     case discCount
+    case sortTitle
+    case sortArtist
+    case sortAlbumArtist
+    case sortAlbum
+    case sortComposer
 
     var label: String {
         switch self {
@@ -24,6 +29,11 @@ enum TagField: CaseIterable, Hashable, Sendable {
         case .year: "Year"
         case .trackNumber, .discNumber: "Number"
         case .trackCount, .discCount: "Count"
+        case .sortTitle: "Sort Title"
+        case .sortArtist: "Sort Artist"
+        case .sortAlbumArtist: "Sort Album Artist"
+        case .sortAlbum: "Sort Album"
+        case .sortComposer: "Sort Composer"
         }
     }
 
@@ -41,6 +51,23 @@ enum TagField: CaseIterable, Hashable, Sendable {
         case .trackCount: Self.text(track.trackCount)
         case .discNumber: Self.text(track.discNumber)
         case .discCount: Self.text(track.discCount)
+        case .sortTitle: track.sortTitleTag ?? ""
+        case .sortArtist: track.sortArtistTag ?? ""
+        case .sortAlbumArtist: track.sortAlbumArtistTag ?? ""
+        case .sortAlbum: track.sortAlbumTag ?? ""
+        case .sortComposer: track.sortComposerTag ?? ""
+        }
+    }
+
+    /// The field a sort field orders, whose name without a leading article is used when the sort tag is empty.
+    var sortedField: TagField? {
+        switch self {
+        case .sortTitle: .title
+        case .sortArtist: .artist
+        case .sortAlbumArtist: .albumArtist
+        case .sortAlbum: .album
+        case .sortComposer: .composer
+        default: nil
         }
     }
 

@@ -83,4 +83,25 @@ struct LibraryTrackSortingTests {
         let tracks = [track("Zebra"), track("Apple"), track("Mango")]
         #expect(titles(tracks, by: KeyPathComparator(\.artist)) == ["Apple", "Mango", "Zebra"])
     }
+
+    @Test func albumArtistIgnoresLeadingArticles() {
+        let tracks = [
+            track("t", albumArtist: "Travis"),
+            track("k", albumArtist: "The Killers"),
+            track("a", albumArtist: "Arcade Fire"),
+        ]
+        #expect(titles(tracks, by: KeyPathComparator(\.albumArtist)) == ["a", "k", "t"])
+    }
+
+    @Test func sortTagOverridesTheArticleRule() {
+        let bowie = track("b", artist: "David Bowie")
+        bowie.sortArtistTag = "Bowie, David"
+        let tracks = [track("k", artist: "The Killers"), bowie, track("a", artist: "Arcade Fire")]
+        #expect(titles(tracks, by: KeyPathComparator(\.artist)) == ["a", "b", "k"])
+    }
+
+    @Test func searchStillMatchesLeadingArticle() {
+        let keys = LibraryTrack.sortKeys(for: [track("Mr. Brightside", artist: "The Killers"), track("Other")])
+        #expect(keys.filter { $0.matches(TrackSearchQuery("the killers")) }.map(\.title) == ["Mr. Brightside"])
+    }
 }

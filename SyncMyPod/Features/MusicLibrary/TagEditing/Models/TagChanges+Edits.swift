@@ -9,7 +9,9 @@ extension TagChanges {
                   year: edits[.year].map(TagField.number(from:)),
                   track: Self.pair(edits[.trackNumber], edits[.trackCount], current: track.trackPosition),
                   disc: Self.pair(edits[.discNumber], edits[.discCount], current: track.discPosition),
-                  artwork: artwork)
+                  artwork: artwork, sortTitle: edits[.sortTitle], sortArtist: edits[.sortArtist],
+                  sortAlbumArtist: edits[.sortAlbumArtist], sortAlbum: edits[.sortAlbum],
+                  sortComposer: edits[.sortComposer])
     }
 
     private static func pair(_ number: String?, _ count: String?, current: TagNumberPair) -> TagNumberPair? {

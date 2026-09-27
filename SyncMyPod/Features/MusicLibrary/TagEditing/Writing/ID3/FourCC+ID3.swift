@@ -12,4 +12,9 @@ nonisolated extension FourCC {
     static let id3Track = FourCC("TRCK")
     static let id3Disc = FourCC("TPOS")
     static let id3Picture = FourCC("APIC")
+    static let id3SortTitle = FourCC("TSOT")
+    static let id3SortArtist = FourCC("TSOP")
+    static let id3SortAlbumArtist = FourCC("TSO2")
+    static let id3SortAlbum = FourCC("TSOA")
+    static let id3SortComposer = FourCC("TSOC")
 }

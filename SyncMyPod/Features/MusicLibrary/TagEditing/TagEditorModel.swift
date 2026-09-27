@@ -37,8 +37,11 @@ final class TagEditorModel {
         }
     }
 
+    /// An empty sort field shows what the song sorts by: its name without a leading "A", "An" or "The".
     func placeholder(for field: TagField) -> String {
-        originals[field] == .mixed ? "Mixed" : ""
+        if originals[field] == .mixed { return "Mixed" }
+        guard let sorted = field.sortedField else { return "" }
+        return values[sorted, default: ""].sortName
     }
 
     func revert() {

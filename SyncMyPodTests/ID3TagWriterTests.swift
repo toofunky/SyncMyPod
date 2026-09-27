@@ -45,6 +45,22 @@ struct ID3TagWriterTests {
         #expect(try !Self.frameIDs(of: url).contains("TCOM"))
     }
 
+    @Test func writesAndRemovesSortTags() async throws {
+        defer { try? FileManager.default.removeItem(at: folder) }
+        let url = try MP3FixtureWriter.write(to: folder.appending(path: "song.mp3"), tags: Self.fixtureTags)
+
+        try ID3TagWriter().write(TagChanges(sortTitle: "Song", sortArtist: "Killers", sortAlbumArtist: "Bowie, David",
+                                        sortAlbum: "Hot Fuss", sortComposer: "Flowers"), to: url)
+        let tags = try #require(try await AudioMetadataReader().read(url)).tags
+        #expect(tags.sortTitle == "Song" && tags.sortArtist == "Killers" && tags.sortAlbumArtist == "Bowie, David")
+        #expect(tags.sortAlbum == "Hot Fuss" && tags.sortComposer == "Flowers")
+
+        try ID3TagWriter().write(TagChanges(sortComposer: ""), to: url)
+        let cleared = try #require(try await AudioMetadataReader().read(url)).tags
+        #expect(cleared.sortComposer == nil && cleared.sortTitle == "Song")
+        #expect(try !Self.frameIDs(of: url).contains("TSOC"))
+    }
+
     @Test func rewritesInPlaceWhenThePaddingFits() async throws {
         defer { try? FileManager.default.removeItem(at: folder) }
         let url = try MP3FixtureWriter.write(to: folder.appending(path: "song.mp3"), tags: Self.fixtureTags)

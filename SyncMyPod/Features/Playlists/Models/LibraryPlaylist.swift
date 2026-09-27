@@ -10,6 +10,8 @@ nonisolated final class LibraryPlaylist {
     var createdAt: Date
     /// Library file paths in play order; a song may appear more than once.
     var trackPaths: [String] = []
+    /// Position in the sidebar; nil for playlists that have never been reordered.
+    var sortIndex: Int?
 
     init(name: String = LibraryPlaylist.untitledName, trackPaths: [String] = []) {
         playlistID = UUID()

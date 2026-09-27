@@ -22,7 +22,8 @@ struct ContentView: View {
             switch selection {
             case .device: DeviceDetectionView()
             case .playlist(let id): PlaylistDetailView(playlistID: id)
-            case .library, nil: MusicLibraryView()
+            case .library, nil:
+                MusicLibraryView { selection = .playlist($0.playlistID) }
             }
         }
         .frame(minWidth: 420, minHeight: 320)

@@ -21,6 +21,9 @@ nonisolated enum MP4MetadataEditor {
             (.songName, changes.title), (.artist, changes.artist), (.album, changes.album),
             (.albumArtist, changes.albumArtist), (.composer, changes.composer), (.userGenre, changes.genre),
             (.releaseDate, changes.year.map { $0 > 0 ? String($0) : "" }),
+            (.sortName, changes.sortTitle), (.sortArtist, changes.sortArtist),
+            (.sortAlbumArtist, changes.sortAlbumArtist), (.sortAlbum, changes.sortAlbum),
+            (.sortComposer, changes.sortComposer),
         ]
         for case let (type, value?) in fields {
             if type == .userGenre { items.removeAll { $0.type == .standardGenre } }

@@ -6,7 +6,8 @@ nonisolated final class LibraryTrack {
     /// Bumped when scanning starts reading something new, so older rows get re-read.
     /// 2: the `codec` → `codecRawValue` rename left older rows `NULL`, so they must be re-read.
     /// 3: reads the composer.
-    static let currentScanVersion = 3
+    /// 4: reads the sort tags.
+    static let currentScanVersion = 4
 
     @Attribute(.unique) var filePath: String
     /// Optional because rows from before a rescan can hold `NULL`; those read as AAC.
@@ -30,6 +31,12 @@ nonisolated final class LibraryTrack {
     var sampleRate = 0
     var dateAdded = Date.now
     var artworkFingerprint: String?
+    /// Optional, like `composerTag`, because rows scanned before sort tags were read hold `NULL`.
+    var sortTitleTag: String?
+    var sortArtistTag: String?
+    var sortAlbumArtistTag: String?
+    var sortAlbumTag: String?
+    var sortComposerTag: String?
     var scanVersion = 0
 
     init(filePath: String) {
@@ -72,6 +79,15 @@ nonisolated final class LibraryTrack {
         trackCount = tags.track.count
         discNumber = tags.disc.number
         discCount = tags.disc.count
+        applySortTags(tags)
+    }
+
+    private func applySortTags(_ tags: AudioTags) {
+        sortTitleTag = tags.sortTitle
+        sortArtistTag = tags.sortArtist
+        sortAlbumArtistTag = tags.sortAlbumArtist
+        sortAlbumTag = tags.sortAlbum
+        sortComposerTag = tags.sortComposer
     }
 }
 

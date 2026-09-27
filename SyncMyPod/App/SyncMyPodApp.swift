@@ -9,6 +9,10 @@ struct SyncMyPodApp: App {
     private let modelContainer = LibraryStore.makeContainer()
     @AppStorage(AppAppearance.storageKey) private var appearance = AppAppearance.system
 
+    init() {
+        LibraryFolderAccess.shared.open(in: modelContainer.mainContext)
+    }
+
     var body: some Scene {
         WindowGroup {
             ContentView()

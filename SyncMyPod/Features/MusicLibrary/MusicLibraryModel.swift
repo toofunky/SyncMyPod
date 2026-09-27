@@ -38,9 +38,7 @@ final class MusicLibraryModel {
 
     private func scan(_ folder: LibraryFolder, container: ModelContainer) async {
         do {
-            let url = try folder.resolveURL()
-            let accessing = url.startAccessingSecurityScopedResource()
-            defer { if accessing { url.stopAccessingSecurityScopedResource() } }
+            let url = try LibraryFolderAccess.shared.open(folder)
             state = .scanning(LibraryScanProgress(completed: 0, total: 0))
             let summary = try await Self.runScanner(in: container, folderURL: url) { [weak self] in
                 self?.state = .scanning($0)

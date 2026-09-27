@@ -22,6 +22,11 @@ extension LibraryTrack {
                          fileSize: fileSize, duration: duration, trackNumber: trackNumber,
                          trackCount: trackCount, discNumber: discNumber, discCount: discCount, year: year,
                          bitrate: bitrate, sampleRate: sampleRate, dateAdded: .now,
-                         lastModified: modificationDate, codec: codec)
+                         lastModified: modificationDate, codec: codec,
+                         sortTitle: title.iPodSortValue(tagged: sortTitleTag),
+                         sortArtist: artist.iPodSortValue(tagged: sortArtistTag),
+                         sortAlbumArtist: albumArtist.iPodSortValue(tagged: sortAlbumArtistTag),
+                         sortAlbum: album.iPodSortValue(tagged: sortAlbumTag),
+                         sortComposer: composer.iPodSortValue(tagged: sortComposerTag))
     }
 }
