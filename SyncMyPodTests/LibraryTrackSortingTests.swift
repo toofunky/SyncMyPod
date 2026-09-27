@@ -4,12 +4,13 @@ import Testing
 
 struct LibraryTrackSortingTests {
     private func track(_ title: String, artist: String = "A", album: String = "X", albumArtist: String = "",
-                       disc: Int = 1, number: Int = 0) -> LibraryTrack {
+                       composer: String? = nil, disc: Int = 1, number: Int = 0) -> LibraryTrack {
         let track = LibraryTrack(filePath: "/Music/\(artist)/\(album)/\(title).m4a")
         track.title = title
         track.artist = artist
         track.album = album
         track.albumArtist = albumArtist
+        track.composerTag = composer
         track.discNumber = disc
         track.trackNumber = number
         return track
@@ -28,6 +29,16 @@ struct LibraryTrackSortingTests {
             track("d1t1", album: "Y", disc: 1, number: 1),
         ]
         #expect(titles(tracks, by: KeyPathComparator(\.artist)) == ["x1", "d1t1", "d1t2", "d2t1", "b"])
+    }
+
+    @Test func composerSortsMissingComposersFirst() {
+        let tracks = [track("b", composer: "Bach"), track("none"), track("a", composer: "Arvo Pärt")]
+        #expect(titles(tracks, by: KeyPathComparator(\.composer)) == ["none", "a", "b"])
+    }
+
+    @Test func searchMatchesComposer() {
+        let keys = LibraryTrack.sortKeys(for: [track("Spiegel", composer: "Arvo Pärt"), track("Other")])
+        #expect(keys.filter { $0.matches(TrackSearchQuery("arvo part")) }.map(\.title) == ["Spiegel"])
     }
 
     @Test func albumSubSortsByAlbumArtistBeforeTrack() {

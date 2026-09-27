@@ -31,7 +31,8 @@ struct AudioMetadataReaderTests {
         let folder = try AudioFixtureWriter.makeTemporaryFolder()
         defer { try? FileManager.default.removeItem(at: folder) }
         let tags = ["TIT2": "Float On", "TPE1": "Modest Mouse", "TALB": "Good News", "TPE2": "Various",
-                    "TCON": "Indie", "TYER": "2004", "TRCK": "3/16", "TPOS": "1/2"]
+                    "TCON": "Indie", "TYER": "2004", "TRCK": "3/16", "TPOS": "1/2",
+                    "TCOM": "Isaac Brock"]
         let url = try MP3FixtureWriter.write(to: folder.appending(path: "song.mp3"), seconds: 2, tags: tags)
 
         let metadata = try #require(try await AudioMetadataReader().read(url))
@@ -39,7 +40,8 @@ struct AudioMetadataReaderTests {
         #expect(abs(metadata.duration - 2) < 0.1)
         #expect(metadata.sampleRate == 44_100 && (120...130).contains(metadata.bitrate))
         #expect(metadata.tags == AudioTags(title: "Float On", artist: "Modest Mouse", album: "Good News",
-                                           albumArtist: "Various", genre: "Indie", year: 2004,
+                                           albumArtist: "Various", composer: "Isaac Brock",
+                                           genre: "Indie", year: 2004,
                                            track: TagNumberPair(number: 3, count: 16),
                                            disc: TagNumberPair(number: 1, count: 2)))
     }

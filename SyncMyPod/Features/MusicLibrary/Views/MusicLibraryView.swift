@@ -16,6 +16,7 @@ struct MusicLibraryView: View {
     @State private var isChoosingFolder = false
     @State private var isShowingTagEditor = false
     @State private var selection = Set<LibraryTrack.ID>()
+    @State private var searchText = ""
     @AppStorage(AppAppearance.storageKey) private var appearance = AppAppearance.system
     @Environment(\.colorScheme) private var colorScheme
 
@@ -27,6 +28,7 @@ struct MusicLibraryView: View {
                                           max: Self.tagEditorMaxWidth)
             }
             .toolbar { toolbarContent }
+            .searchable(text: $searchText, prompt: "Search Library")
             .fileImporter(isPresented: $isChoosingFolder, allowedContentTypes: [.folder]) { result in
                 if case .success(let url) = result { model.chooseFolder(url, in: context) }
             }
@@ -52,7 +54,8 @@ struct MusicLibraryView: View {
                 LibraryScanStatusView(folderPath: folder.path, trackCount: tracks.count,
                                       lastScanDate: folder.lastScanDate, state: model.state,
                                       onCancel: model.cancelScan)
-                LibraryTrackTableView(tracks: tracks, selection: $selection, addToIPod: addToIPod)
+                LibraryTrackTableView(tracks: tracks, selection: $selection, searchText: searchText,
+                                      addToIPod: addToIPod)
             }
         } else {
             ContentUnavailableView {
