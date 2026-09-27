@@ -25,6 +25,8 @@ struct SyncPlanTests {
          track("Untagged", artist: "", album: "")]
     }
 
+    private var snapshots: [SyncTrackSnapshot] { library.map { $0.syncSnapshot(preservingAlbumArtist: false) } }
+
     private func deviceTrack(for track: LibraryTrack, id: UInt32 = 1) -> ITunesTrack {
         ITunesTrack(id: id, databaseID: UInt64(id) * 10, strings: [.title: track.title, .artist: track.artist,
                                                                    .album: track.album],
@@ -42,7 +44,7 @@ struct SyncPlanTests {
     }
 
     @Test func treeGroupsByAlbumArtistAndSortsByName() {
-        let artists = SyncTreeBuilder.artists(from: library)
+        let artists = SyncTreeBuilder.artists(from: snapshots)
         #expect(artists.map(\.name) == ["Coldplay", "OutKast", "Unknown Artist", "Various Artists"])
         #expect(artists[0].albums.map(\.title) == ["A Rush of Blood", "Parachutes"])
         #expect(artists[0].albums[0].byteCount == 7_000)
@@ -67,7 +69,7 @@ struct SyncPlanTests {
     }
 
     @Test func genresGroupTrimmedNamesAndNameUntaggedSongs() {
-        let genres = SyncTreeBuilder.genres(from: library)
+        let genres = SyncTreeBuilder.genres(from: snapshots)
         #expect(genres.map(\.name) == ["Hip-Hop", "Rock", "Soul", "Unknown Genre"])
         #expect(genres[1].trackCount == 2 && genres[1].byteCount == 12_000)
     }

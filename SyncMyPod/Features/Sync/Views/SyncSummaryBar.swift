@@ -1,13 +1,16 @@
 import SwiftUI
 
 struct SyncSummaryBar: View {
-    let plan: SyncPlan
+    /// `nil` until the first plan has been worked out.
+    let plan: SyncPlan?
+    let isCalculating: Bool
     let freeBytes: Int64?
     let isSyncing: Bool
     let onSync: () -> Void
 
     private var fits: Bool {
-        freeBytes.map { plan.byteCount + plan.updatedByteCount < $0 + plan.removedByteCount } ?? true
+        guard let plan, let freeBytes else { return true }
+        return plan.byteCount + plan.updatedByteCount < freeBytes + plan.removedByteCount
     }
 
     var body: some View {
@@ -19,14 +22,19 @@ struct SyncSummaryBar: View {
                     .foregroundStyle(fits ? Color.secondary : Color.red)
             }
             Spacer()
+            if isCalculating || isSyncing {
+                ProgressView()
+                    .controlSize(.small)
+            }
             Button("Sync Now", systemImage: "arrow.triangle.2.circlepath", action: onSync)
                 .buttonStyle(.borderedProminent)
-                .disabled(plan.isEmpty || isSyncing || !fits)
+                .disabled(plan?.isEmpty ?? true || isCalculating || isSyncing || !fits)
         }
         .padding()
     }
 
     private var headline: String {
+        guard let plan else { return "Calculating…" }
         guard !plan.isEmpty else {
             return plan.selectedCount == 0 ? "Nothing selected" : "The iPod is up to date"
         }
@@ -50,6 +58,7 @@ struct SyncSummaryBar: View {
     private var detail: String {
         let free = freeBytes.map { "\(bytes($0)) free" } ?? "Free space unknown"
         guard fits else { return "Not enough space on the iPod · \(free)" }
+        guard let plan else { return free }
         return "\(plan.alreadyOnDeviceCount) already on the iPod · \(free)"
     }
 
@@ -61,11 +70,15 @@ struct SyncSummaryBar: View {
 #Preview("Adding and removing") {
     SyncSummaryBar(plan: SyncPlan(requests: [LibraryTrack.previewTracks[0].syncRequest(preservingAlbumArtist: false)],
                                   removals: [ITunesDatabase.preview.tracks[0]], selectedCount: 3),
-                   freeBytes: 38_000_000_000, isSyncing: false, onSync: {})
+                   isCalculating: false, freeBytes: 38_000_000_000, isSyncing: false, onSync: {})
 }
 
 #Preview("Up to date") {
-    SyncSummaryBar(plan: SyncPlan(requests: [], removals: [], selectedCount: 3), freeBytes: 38_000_000_000,
-                   isSyncing: false, onSync: {})
+    SyncSummaryBar(plan: SyncPlan(requests: [], removals: [], selectedCount: 3), isCalculating: false,
+                   freeBytes: 38_000_000_000, isSyncing: false, onSync: {})
+}
+
+#Preview("Calculating") {
+    SyncSummaryBar(plan: nil, isCalculating: true, freeBytes: 38_000_000_000, isSyncing: false, onSync: {})
 }
 #endif

@@ -36,15 +36,24 @@ nonisolated struct SyncPlan: Equatable, Sendable {
                      preservingAlbumArtist: Bool = false, playlists: [IPodPlaylistRequest] = [], onDevice: [ITunesTrack],
                      devicePlaylists: [ITunesPlaylist] = [], manifest: SyncManifest = SyncManifest(),
                      strayDatabaseIDs: Set<UInt64> = []) -> SyncPlan {
+        make(snapshots: tracks.map { $0.syncSnapshot(preservingAlbumArtist: preservingAlbumArtist) }, mode: mode,
+             selectedAlbums: selectedAlbums, selectedGenres: selectedGenres, playlists: playlists,
+             onDevice: onDevice, devicePlaylists: devicePlaylists, manifest: manifest,
+             strayDatabaseIDs: strayDatabaseIDs)
+    }
+
+    static func make(snapshots tracks: [SyncTrackSnapshot], mode: SyncMode, selectedAlbums: Set<String>,
+                     selectedGenres: Set<String>, playlists: [IPodPlaylistRequest], onDevice: [ITunesTrack],
+                     devicePlaylists: [ITunesPlaylist], manifest: SyncManifest,
+                     strayDatabaseIDs: Set<UInt64>) -> SyncPlan {
         let playlistPaths = Set(playlists.flatMap { $0.tracks.map(\.sourcePath) })
-        let isSelected = { (track: LibraryTrack) in
-            mode == .allSongs || selectedAlbums.contains(track.syncAlbumKey)
-                || selectedGenres.contains(track.syncGenre) || playlistPaths.contains(track.filePath)
+        let isSelected = { (track: SyncTrackSnapshot) in
+            mode == .allSongs || selectedAlbums.contains(track.albumKey)
+                || selectedGenres.contains(track.genre) || playlistPaths.contains(track.filePath)
         }
-        let request = { (track: LibraryTrack) in track.syncRequest(preservingAlbumArtist: preservingAlbumArtist) }
         let plan = SyncPlanner(manifest: manifest, onDevice: onDevice, strayDatabaseIDs: strayDatabaseIDs)
-            .plan(selected: tracks.filter(isSelected).map(request),
-                  unselected: tracks.filter { !isSelected($0) }.map(request))
+            .plan(selected: tracks.filter(isSelected).map(\.request),
+                  unselected: tracks.filter { !isSelected($0) }.map(\.request))
         let resolver = PlaylistTrackResolver(manifest: manifest.valid(for: Set(onDevice.map(\.databaseID))),
                                              onDevice: onDevice)
         let changes = PlaylistChangeCounter.count(playlists, resolver: resolver, onDevice: onDevice,

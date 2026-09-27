@@ -4,6 +4,8 @@ struct SyncAlbumTreeView: View {
     let artists: [SyncArtistNode]
     @Binding var selection: Set<String>
 
+    @State private var expanded: Set<String> = []
+
     var body: some View {
         List {
             ForEach(artists, content: artistGroup)
@@ -12,7 +14,7 @@ struct SyncAlbumTreeView: View {
     }
 
     private func artistGroup(_ artist: SyncArtistNode) -> some View {
-        DisclosureGroup {
+        DisclosureGroup(isExpanded: $expanded.contains(artist.id)) {
             ForEach(artist.albums) { album in
                 Toggle(isOn: $selection.contains(album.key)) {
                     SyncRowLabel(title: album.title,
@@ -20,8 +22,15 @@ struct SyncAlbumTreeView: View {
                 }
             }
         } label: {
-            Toggle(sources: artist.albums.map { $selection.contains($0.key) }, isOn: \.self) {
+            HStack {
+                Toggle(sources: artist.albums.map { $selection.contains($0.key) }, isOn: \.self) {
+                    Text(artist.name)
+                }
+                .labelsHidden()
                 Text(artist.name)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .contentShape(.rect)
+                    .onTapGesture { expanded.formSymmetricDifference([artist.id]) }
             }
         }
     }
