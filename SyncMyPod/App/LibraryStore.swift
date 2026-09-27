@@ -18,7 +18,12 @@ enum LibraryStore {
         try? FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
         return folder.appending(path: "default.store")
         #else
-        URL.applicationSupportDirectory.appending(path: "default.store")
+        let folderName = Bundle.main.bundleIdentifier ?? "io.github.toofunky.SyncMyPod"
+        let folder = URL.applicationSupportDirectory.appending(path: folderName, directoryHint: .isDirectory)
+        try? FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        let url = folder.appending(path: "Library.store")
+        LegacyLibraryStoreMigration.moveLegacyStore(to: url)
+        return url
         #endif
     }
 }
