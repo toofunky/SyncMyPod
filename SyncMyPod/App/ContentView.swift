@@ -9,7 +9,11 @@ struct ContentView: View {
             List(selection: $selection) {
                 Section("Library") {
                     ForEach(SidebarItem.fixedItems) { item in
-                        Label(item.title, systemImage: item.systemImage)
+                        if item == .device {
+                            DeviceSidebarRow()
+                        } else {
+                            Label(item.title, systemImage: item.systemImage)
+                        }
                     }
                 }
                 PlaylistSidebarSection(selection: $selection)

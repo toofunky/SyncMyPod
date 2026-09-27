@@ -6,6 +6,7 @@ import AppKit
 @MainActor
 final class IPodMountWatcher {
     private(set) var connectedDevice: IPodDevice?
+    private(set) var isEjecting = false
 
     @ObservationIgnored
     nonisolated(unsafe) private var mountObserver: NSObjectProtocol?
@@ -31,6 +32,19 @@ final class IPodMountWatcher {
         let center = NSWorkspace.shared.notificationCenter
         if let mountObserver { center.removeObserver(mountObserver) }
         if let unmountObserver { center.removeObserver(unmountObserver) }
+    }
+
+    func ejectConnectedDevice() async throws {
+        guard let device = connectedDevice, !isEjecting else { return }
+        isEjecting = true
+        defer { isEjecting = false }
+        try await Self.unmountAndEject(volumeAt: device.volumeURL)
+        handleVolumeDisappeared(at: device.volumeURL)
+    }
+
+    @concurrent
+    nonisolated private static func unmountAndEject(volumeAt url: URL) async throws {
+        try NSWorkspace.shared.unmountAndEjectDevice(at: url)
     }
 
     private func observeWorkspaceNotifications() {
