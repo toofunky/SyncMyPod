@@ -17,3 +17,6 @@ SyncMyPod-1.2
 - Sync Composer to iPod.
 - Fix some formatting issues on the Sync view.
 - Add info button beside "Preserve Album Artist?" sync option.
+
+SyncMyPod-1.3
+- Reduce how often you are asked to confirm accessing an external/removable volume.
