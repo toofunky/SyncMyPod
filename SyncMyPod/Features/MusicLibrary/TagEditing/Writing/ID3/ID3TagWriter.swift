@@ -24,7 +24,7 @@ nonisolated struct ID3TagWriter {
         let yearID: FourCC = tag.majorVersion >= 4 ? .id3RecordingTime : .id3Year
         let texts: [(FourCC, String?)] = [
             (.id3Title, changes.title), (.id3Artist, changes.artist), (.id3Album, changes.album),
-            (.id3AlbumArtist, changes.albumArtist), (.id3Genre, changes.genre),
+            (.id3AlbumArtist, changes.albumArtist), (.id3Composer, changes.composer), (.id3Genre, changes.genre),
             (yearID, changes.year.map { $0 > 0 ? String($0) : "" }),
         ]
         for case let (id, value?) in texts {

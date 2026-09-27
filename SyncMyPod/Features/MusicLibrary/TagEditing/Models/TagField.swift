@@ -5,6 +5,7 @@ enum TagField: CaseIterable, Hashable, Sendable {
     case artist
     case albumArtist
     case album
+    case composer
     case genre
     case year
     case trackNumber
@@ -18,6 +19,7 @@ enum TagField: CaseIterable, Hashable, Sendable {
         case .artist: "Artist"
         case .albumArtist: "Album Artist"
         case .album: "Album"
+        case .composer: "Composer"
         case .genre: "Genre"
         case .year: "Year"
         case .trackNumber, .discNumber: "Number"
@@ -32,6 +34,7 @@ enum TagField: CaseIterable, Hashable, Sendable {
         case .artist: track.artist
         case .albumArtist: track.albumArtist
         case .album: track.album
+        case .composer: track.composer
         case .genre: track.genre
         case .year: Self.text(track.year)
         case .trackNumber: Self.text(track.trackNumber)

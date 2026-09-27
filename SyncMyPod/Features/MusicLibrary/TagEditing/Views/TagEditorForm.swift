@@ -2,7 +2,7 @@ import SwiftData
 import SwiftUI
 
 struct TagEditorForm: View {
-    private static let textFields: [TagField] = [.title, .artist, .albumArtist, .album, .genre, .year]
+    private static let textFields: [TagField] = [.title, .artist, .albumArtist, .album, .composer, .genre, .year]
 
     @Bindable var model: TagEditorModel
     var isLocked = false

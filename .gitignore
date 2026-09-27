@@ -2,3 +2,4 @@ SyncMyPodTests/Fixtures/iTunesDB*
 SyncMyPodTests/Fixtures/ArtworkDB
 SyncMyPodTests/Fixtures/PlayCounts
 Temp/*
+*.profraw

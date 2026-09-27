@@ -7,9 +7,11 @@ struct ITunesDBTrackUpdaterTests {
                                        location: ":iPod_Control:Music:F07:ABCD.m4a", playCount: 7,
                                        dateAddedMacSeconds: 3_000_000_000,
                                        extraStrings: [ITunesStringField.composer.rawValue: "Bono",
+                                                      ITunesStringField.sortComposer.rawValue: "Bono",
+                                                      ITunesStringField.comment.rawValue: "Single",
                                                       ITunesStringField.sortArtist.rawValue: "U2, The"])
     private let retagged = ITunesTrackDraft(title: "Vertigo (Live)", artist: "U2", album: "Live in Dublin",
-                                            genre: "Rock", location: ":iPod_Control:Music:F02:WXYZ.m4a",
+                                            composer: "U2", genre: "Rock", location: ":iPod_Control:Music:F02:WXYZ.m4a",
                                             fileSize: 6_000_000, trackNumber: 3, year: 2005, bitrate: 256,
                                             sampleRate: 44_100)
 
@@ -51,8 +53,9 @@ struct ITunesDBTrackUpdaterTests {
         var editor = try editor(fixture)
         _ = editor.updateTrack(databaseID: 101_000, with: retagged, keepingArtwork: false)
         let track = try #require(try ITunesDBParser(data: editor.serialized()).parse().tracks.first)
-        #expect(track.strings[.composer] == "Bono")
-        #expect(track.strings[.sortArtist] == nil)
+        #expect(track.strings[.comment] == "Single")
+        #expect(track.strings[.composer] == "U2")
+        #expect(track.strings[.sortArtist] == nil && track.strings[.sortComposer] == nil)
     }
 
     @Test func movesTrackToItsNewAlbumAndDropsTheEmptyOne() throws {

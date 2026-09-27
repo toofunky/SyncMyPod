@@ -7,8 +7,8 @@ nonisolated enum ITunesDBTrackUpdater {
     private static let albumIDOffset = 0x120
     /// The strings a draft writes, plus sort names that would otherwise contradict the new tags.
     private static let replacedStrings: Set<UInt32> = Set([
-        ITunesStringField.title, .location, .album, .artist, .genre, .fileType, .albumArtist,
-        .sortArtist, .sortTitle, .sortAlbum, .sortAlbumArtist
+        ITunesStringField.title, .location, .album, .artist, .genre, .fileType, .albumArtist, .composer,
+        .sortArtist, .sortTitle, .sortAlbum, .sortAlbumArtist, .sortComposer
     ].map(\.rawValue))
 
     static func contains(_ databaseID: UInt64, in root: ITunesDBRecord) -> Bool {

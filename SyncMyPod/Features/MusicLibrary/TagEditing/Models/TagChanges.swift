@@ -6,6 +6,7 @@ nonisolated struct TagChanges: Equatable, Sendable {
     var artist: String?
     var album: String?
     var albumArtist: String?
+    var composer: String?
     var genre: String?
     var year: Int?
     var track: TagNumberPair?

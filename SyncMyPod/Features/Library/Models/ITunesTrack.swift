@@ -23,7 +23,9 @@ nonisolated struct ITunesTrack: Identifiable, Equatable, Sendable {
     var title: String { strings[.title] ?? "" }
     var artist: String { strings[.artist] ?? "" }
     var album: String { strings[.album] ?? "" }
+    var albumArtist: String { strings[.albumArtist] ?? "" }
     var genre: String { strings[.genre] ?? "" }
+    var composer: String { strings[.composer] ?? "" }
     var location: String? { strings[.location] }
 
     /// Converts the colon-separated iPod path (":iPod_Control:Music:F00:ABCD.mp3") to a file URL.

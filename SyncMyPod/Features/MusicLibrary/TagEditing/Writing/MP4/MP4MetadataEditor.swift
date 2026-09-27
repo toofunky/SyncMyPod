@@ -19,7 +19,7 @@ nonisolated enum MP4MetadataEditor {
     private static func applyText(_ changes: TagChanges, to items: inout [MP4Box]) {
         let fields: [(FourCC, String?)] = [
             (.songName, changes.title), (.artist, changes.artist), (.album, changes.album),
-            (.albumArtist, changes.albumArtist), (.userGenre, changes.genre),
+            (.albumArtist, changes.albumArtist), (.composer, changes.composer), (.userGenre, changes.genre),
             (.releaseDate, changes.year.map { $0 > 0 ? String($0) : "" }),
         ]
         for case let (type, value?) in fields {

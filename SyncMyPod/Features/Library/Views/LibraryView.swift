@@ -5,6 +5,7 @@ struct LibraryView: View {
 
     @Environment(\.iTunesDBLoader) private var loader
     @State private var state = LibraryLoadState.loading
+    @State private var searchText = ""
 
     var body: some View {
         content
@@ -20,8 +21,9 @@ struct LibraryView: View {
         case .loaded(let database):
             VStack(alignment: .leading, spacing: 0) {
                 LibrarySummaryView(database: database)
-                TrackTableView(tracks: database.tracks)
+                TrackTableView(tracks: database.tracks, searchText: searchText)
             }
+            .searchable(text: $searchText, prompt: "Search iPod")
         case .failed(let message):
             ContentUnavailableView("Couldn't Read Library",
                                    systemImage: "exclamationmark.triangle",

@@ -33,6 +33,18 @@ struct ID3TagWriterTests {
         #expect(try Self.frameIDs(of: url).contains("TCOM"))
     }
 
+    @Test func replacesAndRemovesTheComposer() async throws {
+        defer { try? FileManager.default.removeItem(at: folder) }
+        let url = try MP3FixtureWriter.write(to: folder.appending(path: "song.mp3"), tags: Self.fixtureTags)
+
+        try ID3TagWriter().write(TagChanges(composer: "Brock/Green"), to: url)
+        #expect(try #require(try await AudioMetadataReader().read(url)).tags.composer == "Brock/Green")
+
+        try ID3TagWriter().write(TagChanges(composer: ""), to: url)
+        #expect(try #require(try await AudioMetadataReader().read(url)).tags.composer == nil)
+        #expect(try !Self.frameIDs(of: url).contains("TCOM"))
+    }
+
     @Test func rewritesInPlaceWhenThePaddingFits() async throws {
         defer { try? FileManager.default.removeItem(at: folder) }
         let url = try MP3FixtureWriter.write(to: folder.appending(path: "song.mp3"), tags: Self.fixtureTags)

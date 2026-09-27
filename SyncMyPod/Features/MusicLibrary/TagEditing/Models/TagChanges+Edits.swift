@@ -5,7 +5,7 @@ extension TagChanges {
     /// half of the pair, so setting a count across an album keeps each song's track number.
     init(edits: [TagField: String], artwork: ArtworkChange, applyingTo track: LibraryTrack) {
         self.init(title: edits[.title], artist: edits[.artist], album: edits[.album],
-                  albumArtist: edits[.albumArtist], genre: edits[.genre],
+                  albumArtist: edits[.albumArtist], composer: edits[.composer], genre: edits[.genre],
                   year: edits[.year].map(TagField.number(from:)),
                   track: Self.pair(edits[.trackNumber], edits[.trackCount], current: track.trackPosition),
                   disc: Self.pair(edits[.discNumber], edits[.discCount], current: track.discPosition),

@@ -5,7 +5,8 @@ import SwiftData
 nonisolated final class LibraryTrack {
     /// Bumped when scanning starts reading something new, so older rows get re-read.
     /// 2: the `codec` → `codecRawValue` rename left older rows `NULL`, so they must be re-read.
-    static let currentScanVersion = 2
+    /// 3: reads the composer.
+    static let currentScanVersion = 3
 
     @Attribute(.unique) var filePath: String
     /// Optional because rows from before a rescan can hold `NULL`; those read as AAC.
@@ -16,6 +17,8 @@ nonisolated final class LibraryTrack {
     var artist = ""
     var album = ""
     var albumArtist = ""
+    /// Optional because rows scanned before composers were read hold `NULL`.
+    var composerTag: String?
     var genre = ""
     var trackNumber = 0
     var trackCount = 0
@@ -32,6 +35,8 @@ nonisolated final class LibraryTrack {
     init(filePath: String) {
         self.filePath = filePath
     }
+
+    var composer: String { composerTag ?? "" }
 
     var codec: AudioCodec {
         get { codecRawValue.flatMap(AudioCodec.init(rawValue:)) ?? .aac }
@@ -60,6 +65,7 @@ nonisolated final class LibraryTrack {
         artist = tags.artist ?? ""
         album = tags.album ?? ""
         albumArtist = tags.albumArtist ?? ""
+        composerTag = tags.composer
         genre = tags.genre ?? ""
         year = tags.year ?? 0
         trackNumber = tags.track.number

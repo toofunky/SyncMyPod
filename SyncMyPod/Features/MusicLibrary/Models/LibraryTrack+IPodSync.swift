@@ -17,7 +17,8 @@ extension LibraryTrack {
     }
 
     private var draft: ITunesTrackDraft {
-        ITunesTrackDraft(title: title, artist: artist, album: album, albumArtist: albumArtist, genre: genre,
+        ITunesTrackDraft(title: title, artist: artist, album: album, albumArtist: albumArtist,
+                         composer: composer, genre: genre,
                          fileSize: fileSize, duration: duration, trackNumber: trackNumber,
                          trackCount: trackCount, discNumber: discNumber, discCount: discCount, year: year,
                          bitrate: bitrate, sampleRate: sampleRate, dateAdded: .now,
