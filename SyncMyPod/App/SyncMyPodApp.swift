@@ -6,6 +6,7 @@ struct SyncMyPodApp: App {
     @State private var mountWatcher = IPodMountWatcher()
     @State private var syncModel = IPodSyncModel()
     @State private var updater = AppUpdater()
+    private let modelContainer = LibraryStore.makeContainer()
     @AppStorage(AppAppearance.storageKey) private var appearance = AppAppearance.system
 
     var body: some Scene {
@@ -15,7 +16,7 @@ struct SyncMyPodApp: App {
                 .environment(syncModel)
                 .preferredColorScheme(appearance.colorScheme)
         }
-        .modelContainer(for: MusicLibrarySchema.models)
+        .modelContainer(modelContainer)
         .commands {
             AboutCommand()
             CheckForUpdatesCommand(updater: updater)
