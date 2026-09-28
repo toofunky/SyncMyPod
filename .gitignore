@@ -3,3 +3,6 @@ SyncMyPodTests/Fixtures/ArtworkDB
 SyncMyPodTests/Fixtures/PlayCounts
 Temp/*
 *.profraw
+xcuserdata/
+*.xcuserstate
+.DS_Store
