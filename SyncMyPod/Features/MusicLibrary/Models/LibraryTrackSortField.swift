@@ -2,7 +2,7 @@ import Foundation
 
 /// A sortable library column; compares `LibraryTrackSortKey`s directly because `KeyPathComparator` is ~5× slower.
 nonisolated enum LibraryTrackSortField: Sendable {
-    case title, artist, albumArtist, album, composer, genre, trackNumber, discNumber, duration, bitrate, codecName
+    case title, artist, albumArtist, album, composer, genre, year, trackNumber, discNumber, duration, bitrate, codecName
 
     init(keyPath: PartialKeyPath<LibraryTrack>) {
         switch keyPath {
@@ -11,6 +11,7 @@ nonisolated enum LibraryTrackSortField: Sendable {
         case \LibraryTrack.album: self = .album
         case \LibraryTrack.composer: self = .composer
         case \LibraryTrack.genre: self = .genre
+        case \LibraryTrack.year: self = .year
         case \LibraryTrack.trackNumber: self = .trackNumber
         case \LibraryTrack.discNumber: self = .discNumber
         case \LibraryTrack.duration: self = .duration
@@ -39,6 +40,7 @@ nonisolated enum LibraryTrackSortField: Sendable {
         case .album: lhs.sortAlbum.localizedStandardCompare(rhs.sortAlbum)
         case .composer: lhs.sortComposer.localizedStandardCompare(rhs.sortComposer)
         case .genre: lhs.sortGenre.localizedStandardCompare(rhs.sortGenre)
+        case .year: Self.compare(lhs.year, rhs.year)
         case .trackNumber: Self.compare(lhs.trackNumber, rhs.trackNumber)
         case .discNumber: Self.compare(lhs.discNumber, rhs.discNumber)
         case .duration: Self.compare(lhs.duration, rhs.duration)

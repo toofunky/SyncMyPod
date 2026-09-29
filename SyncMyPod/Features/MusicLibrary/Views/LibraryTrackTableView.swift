@@ -80,6 +80,11 @@ struct LibraryTrackTableView: View {
             .defaultVisibility(.hidden)
         TableColumn("Genre", value: \.genre)
             .customizationID("genre")
+        TableColumn("Year", value: \.year) { track in
+            Text(track.yearText)
+                .monospacedDigit()
+        }
+        .customizationID("year")
     }
 
     @TableColumnBuilder<LibraryTrack, KeyPathComparator<LibraryTrack>>
