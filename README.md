@@ -94,6 +94,12 @@ SyncMyPod doesn't link to or bundle [libgpod](https://sourceforge.net/projects/g
 - **hash58 signing**: `Hash58.swift` is a Swift port of libgpod's `itdb_hash58.c` by Christophe Fergeau, which builds on proof-of-concept work by wtbw. Unlike the rest of libgpod (LGPL), that file is under a BSD-style license, which is kept in the source file's header and in `SyncMyPod/Credits.html`.
 - **Database and device code**: libgpod served as the reference for how the iTunesDB, ArtworkDB and Play Counts files are laid out, which artwork sizes each device uses, and how to read SysInfoExtended over USB.
 
+## Support
+
+If SyncMyPod is useful to you, you can support its development:
+
+<a href="https://buymeacoffee.com/Ogr7PoWL9a"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" height="50"></a>
+
 ## License
 
 SyncMyPod is released under the [MIT License](LICENSE). Copyright © 2026 Major Talent Studios, LLC.
