@@ -2,6 +2,12 @@
 
 SyncMyPod is a native macOS app for syncing music from a folder on your Mac to a classic, click-wheel iPod. You don't need iTunes, Music or Finder. It reads and writes the iPod's own `iTunesDB` and `ArtworkDB` directly, so your library stays in plain audio files on disk and your iPod stays in sync with them.
 
+## Screenshots
+
+![Music library](Screenshots/music-library.png)
+![Playlists](Screenshots/playlists.png)
+![iPod sync](Screenshots/ipod-sync.png)
+
 ## Supported iPods
 
 | Model | Generation | Database signing |
