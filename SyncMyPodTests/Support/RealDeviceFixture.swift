@@ -11,10 +11,17 @@ nonisolated enum RealDeviceFixture {
     static let compressedDatabase: Data? = load("iTunesCDB")
     static let compressedDatabaseFireWireID: String? = load("iTunesCDB.firewireid")
         .flatMap { String(data: $0, encoding: .utf8)?.trimmingCharacters(in: .whitespacesAndNewlines) }
+    /// The same nano's SysInfoExtended (read over USB) and the `iTunes Library.itlp` folder iTunes wrote with it.
+    static let nanoSysInfoExtended: String? = load("SysInfoExtended.nano.xml").map { String(decoding: $0, as: UTF8.self) }
+    static let nanoLibraryFolder: URL? = {
+        let url = fixturesURL.appending(path: "iTunes Library.itlp", directoryHint: .isDirectory)
+        return FileManager.default.fileExists(atPath: url.path(percentEncoded: false)) ? url : nil
+    }()
+
+    private static let fixturesURL = URL(filePath: #filePath).deletingLastPathComponent().deletingLastPathComponent()
+        .appending(path: "Fixtures", directoryHint: .isDirectory)
 
     private static func load(_ name: String) -> Data? {
-        let url = URL(filePath: #filePath).deletingLastPathComponent().deletingLastPathComponent()
-            .appending(path: "Fixtures/\(name)", directoryHint: .notDirectory)
-        return try? Data(contentsOf: url)
+        try? Data(contentsOf: fixturesURL.appending(path: name, directoryHint: .notDirectory))
     }
 }

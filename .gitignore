@@ -7,3 +7,5 @@ xcuserdata/
 *.xcuserstate
 .DS_Store
 SyncMyPodTests/Fixtures/iTunesCDB*
+SyncMyPodTests/Fixtures/iTunes Library.itlp/
+SyncMyPodTests/Fixtures/SysInfoExtended*

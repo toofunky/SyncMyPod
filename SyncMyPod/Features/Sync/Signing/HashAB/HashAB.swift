@@ -53,6 +53,11 @@ nonisolated struct HashAB: Sendable {
         return stored == Self.signature(sha1: Self.digest(of: database), uuid: fireWireID.bytes, random: random)
     }
 
+    /// Signs a SHA-1 digest directly, as Locations.itdb.cbk does.
+    func signature(forDigest sha1: [UInt8], randomBytes: [UInt8] = libgpodRandomBytes) -> [UInt8] {
+        Self.signature(sha1: sha1, uuid: fireWireID.bytes, random: randomBytes)
+    }
+
     static func signature(sha1: [UInt8], uuid: [UInt8], random: [UInt8]) -> [UInt8] {
         let input = (uuid.prefix(8) + sha1 + random).map { $0 &* 0xED }
         let stage1 = HashABCipher.stage1.encrypt(input + [UInt8](repeating: 0xC1, count: 80 - input.count),
