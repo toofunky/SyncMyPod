@@ -1,3 +1,4 @@
+import AppKit
 import SwiftUI
 
 struct LibraryScanStatusView: View {
@@ -9,15 +10,38 @@ struct LibraryScanStatusView: View {
 
     var body: some View {
         HStack {
-            Label(folderPath, systemImage: "folder")
-                .lineLimit(1)
-                .truncationMode(.middle)
+            folderLabel
             Text("\(trackCount) songs")
                 .foregroundStyle(.secondary)
             Spacer()
             status
         }
         .padding()
+    }
+
+    private var folderURL: URL {
+        URL(filePath: folderPath, directoryHint: .isDirectory)
+    }
+
+    private var showsFullPath: Bool {
+        if case .failed = state { return true }
+        return false
+    }
+
+    private var folderLabel: some View {
+        Label(showsFullPath ? folderPath : folderURL.lastPathComponent, systemImage: "folder")
+            .lineLimit(1)
+            .truncationMode(.middle)
+            .help(folderPath)
+            .contextMenu {
+                Button("Show in Finder", systemImage: "finder") {
+                    NSWorkspace.shared.activateFileViewerSelecting([folderURL])
+                }
+                Button("Copy Path", systemImage: "doc.on.doc") {
+                    NSPasteboard.general.clearContents()
+                    NSPasteboard.general.setString(folderPath, forType: .string)
+                }
+            }
     }
 
     @ViewBuilder

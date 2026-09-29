@@ -23,6 +23,11 @@ struct TrackTableView: View {
             TableColumn("Composer", value: \.sortingComposer) { Text($0.composer) }
                 .customizationID("composer")
                 .defaultVisibility(.hidden)
+            TableColumn("Year", value: \.year) { track in
+                Text(track.year > 0 ? String(track.year) : "")
+                    .monospacedDigit()
+            }
+            .customizationID("year")
             TableColumn("Time", value: \.duration) { track in
                 Text(Duration.seconds(track.duration), format: .time(pattern: .minuteSecond))
                     .monospacedDigit()

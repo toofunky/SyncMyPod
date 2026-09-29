@@ -16,6 +16,7 @@ nonisolated struct LibraryTrackSortKey: Sendable {
     let sortGenre: String
     let trackNumber: Int
     let discNumber: Int
+    let year: Int
     let duration: TimeInterval
     let bitrate: Int
     let codecName: String
@@ -35,6 +36,7 @@ nonisolated struct LibraryTrackSortKey: Sendable {
         sortGenre = track.genre.sortName
         trackNumber = track.trackNumber
         discNumber = track.discNumber
+        year = track.year
         duration = track.duration
         bitrate = track.bitrate
         codecName = track.codecName
