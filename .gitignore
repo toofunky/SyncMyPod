@@ -6,3 +6,4 @@ Temp/*
 xcuserdata/
 *.xcuserstate
 .DS_Store
+SyncMyPodTests/Fixtures/iTunesCDB*

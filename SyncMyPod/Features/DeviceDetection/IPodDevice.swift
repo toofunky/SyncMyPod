@@ -23,15 +23,18 @@ nonisolated struct IPodDevice: Identifiable, Equatable, Sendable {
         if let generation = modelNumber.flatMap(IPodModelCatalog.generation(forModelNumber:)) {
             return generation
         }
+        if let generation = usbIdentity?.productID.flatMap(IPodModelCatalog.generation(forProductID:)) {
+            return generation
+        }
         guard usbIdentity?.productID == IPodModelCatalog.classicProductID else { return nil }
         return firmwareVersion.flatMap(IPodModelCatalog.classicGeneration(forFirmwareVersion:))
     }
 
     /// Falls back to the USB product ID, which settles the question even when the exact
     /// generation can't be pinned down (e.g. a 5G/5.5G with an empty SysInfo).
-    var requiresDatabaseHash: Bool? {
-        generation?.requiresDatabaseHash
-            ?? usbIdentity?.productID.flatMap(IPodModelCatalog.requiresDatabaseHash(forProductID:))
+    var databaseSigning: IPodDatabaseSigning? {
+        generation?.databaseSigning
+            ?? usbIdentity?.productID.flatMap(IPodModelCatalog.databaseSigning(forProductID:))
     }
 
     var generationDescription: String? {

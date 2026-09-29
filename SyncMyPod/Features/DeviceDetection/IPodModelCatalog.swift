@@ -3,23 +3,31 @@ import Foundation
 nonisolated enum IPodModelCatalog {
     static let videoProductID = 0x1209
     static let classicProductID = 0x1261
+    static let nano7GProductID = 0x1267
 
     /// Used when the exact generation can't be determined; a product ID spans several generations.
     static func familyName(forProductID productID: Int) -> String? {
         switch productID {
         case videoProductID: "iPod (5th or 5.5th Generation)"
         case classicProductID: "iPod classic"
+        case nano7GProductID: IPodGeneration.nano7G.displayName
         default: nil
         }
     }
 
-    /// Whether every generation sharing this product ID needs a signed iTunesDB, or `nil` if unknown.
-    static func requiresDatabaseHash(forProductID productID: Int) -> Bool? {
+    /// How every generation sharing this product ID signs its database, or `nil` if unknown.
+    static func databaseSigning(forProductID productID: Int) -> IPodDatabaseSigning? {
         switch productID {
-        case videoProductID: false
-        case classicProductID: true
+        case videoProductID: .unsigned
+        case classicProductID: .hash58
+        case nano7GProductID: .hashAB
         default: nil
         }
+    }
+
+    /// Only for product IDs a single generation uses.
+    static func generation(forProductID productID: Int) -> IPodGeneration? {
+        productID == nano7GProductID ? .nano7G : nil
     }
 
     /// Accepts "MA146", "xA146" (SysInfo form) or "MA146LL/A"; the first letter is ignored.
@@ -49,7 +57,10 @@ nonisolated enum IPodModelCatalog {
         "A444": .video5_5G, "A446": .video5_5G, "A448": .video5_5G, "A450": .video5_5G, "A664": .video5_5G,
         "B029": .classic6G, "B147": .classic6G, "B145": .classic6G, "B150": .classic6G,
         "B562": .classic6_5G, "B565": .classic6_5G,
-        "C293": .classic7G, "C297": .classic7G
+        "C293": .classic7G, "C297": .classic7G,
+        "D475": .nano7G, "D476": .nano7G, "D477": .nano7G, "D478": .nano7G, "D479": .nano7G,
+        "D480": .nano7G, "D481": .nano7G, "D744": .nano7G, "E971": .nano7G,
+        "KMV2": .nano7G, "KMX2": .nano7G, "KN02": .nano7G, "KN22": .nano7G, "KN52": .nano7G, "KN72": .nano7G
     ]
 
     private static let modelNumbersBySerialSuffix: [String: String] = [
