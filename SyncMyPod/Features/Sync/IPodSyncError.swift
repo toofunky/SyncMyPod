@@ -6,7 +6,7 @@ nonisolated enum IPodSyncError: Error, Equatable, LocalizedError {
     case insufficientSpace(required: Int64, available: Int64)
     case verificationFailed
     case unsupportedDevice(String)
-    case syncNotYetSupported(String)
+    case missingLibraryCommands
     case missingFireWireID
     case signatureMismatch
 
@@ -22,10 +22,10 @@ nonisolated enum IPodSyncError: Error, Equatable, LocalizedError {
             "The iTunesDB written to the iPod didn't read back correctly, so the previous one was restored."
         case .unsupportedDevice(let name):
             "SyncMyPod couldn't identify \(name) precisely enough to write its library safely."
-        case .syncNotYetSupported(let name):
-            "Syncing to the \(name) isn't supported yet. SyncMyPod can show its library but won't change it."
+        case .missingLibraryCommands:
+            "The iPod nano's library setup couldn't be read over USB, so its library can't be written. Reconnect the iPod and try again."
         case .missingFireWireID:
-            "This iPod classic's FireWire ID couldn't be read, so its library can't be signed."
+            "This iPod's FireWire ID couldn't be read, so its library can't be signed."
         case .signatureMismatch:
             "The iPod's current library signature doesn't match this device, so nothing was changed. Syncing could make the iPod unable to read its music."
         }

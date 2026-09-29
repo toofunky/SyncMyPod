@@ -7,6 +7,8 @@ nonisolated enum ITunesCDB {
     private static let minimumHeaderLength = 0xA9
     private static let zlibHeaderLength = 2
     private static let zlibChecksumLength = 4
+    /// Deflate with a 32 KB window at the default level.
+    private static let zlibHeader: [UInt8] = [0x78, 0x9C]
 
     static func isCompressed(_ data: Data) -> Bool {
         guard let headerLength = headerLength(of: data) else { return false }
@@ -27,6 +29,35 @@ nonisolated enum ITunesCDB {
         database.write(UInt32(database.count), at: totalLengthOffset)
         database.write(UInt16(0), at: compressionFlagOffset)
         return database
+    }
+
+    /// Returns `database` as an iTunesCDB: its header followed by the rest as one zlib stream.
+    static func compress(_ database: Data) throws -> Data {
+        guard let headerLength = headerLength(of: database), !isCompressed(database) else {
+            throw ITunesDBError.invalidLength(offset: 0x04)
+        }
+        let payload = Data(database.dropFirst(headerLength))
+        let deflated = try (payload as NSData).compressed(using: .zlib) as Data
+        let checksum = adler32(payload).bigEndian
+        var compressed = Data(database.prefix(headerLength)) + Data(zlibHeader) + deflated
+        withUnsafeBytes(of: checksum) { compressed.append(contentsOf: $0) }
+        compressed.write(UInt32(compressed.count), at: totalLengthOffset)
+        compressed.write(UInt16(1), at: compressionFlagOffset)
+        return compressed
+    }
+
+    static func adler32(_ data: Data) -> UInt32 {
+        let modulus: UInt32 = 65_521
+        var low: UInt32 = 1, high: UInt32 = 0
+        for chunk in stride(from: data.startIndex, to: data.endIndex, by: 5_552) {
+            for byte in data[chunk..<min(chunk + 5_552, data.endIndex)] {
+                low += UInt32(byte)
+                high += low
+            }
+            low %= modulus
+            high %= modulus
+        }
+        return high << 16 | low
     }
 
     private static func headerLength(of data: Data) -> Int? {

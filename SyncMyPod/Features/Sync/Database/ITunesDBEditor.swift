@@ -14,7 +14,9 @@ nonisolated struct ITunesDBEditor {
 
     init(root: ITunesDBRecord) throws {
         guard let tracks = Self.list(in: root, section: .tracks) else { throw IPodSyncError.missingTrackList }
-        guard Self.list(in: root, section: .playlists)?.children.contains(where: \.isMasterPlaylist) == true else {
+        guard Self.playlistSections.contains(where: {
+            Self.list(in: root, section: $0)?.children.contains(where: \.isMasterPlaylist) == true
+        }) else {
             throw IPodSyncError.missingMasterPlaylist
         }
         self.root = root

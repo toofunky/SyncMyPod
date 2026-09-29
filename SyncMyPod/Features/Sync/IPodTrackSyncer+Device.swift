@@ -7,15 +7,23 @@ nonisolated extension IPodTrackSyncer {
         case .unsigned?:
             self.init(volumeURL: device.volumeURL, formats: ArtworkFormat.videoIPod)
         case .hash58?:
-            guard let fireWireID = device.firewireGUID.flatMap(FireWireID.init(hexString:)) else {
-                throw IPodSyncError.missingFireWireID
-            }
             self.init(volumeURL: device.volumeURL, formats: ArtworkFormat.classicIPod,
-                      signer: Hash58(fireWireID: fireWireID))
+                      signer: Hash58(fireWireID: try Self.fireWireID(of: device)))
         case .hashAB?:
-            throw IPodSyncError.syncNotYetSupported(device.generationDescription ?? "this iPod")
+            guard let commands = device.libraryCommands else { throw IPodSyncError.missingLibraryCommands }
+            let signer = HashAB(fireWireID: try Self.fireWireID(of: device))
+            // Nano artwork formats aren't written yet, so songs are added without covers.
+            self.init(volumeURL: device.volumeURL, formats: [], signer: signer,
+                      nanoLibrary: NanoLibraryWriter(commands: commands, signer: signer))
         case nil:
             throw IPodSyncError.unsupportedDevice(device.generationDescription ?? "this iPod")
         }
+    }
+
+    private static func fireWireID(of device: IPodDevice) throws -> FireWireID {
+        guard let id = device.firewireGUID.flatMap(FireWireID.init(hexString:)) else {
+            throw IPodSyncError.missingFireWireID
+        }
+        return id
     }
 }

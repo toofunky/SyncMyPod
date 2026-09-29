@@ -73,7 +73,7 @@ struct IPodModelCatalogTests {
                                                              vendorID: 0x05AC, productID: 0x1267))
         #expect(device.generation == .nano7G)
         #expect(device.databaseSigning == .hashAB)
-        #expect(throws: IPodSyncError.syncNotYetSupported("iPod nano (7th Generation)")) {
+        #expect(throws: IPodSyncError.missingLibraryCommands) {
             _ = try IPodTrackSyncer(device: device)
         }
     }

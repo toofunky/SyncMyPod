@@ -7,7 +7,7 @@ import CryptoKit
 import Foundation
 
 /// Signs an iTunesCDB for iPod nano 6G/7G firmware: a 57-byte signature over the file's SHA-1 and the FireWire ID.
-nonisolated struct HashAB: Sendable {
+nonisolated struct HashAB: IPodDatabaseSigner {
     /// libgpod's ITDB_CHECKSUM_HASHAB, and what iTunes writes on a nano 7G.
     static let scheme: UInt16 = 3
     static let schemeOffset = 0x30
@@ -32,7 +32,11 @@ nonisolated struct HashAB: Sendable {
     let fireWireID: FireWireID
 
     /// Returns `database` with the hashing scheme set and the hashAB field filled in.
-    func sign(_ database: Data, randomBytes: [UInt8] = libgpodRandomBytes) throws -> Data {
+    func sign(_ database: Data) throws -> Data {
+        try sign(database, randomBytes: Self.libgpodRandomBytes)
+    }
+
+    func sign(_ database: Data, randomBytes: [UInt8]) throws -> Data {
         guard database.prefix(4) == Data("mhbd".utf8),
               database.read(UInt32.self, at: 0x04) >= Self.signatureRange.upperBound,
               database.count >= Self.signatureRange.upperBound, randomBytes.count == Self.randomCount else {
@@ -51,6 +55,10 @@ nonisolated struct HashAB: Sendable {
         let stored = [UInt8](database.subdata(in: Self.signatureRange))
         guard let random = Self.randomBytes(in: stored) else { return false }
         return stored == Self.signature(sha1: Self.digest(of: database), uuid: fireWireID.bytes, random: random)
+    }
+
+    static func isSigned(_ database: Data) -> Bool {
+        database.count >= signatureRange.upperBound && database.read(UInt16.self, at: schemeOffset) == scheme
     }
 
     /// Signs a SHA-1 digest directly, as Locations.itdb.cbk does.

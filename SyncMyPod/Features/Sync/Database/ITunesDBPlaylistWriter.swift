@@ -45,8 +45,8 @@ nonisolated enum ITunesDBPlaylistWriter {
 
     /// iTunes gives every playlist a type-100 display settings `mhod`; reuse the master playlist's.
     private static func masterSettings(in root: ITunesDBRecord) -> ITunesDBRecord? {
-        let list = root.children.first { $0.isSection(.playlists) }?.children.first
-        let master = list?.children.first(where: \.isMasterPlaylist)
+        let lists = sections.compactMap { section in root.children.first { $0.isSection(section) }?.children.first }
+        let master = lists.lazy.compactMap { $0.children.first(where: \.isMasterPlaylist) }.first
         return master?.children.first { $0.tag == "mhod" && $0.recordType == settingsType }
     }
 }
