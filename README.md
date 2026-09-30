@@ -1,6 +1,6 @@
 # SyncMyPod
 
-SyncMyPod is a native macOS app for syncing music from a folder on your Mac to a classic, click-wheel iPod. You don't need iTunes, Music or Finder. It reads and writes the iPod's own `iTunesDB` and `ArtworkDB` directly, so your library stays in plain audio files on disk and your iPod stays in sync with them.
+SyncMyPod is a native macOS app for syncing music from a folder on your Mac to a classic, click-wheel iPod or a 7th-generation iPod nano. You don't need iTunes, Music or Finder. It reads and writes the iPod's own `iTunesDB` and `ArtworkDB` directly, so your library stays in plain audio files on disk and your iPod stays in sync with them.
 
 ## Screenshots
 
@@ -14,6 +14,9 @@ SyncMyPod is a native macOS app for syncing music from a folder on your Mac to a
 | --- | --- | --- |
 | iPod (video) | 5G, 5.5G | Not required |
 | iPod classic | 6G, 6.5G, 7G | hash58 |
+| iPod nano | 7G | hashAB |
+
+The iPod nano (7th generation) reads its library from SQLite databases instead of the `iTunesDB`. For the nano, SyncMyPod writes a compressed `iTunesCDB` and builds the SQLite library from it, running the SQL the nano itself provides, as iTunes does. Play counts, skips and ratings recorded on the nano are kept at each sync.
 
 ## Features
 
@@ -66,7 +69,7 @@ xcodebuild -scheme SyncMyPod -destination 'platform=macOS' build
 xcodebuild -scheme SyncMyPod -destination 'platform=macOS' test
 ```
 
-Some tests run against real databases copied from a device. To enable them, copy `iTunesDB`, `ArtworkDB` and `PlayCounts` from an iPod's `iPod_Control` folder into `SyncMyPodTests/Fixtures/`. Git ignores those files, and without them the tests are skipped.
+Some tests run against real databases copied from a device. To enable them, copy `iTunesDB`, `ArtworkDB` and `PlayCounts` from an iPod's `iPod_Control` folder into `SyncMyPodTests/Fixtures/`. The iPod nano tests also use `iTunesCDB`, the `iTunes Library.itlp` folder, the nano's `ArtworkDB` saved as `ArtworkDB.nano`, its SysInfoExtended saved as `SysInfoExtended.nano.xml`, and its FireWire GUID in a text file named `iTunesCDB.firewireid`. Git ignores those files, and without them the tests are skipped.
 
 ### Project Layout
 
@@ -78,7 +81,8 @@ SyncMyPod/
     Library/         iTunesDB parsing and the lossless record tree
     MusicLibrary/    Folder scanning, SwiftData library and tag editing
     Playlists/       Playlist models and views
-    Sync/            Sync planning, database editing, artwork and hash58 signing
+    Sync/            Sync planning, database editing, artwork, hash58 and hashAB signing,
+                     and the iPod nano's SQLite library
     Updates/         Sparkle integration
 SyncMyPodTests/      Unit tests and fixture builders
 ```
@@ -92,6 +96,8 @@ Almost all of SyncMyPod's code was written by [Claude Code](https://claude.com/c
 SyncMyPod doesn't link to or bundle [libgpod](https://sourceforge.net/projects/gtkpod/), but SyncMyPod's iPod syncing code draws heavily on what libgpod documents. Many thanks to the libgpod contributors for years of work documenting how the iPod stores music.
 
 - **hash58 signing**: `Hash58.swift` is a Swift port of libgpod's `itdb_hash58.c` by Christophe Fergeau, which builds on proof-of-concept work by wtbw. Unlike the rest of libgpod (LGPL), that file is under a BSD-style license, which is kept in the source file's header and in `SyncMyPod/Credits.html`.
+- **hashAB signing**: the `Sync/Signing/HashAB` folder is a Swift port of [dstaley/hashab](https://github.com/dstaley/hashab), a clean-room reimplementation of the iPod nano's database signature, released into the public domain. It includes the EDON-R' 256 compression function from [RHash](https://github.com/rhash/RHash) by Aleksey Kravchenko, under a permissive license kept in `EdonR256.swift` and `SyncMyPod/Credits.html`.
+- **iPod nano library**: [iOpenPod](https://github.com/TheRealSavi/iOpenPod) (MIT) and libgpod's `itdb_sqlite.c` served as references for the nano's SQLite databases and cover art formats.
 - **Database and device code**: libgpod served as the reference for how the iTunesDB, ArtworkDB and Play Counts files are laid out, which artwork sizes each device uses, and how to read SysInfoExtended over USB.
 
 ## Support
@@ -106,6 +112,6 @@ SyncMyPod is released under the [MIT License](LICENSE). Copyright © 2026 Major 
 
 The [toofunky](https://github.com/toofunky) GitHub account belongs to Major Talent Studios, LLC, so the account and the company that holds the copyright are the same.
 
-`Hash58.swift` is excluded and stays under its original BSD-style license (see [Acknowledgements](#acknowledgements)).
+`Hash58.swift` is excluded and stays under its original BSD-style license, and `EdonR256.swift` keeps its original permissive license (see [Acknowledgements](#acknowledgements)).
 
 iTunes and iPod are trademarks of Apple Inc. SyncMyPod is not affiliated with Apple.
