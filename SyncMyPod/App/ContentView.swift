@@ -3,30 +3,33 @@ import SwiftUI
 
 struct ContentView: View {
     @State private var selection: SidebarItem? = .library
+    @State private var selectedPlaylistID: UUID?
 
     var body: some View {
         NavigationSplitView {
             List(selection: $selection) {
-                Section("Library") {
-                    ForEach(SidebarItem.fixedItems) { item in
-                        if item == .device {
-                            DeviceSidebarRow()
-                        } else {
-                            Label(item.title, systemImage: item.systemImage)
-                        }
+                ForEach(SidebarItem.fixedItems) { item in
+                    if item == .device {
+                        DeviceSidebarRow()
+                    } else {
+                        Label(item.title, systemImage: item.systemImage)
                     }
                 }
-                PlaylistSidebarSection(selection: $selection)
             }
         } detail: {
             switch selection {
             case .device: DeviceDetectionView()
-            case .playlist(let id): PlaylistDetailView(playlistID: id)
+            case .playlists: PlaylistsView(selection: $selectedPlaylistID)
             case .library, nil:
-                MusicLibraryView { selection = .playlist($0.playlistID) }
+                MusicLibraryView(showPlaylist: show)
             }
         }
         .frame(minWidth: 420, minHeight: 320)
+    }
+
+    private func show(_ playlist: LibraryPlaylist) {
+        selectedPlaylistID = playlist.playlistID
+        selection = .playlists
     }
 }
 
