@@ -22,9 +22,10 @@ nonisolated extension NanoLibraryRows {
         SQLiteTableRows(table: "item_stats", records: snapshot.items.map { item in
             [("item_pid", .id(item.pid)), ("has_been_played", .bool(item.playCount > 0)),
              ("date_played", .int(NanoTimestamp.seconds(fromLocal: item.dateLastPlayed))),
-             ("play_count_user", .int(item.playCount)), ("play_count_recent", .int(0)), ("date_skipped", .int(0)),
+             ("play_count_user", .int(item.playCount)), ("play_count_recent", .int(0)),
+             ("date_skipped", .int(NanoTimestamp.seconds(fromLocal: item.dateLastSkipped))),
              ("skip_count_user", .int(item.skipCount)), ("skip_count_recent", .int(0)),
-             ("bookmark_time_ms", .real(0)), ("bookmark_time_ms_common", .real(0)),
+             ("bookmark_time_ms", .real(Double(item.bookmarkMS))), ("bookmark_time_ms_common", .real(Double(item.bookmarkMS))),
              ("user_rating", .int(item.rating)), ("user_rating_common", .int(item.rating))]
         })
     }

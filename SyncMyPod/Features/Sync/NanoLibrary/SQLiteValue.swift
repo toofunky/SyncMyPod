@@ -14,6 +14,23 @@ nonisolated enum SQLiteValue: Hashable, Sendable {
 
     static func bool(_ value: Bool) -> SQLiteValue { .integer(value ? 1 : 0) }
 
+    /// Integers as is, reals truncated, anything else 0.
+    var integerValue: Int64 {
+        switch self {
+        case .integer(let value): value
+        case .real(let value): Int64(value)
+        default: 0
+        }
+    }
+
+    var realValue: Double {
+        switch self {
+        case .real(let value): value
+        case .integer(let value): Double(value)
+        default: 0
+        }
+    }
+
     /// `nil` and empty strings are stored as NULL, as iTunes does.
     static func optionalText(_ value: String?) -> SQLiteValue {
         guard let value, !value.isEmpty else { return .null }

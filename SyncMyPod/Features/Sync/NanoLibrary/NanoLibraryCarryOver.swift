@@ -37,6 +37,8 @@ nonisolated enum NanoLibraryCarryOver {
         if attached.contains("old_dynamic") {
             statements += [
                 "INSERT OR REPLACE INTO dynamic.item_stats (\(statsColumns)) SELECT \(statsColumns) FROM old_dynamic.item_stats WHERE \(items)",
+                // "Recent" counts plays since the last sync, which this sync has now taken in.
+                "UPDATE dynamic.item_stats SET play_count_recent = 0, skip_count_recent = 0",
                 "INSERT OR REPLACE INTO dynamic.container_ui SELECT * FROM old_dynamic.container_ui WHERE container_pid IN (SELECT pid FROM main.container)"
             ]
         }

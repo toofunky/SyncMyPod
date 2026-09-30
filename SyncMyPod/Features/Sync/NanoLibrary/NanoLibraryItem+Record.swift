@@ -18,6 +18,7 @@ nonisolated extension NanoLibraryItem {
             bitrate: Int(mhit.uint32(at: 0x38)), sampleRate: Int(mhit.header.read(UInt16.self, at: 0x3E)),
             fileSize: Int(mhit.uint32(at: 0x24)), fileTypeCode: mhit.uint32(at: 0x18),
             playCount: Int(mhit.uint32(at: 0x50)), skipCount: Int(mhit.uint32(at: 0x98)),
+            dateLastSkipped: mhit.uint32(at: 0xA0), bookmarkMS: Int(mhit.uint32(at: 0x6C)),
             dateModified: mhit.uint32(at: 0x20), dateLastPlayed: mhit.uint32(at: 0x58),
             dateAdded: mhit.uint32(at: 0x68), dateReleased: mhit.uint32(at: 0x8C),
             volumeNormalization: Int(mhit.uint32(at: 0x4C)), sampleCount: UInt64(mhit.uint32(at: 0xBC)),

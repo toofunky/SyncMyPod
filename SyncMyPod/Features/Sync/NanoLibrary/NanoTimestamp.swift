@@ -12,6 +12,13 @@ nonisolated enum NanoTimestamp {
         return local - Int64(offset)
     }
 
+    /// The inverse of `seconds(fromLocal:)`, for folding the nano's own records back into the iTunesDB.
+    static func localMacSeconds(from seconds: Int64, timeZone: TimeZone = .current) -> UInt32 {
+        guard seconds != 0 else { return 0 }
+        let offset = timeZone.secondsFromGMT(for: Date(timeIntervalSinceReferenceDate: TimeInterval(seconds)))
+        return UInt32(clamping: seconds + Int64(offset) + macToReferenceOffset)
+    }
+
     /// Release dates are stored in UTC even in the iTunesDB.
     static func seconds(fromUTC macSeconds: UInt32) -> Int64 {
         macSeconds == 0 ? 0 : Int64(macSeconds) - macToReferenceOffset

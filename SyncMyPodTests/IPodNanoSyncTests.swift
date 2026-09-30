@@ -138,14 +138,38 @@ struct IPodNanoSyncTests {
             .map { $0 == (6_612, 57) } == true)
     }
 
-    @Test func keepsPlayCountsTheNanoRecordedSinceTheLastSync() async throws {
+    /// The nano records each play both as a running total in Dynamic.itdb and as a delta in Play Counts; only the
+    /// total is taken, so plays aren't counted twice.
+    @Test func takesThePlayTotalsTheNanoRecordedWithoutCountingThemTwice() async throws {
         let volume = try nanoVolume()
         let syncer = try IPodTrackSyncer(device: device(volume: volume.url, commands: commands))
         _ = try await syncer.sync(adding: [try song("First", in: volume)])
-        try library(volume, .dynamic).execute("UPDATE item_stats SET play_count_user = 5, has_been_played = 1")
+        try library(volume, .dynamic).execute("UPDATE item_stats SET play_count_user = 5, play_count_recent = 5, "
+                                              + "has_been_played = 1, date_played = 812426770, skip_count_user = 2")
+        let playCounts = IPodControlFiles(volumeURL: volume.url).playCountsURL
+        try PlayCountsTests.file(entries: [(plays: 5, lastPlayed: 1, rating: 0, skips: 0)]).write(to: playCounts)
 
         _ = try await syncer.sync(adding: [try song("Second", in: volume)])
-        let counts = try library(volume, .dynamic).rows("SELECT play_count_user FROM item_stats ORDER BY play_count_user")
-        #expect(counts == [[.integer(0)], [.integer(5)]])
+        let database = try ITunesDBParser(data: ITunesCDB.decompress(Data(contentsOf: cdbURL(volume)))).parse()
+        #expect(database.tracks.first { $0.title == "First" }?.playCount == 5)
+        let stats = try library(volume, .dynamic).rows(
+            "SELECT play_count_user, play_count_recent, skip_count_user, date_played FROM item_stats ORDER BY play_count_user")
+        #expect(stats == [[.integer(0), .integer(0), .integer(0), .integer(0)],
+                          [.integer(5), .integer(0), .integer(2), .integer(812426770)]])
+        #expect(!FileManager.default.fileExists(atPath: playCounts.path(percentEncoded: false)))
+    }
+
+    @Test func foldsTheNanosTotalsIntoTracksByDatabaseID() throws {
+        var root = try ITunesDBRecordParser(data: ITunesDBFixtureBuilder(
+            tracks: [FixtureTrack(id: 7, title: "A", artist: "B", album: "C", location: ":iPod_Control:Music:F00:A.m4a")],
+            playlists: [FixturePlaylist(id: 1, name: "iPod", isMaster: true, trackIDs: [7])]).build()).parse()
+        let pid = root.children.first { $0.isSection(.tracks) }!.children[0].children[0].uint64(at: 0x70)
+        let statistics = NanoPlayStatistics(playCount: 3, lastPlayed: 812426770, skipCount: 1, lastSkipped: 812426786, rating: 80)
+        #expect(NanoPlayStatisticsMerger.merge([pid: statistics, 42: NanoPlayStatistics(playCount: 9)], into: &root))
+        let mhit = root.children.first { $0.isSection(.tracks) }!.children[0].children[0]
+        #expect(mhit.uint32(at: 0x50) == 3 && mhit.uint32(at: 0x98) == 1 && mhit.uint8(at: 0x1F) == 80)
+        #expect(NanoTimestamp.seconds(fromLocal: mhit.uint32(at: 0x58)) == 812426770)
+        #expect(NanoTimestamp.seconds(fromLocal: mhit.uint32(at: 0xA0)) == 812426786)
+        #expect(!NanoPlayStatisticsMerger.merge([pid: statistics], into: &root))
     }
 }

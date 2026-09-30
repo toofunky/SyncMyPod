@@ -77,6 +77,13 @@ nonisolated struct ITunesDBEditor {
         return true
     }
 
+    /// Sets tracks' play and skip totals to what the nano recorded; `false` if nothing changed.
+    mutating func applyNanoStatistics(_ statistics: [UInt64: NanoPlayStatistics]) -> Bool {
+        guard NanoPlayStatisticsMerger.merge(statistics, into: &root) else { return false }
+        hasChanges = true
+        return true
+    }
+
     /// The database bytes, with the master playlist's browse indexes rebuilt if tracks changed.
     func serialized() throws -> Data {
         guard hasChanges else { return root.serialized() }

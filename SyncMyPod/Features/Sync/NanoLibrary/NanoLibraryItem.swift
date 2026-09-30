@@ -20,6 +20,8 @@ nonisolated struct NanoLibraryItem: Equatable, Sendable {
     let fileTypeCode: UInt32
     let playCount: Int
     let skipCount: Int
+    let dateLastSkipped: UInt32
+    let bookmarkMS: Int
     let dateModified: UInt32
     let dateLastPlayed: UInt32
     let dateAdded: UInt32

@@ -22,7 +22,7 @@ nonisolated struct IPodTrackSyncer {
               progress: @escaping @Sendable (IPodSyncProgress) async -> Void = { _ in }) async throws -> IPodSyncOutcome {
         let files = IPodControlFiles(volumeURL: volumeURL)
         var editor = try openEditor(store)
-        let mergedPlayCounts = files.playCounts().map { editor.mergePlayCounts($0) } ?? false
+        let mergedPlayCounts = mergePlayStatistics(into: &editor, files: files)
         let removedLocations = editor.removeTracks(databaseIDs: removals)
         let device = try ITunesDBParser(data: editor.serialized()).parse()
         let manifest = files.manifest().valid(for: Set(device.tracks.map(\.databaseID)))
@@ -41,6 +41,15 @@ nonisolated struct IPodTrackSyncer {
                       playCountsMerged: mergedPlayCounts)
         writer.artwork.compactIfWasteful()
         return writer.outcome
+    }
+
+    /// Classics report plays since the last sync in Play Counts. The nano reports the same plays there, but its
+    /// Dynamic.itdb holds running totals, which are taken instead; its Play Counts file is then discarded.
+    private func mergePlayStatistics(into editor: inout ITunesDBEditor, files: IPodControlFiles) -> Bool {
+        guard nanoLibrary != nil else { return files.playCounts().map { editor.mergePlayCounts($0) } ?? false }
+        let dynamic = NanoLibraryInstaller(volumeURL: volumeURL).folderURL.appending(path: NanoLibraryFile.dynamic.fileName)
+        _ = editor.applyNanoStatistics(NanoPlayStatistics.load(from: dynamic))
+        return true
     }
 
     /// Copies the batch and saves both databases, or deletes the copies and restores the ArtworkDB.
