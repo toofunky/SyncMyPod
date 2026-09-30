@@ -61,4 +61,14 @@ struct ArtworkRendererTests {
         #expect(pixel(artwork, x: 5, y: 50) == 0xFFFF)
         #expect(pixel(artwork, x: 50, y: 50) == 0xF800)
     }
+
+    @Test func padsRowsToTheFormatsRowWidth() throws {
+        let format = ArtworkFormat(id: 1016, width: 57, height: 57, rowPixels: 58)
+        let image = TestImage.make(width: 57, height: 57, top: TestImage.color(1, 0, 0))
+        let rendered = try #require(ArtworkRenderer.render(image, as: format))
+        #expect(rendered.pixels.count == 58 * 57 * 2)
+        #expect(rendered.pixels.read(UInt16.self, at: 56 * 2) == 0xF800)
+        #expect(rendered.pixels.read(UInt16.self, at: 57 * 2) == 0)
+        #expect(rendered.pixels.read(UInt16.self, at: 58 * 2) == 0xF800)
+    }
 }

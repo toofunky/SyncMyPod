@@ -18,10 +18,27 @@ nonisolated struct ArtworkFormat: Equatable, Hashable, Sendable {
         ArtworkFormat(id: 1060, width: 320, height: 320)
     ]
 
+    /// iPod nano (7G), from the file list in the device's own ArtworkDB. F1016 rows are padded to 58 pixels.
+    static let nano7G = [
+        ArtworkFormat(id: 1013, width: 50, height: 50),
+        ArtworkFormat(id: 1016, width: 57, height: 57, rowPixels: 58),
+        ArtworkFormat(id: 1015, width: 58, height: 58),
+        ArtworkFormat(id: 1010, width: 240, height: 240)
+    ]
+
     let id: UInt32
     let width: Int
     let height: Int
+    /// Pixels stored per row, which some formats pad beyond `width`.
+    let rowPixels: Int
 
-    var byteCount: Int { width * height * Self.bytesPerPixel }
+    init(id: UInt32, width: Int, height: Int, rowPixels: Int? = nil) {
+        self.id = id
+        self.width = width
+        self.height = height
+        self.rowPixels = rowPixels ?? width
+    }
+
+    var byteCount: Int { rowPixels * height * Self.bytesPerPixel }
     var fileName: String { "F\(id)_1.ithmb" }
 }

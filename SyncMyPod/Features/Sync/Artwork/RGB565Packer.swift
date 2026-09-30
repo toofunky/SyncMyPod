@@ -3,13 +3,22 @@ import Foundation
 /// Converts 8-bit RGBX pixels to the iPod's RGB565 little-endian layout.
 nonisolated enum RGB565Packer {
     static func pack(rgbx: UnsafeRawBufferPointer, pixelCount: Int) -> Data {
-        var output = Data(count: pixelCount * 2)
+        pack(rgbx: rgbx, width: pixelCount, height: 1)
+    }
+
+    /// Packs `height` rows of `width` pixels, zero-padding each row to `rowPixels`.
+    static func pack(rgbx: UnsafeRawBufferPointer, width: Int, height: Int, rowPixels: Int? = nil) -> Data {
+        let stride = rowPixels ?? width
+        var output = Data(count: stride * height * 2)
         output.withUnsafeMutableBytes { destination in
-            for index in 0..<pixelCount {
-                let source = index * 4
-                let value = pack(red: rgbx[source], green: rgbx[source + 1], blue: rgbx[source + 2])
-                destination[index * 2] = UInt8(truncatingIfNeeded: value)
-                destination[index * 2 + 1] = UInt8(truncatingIfNeeded: value >> 8)
+            for row in 0..<height {
+                for column in 0..<width {
+                    let source = (row * width + column) * 4
+                    let target = (row * stride + column) * 2
+                    let value = pack(red: rgbx[source], green: rgbx[source + 1], blue: rgbx[source + 2])
+                    destination[target] = UInt8(truncatingIfNeeded: value)
+                    destination[target + 1] = UInt8(truncatingIfNeeded: value >> 8)
+                }
             }
         }
         return output

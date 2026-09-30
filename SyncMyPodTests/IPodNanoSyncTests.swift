@@ -39,8 +39,23 @@ struct IPodNanoSyncTests {
                                                                           fileSize: try Data(contentsOf: source).count))
     }
 
+    private func coveredSong(in volume: TemporaryIPodVolume) async throws -> IPodSyncRequest {
+        let silence = try AudioFixtureWriter.writeSilence(to: volume.url.appending(path: "source/plain.m4a"))
+        let source = volume.url.appending(path: "source/covered.m4a")
+        let cover = TestImage.make(width: 500, height: 500, top: TestImage.color(1, 0, 0))
+        try await AudioFixtureWriter.embedCoverArt(TestImage.pngData(cover), from: silence, to: source)
+        return IPodSyncRequest(sourceURL: source, draft: ITunesTrackDraft(title: "Song", album: "Album",
+                                                                          fileSize: try Data(contentsOf: source).count))
+    }
+
     private func library(_ volume: TemporaryIPodVolume, _ file: NanoLibraryFile = .library) throws -> SQLiteConnection {
         try SQLiteConnection(openingAt: NanoLibraryInstaller(volumeURL: volume.url).folderURL.appending(path: file.fileName))
+    }
+
+    /// The sizes a nano 7G's own ArtworkDB declares for its four cover formats.
+    @Test func nanoArtworkMatchesTheSizesTheDeviceDeclares() {
+        #expect(ArtworkFormat.nano7G.map(\.id) == [1013, 1016, 1015, 1010])
+        #expect(ArtworkFormat.nano7G.map(\.byteCount) == [5_000, 6_612, 6_728, 115_200])
     }
 
     @Test func nanosAreRefusedWithoutTheirLibraryCommands() throws {
@@ -52,7 +67,7 @@ struct IPodNanoSyncTests {
     @Test func syncWritesASignedCompressedDatabaseAndTheSQLiteLibrary() async throws {
         let volume = try nanoVolume()
         let syncer = try IPodTrackSyncer(device: device(volume: volume.url, commands: commands))
-        _ = try await syncer.sync(adding: [try song("Song", in: volume)])
+        _ = try await syncer.sync(adding: [try await coveredSong(in: volume)])
 
         let written = try Data(contentsOf: cdbURL(volume))
         #expect(ITunesCDB.isCompressed(written) && signer.isValid(written))
@@ -65,8 +80,11 @@ struct IPodNanoSyncTests {
         #expect(LocationsChecksumBook.isValid(try Data(contentsOf: folder.appending(path: LocationsChecksumBook.fileName)),
                                               for: try Data(contentsOf: folder.appending(path: "Locations.itdb")),
                                               signer: signer))
-        #expect(!FileManager.default.fileExists(atPath: volume.url.appending(path: "iPod_Control/Artwork/ArtworkDB")
-            .path(percentEncoded: false)))
+        for format in ArtworkFormat.nano7G {
+            let ithmb = volume.url.appending(path: "iPod_Control/Artwork/\(format.fileName)")
+            #expect(try Data(contentsOf: ithmb).count == format.byteCount)
+        }
+        #expect(try library(volume).rows("SELECT artwork_status, artwork_cache_id > 0 FROM item") == [[.integer(1), .integer(1)]])
     }
 
     /// Adds a song to a copy of a real nano's iTunesCDB and library, then checks nothing about the existing
@@ -98,6 +116,26 @@ struct IPodNanoSyncTests {
             .appending(path: "Dynamic.itdb")).rows(stats)
         #expect(try library(volume, .dynamic).rows(stats).filter { statsBefore.map(\.first).contains($0.first) } == statsBefore)
         #expect(try library(volume).rows("SELECT count(*) FROM container") == [[.integer(32)]])
+    }
+
+    @Test(.enabled(if: RealDeviceFixture.nanoArtworkDB != nil, "No real nano ArtworkDB fixture present"))
+    func addsCoversToTheNanosOwnArtworkDB() async throws {
+        let volume = try nanoVolume()
+        let artworkURL = volume.url.appending(path: "iPod_Control/Artwork/ArtworkDB")
+        try FileManager.default.createDirectory(at: artworkURL.deletingLastPathComponent(), withIntermediateDirectories: true)
+        try #require(RealDeviceFixture.nanoArtworkDB).write(to: artworkURL)
+        let syncer = try IPodTrackSyncer(device: device(volume: volume.url, commands: commands))
+        _ = try await syncer.sync(adding: [try await coveredSong(in: volume)])
+
+        let root = try ITunesDBRecordParser(data: Data(contentsOf: artworkURL), layout: .artworkDB).parse()
+        let lists = root.children.map { $0.children.first?.children ?? [] }
+        let files = lists[2].map { ($0.uint32(at: 0x10), $0.uint32(at: 0x14)) }
+        #expect(files.map(\.0) == [1010, 1013, 1015, 1016])
+        #expect(files.map(\.1) == [115_200, 5_000, 6_728, 6_612])
+        let thumbnails = lists[0].flatMap(\.children).flatMap(\.children)
+        #expect(Set(thumbnails.map { $0.uint32(at: 0x10) }) == [1010, 1013, 1015, 1016])
+        #expect(thumbnails.first { $0.uint32(at: 0x10) == 1016 }.map { ($0.uint32(at: 0x18), $0.header.read(UInt16.self, at: 0x22)) }
+            .map { $0 == (6_612, 57) } == true)
     }
 
     @Test func keepsPlayCountsTheNanoRecordedSinceTheLastSync() async throws {

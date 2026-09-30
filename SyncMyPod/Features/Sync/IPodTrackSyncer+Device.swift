@@ -12,8 +12,7 @@ nonisolated extension IPodTrackSyncer {
         case .hashAB?:
             guard let commands = device.libraryCommands else { throw IPodSyncError.missingLibraryCommands }
             let signer = HashAB(fireWireID: try Self.fireWireID(of: device))
-            // Nano artwork formats aren't written yet, so songs are added without covers.
-            self.init(volumeURL: device.volumeURL, formats: [], signer: signer,
+            self.init(volumeURL: device.volumeURL, formats: ArtworkFormat.nano7G, signer: signer,
                       nanoLibrary: NanoLibraryWriter(commands: commands, signer: signer))
         case nil:
             throw IPodSyncError.unsupportedDevice(device.generationDescription ?? "this iPod")
