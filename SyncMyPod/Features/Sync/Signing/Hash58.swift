@@ -32,7 +32,7 @@ import CryptoKit
 import Foundation
 
 /// Signs an iTunesDB for iPod classic firmware: an HMAC-SHA1 over the whole file, keyed on the FireWire ID.
-nonisolated struct Hash58: Sendable {
+nonisolated struct Hash58: IPodDatabaseSigner {
     static let scheme: UInt16 = 1
     static let schemeOffset = 0x30
     static let hashRange = 0x58..<0x6C

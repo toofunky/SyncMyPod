@@ -1,8 +1,11 @@
 SyncMyPodTests/Fixtures/iTunesDB*
-SyncMyPodTests/Fixtures/ArtworkDB
+SyncMyPodTests/Fixtures/ArtworkDB*
 SyncMyPodTests/Fixtures/PlayCounts
 Temp/*
 *.profraw
 xcuserdata/
 *.xcuserstate
 .DS_Store
+SyncMyPodTests/Fixtures/iTunesCDB*
+SyncMyPodTests/Fixtures/iTunes Library.itlp/
+SyncMyPodTests/Fixtures/SysInfoExtended*

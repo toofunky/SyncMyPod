@@ -15,7 +15,8 @@ nonisolated enum ArtworkRenderer {
         guard let data = context.data else { return nil }
         let buffer = UnsafeRawBufferPointer(start: data, count: context.bytesPerRow * format.height)
         return RenderedArtwork(format: format,
-                               pixels: RGB565Packer.pack(rgbx: buffer, pixelCount: format.width * format.height),
+                               pixels: RGB565Packer.pack(rgbx: buffer, width: format.width, height: format.height,
+                                                         rowPixels: format.rowPixels),
                                horizontalPadding: Int(frame.minX), verticalPadding: Int(frame.minY))
     }
 

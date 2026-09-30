@@ -11,13 +11,24 @@ nonisolated struct ITunesDBLoader: Sendable {
         volumeURL.appending(path: "iPod_Control/iTunes/iTunesDB", directoryHint: .notDirectory)
     }
 
+    static func compressedDatabaseURL(onVolume volumeURL: URL) -> URL {
+        volumeURL.appending(path: "iPod_Control/iTunes/iTunesCDB", directoryHint: .notDirectory)
+    }
+
+    /// Nano 5G and later read iTunesCDB in preference to iTunesDB, which iTunes leaves empty.
+    static func readableDatabaseURL(onVolume volumeURL: URL) -> URL {
+        let compressed = compressedDatabaseURL(onVolume: volumeURL)
+        let size = (try? compressed.resourceValues(forKeys: [.fileSizeKey]))?.fileSize ?? 0
+        return size > 0 ? compressed : databaseURL(onVolume: volumeURL)
+    }
+
     @concurrent
     private static func readDatabase(onVolume volumeURL: URL) async throws -> ITunesDatabase {
-        let url = databaseURL(onVolume: volumeURL)
+        let url = readableDatabaseURL(onVolume: volumeURL)
         guard FileManager.default.fileExists(atPath: url.path) else {
             throw ITunesDBError.databaseNotFound(path: url.path)
         }
-        return try ITunesDBParser(data: Data(contentsOf: url)).parse()
+        return try ITunesDBParser(data: ITunesCDB.decompress(Data(contentsOf: url))).parse()
     }
 }
 

@@ -14,7 +14,9 @@ nonisolated struct ITunesDBEditor {
 
     init(root: ITunesDBRecord) throws {
         guard let tracks = Self.list(in: root, section: .tracks) else { throw IPodSyncError.missingTrackList }
-        guard Self.list(in: root, section: .playlists)?.children.contains(where: \.isMasterPlaylist) == true else {
+        guard Self.playlistSections.contains(where: {
+            Self.list(in: root, section: $0)?.children.contains(where: \.isMasterPlaylist) == true
+        }) else {
             throw IPodSyncError.missingMasterPlaylist
         }
         self.root = root
@@ -71,6 +73,13 @@ nonisolated struct ITunesDBEditor {
     /// Folds the iPod's Play Counts into the tracks; `false` if the entries don't match the track list.
     mutating func mergePlayCounts(_ entries: [PlayCountEntry]) -> Bool {
         guard PlayCountsMerger.merge(entries, into: &root) else { return false }
+        hasChanges = true
+        return true
+    }
+
+    /// Sets tracks' play and skip totals to what the nano recorded; `false` if nothing changed.
+    mutating func applyNanoStatistics(_ statistics: [UInt64: NanoPlayStatistics]) -> Bool {
+        guard NanoPlayStatisticsMerger.merge(statistics, into: &root) else { return false }
         hasChanges = true
         return true
     }

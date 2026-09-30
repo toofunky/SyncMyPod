@@ -22,8 +22,9 @@ nonisolated struct ArtworkSyncSession {
 
     /// Renders and stores the file's embedded cover, reusing identical art already stored for
     /// `albumTracks`; `nil` when there's no cover or it can't be decoded.
+    /// Always `nil` with no formats, for models whose artwork layout SyncMyPod doesn't write yet.
     mutating func prepare(coverFrom url: URL, albumTracks: [UInt64] = []) async throws -> PreparedArtwork? {
-        guard let cover = try? await CoverArtReader().read(url) else { return nil }
+        guard !formats.isEmpty, let cover = try? await CoverArtReader().read(url) else { return nil }
         let renders = formats.compactMap { ArtworkRenderer.render(cover.image, as: $0) }
         guard renders.count == formats.count else { return nil }
         var candidates: [[ArtworkThumbnail]] = []

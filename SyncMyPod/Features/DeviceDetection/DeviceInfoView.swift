@@ -19,6 +19,7 @@ struct DeviceInfoView: View {
                 }
                 LabeledContent("Serial Number", value: device.serialNumber ?? "Unknown")
                 LabeledContent("FireWire GUID", value: device.firewireGUID ?? "Unknown")
+                LabeledContent("Database Signing", value: device.databaseSigning?.displayName ?? "Unknown")
             }
             if let usb = device.usbIdentity {
                 Section("USB Descriptor") {

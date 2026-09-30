@@ -9,7 +9,9 @@ struct IPodModelCatalogTests {
         ("MA450LL/A", .video5_5G),
         ("xB029", .classic6G),
         ("MB565", .classic6_5G),
-        ("MC297", .classic7G)
+        ("MC297", .classic7G),
+        ("xD480", .nano7G),
+        ("MKN52LL/A", .nano7G)
     ])
     func mapsModelNumberToGeneration(modelNumber: String, generation: IPodGeneration) {
         #expect(IPodModelCatalog.generation(forModelNumber: modelNumber) == generation)
@@ -20,9 +22,10 @@ struct IPodModelCatalogTests {
         #expect(IPodModelCatalog.generation(forModelNumber: modelNumber) == nil)
     }
 
-    @Test func onlyClassicModelsRequireDatabaseHash() {
-        let hashed = IPodGeneration.allCases.filter(\.requiresDatabaseHash)
-        #expect(hashed == [.classic6G, .classic6_5G, .classic7G])
+    @Test func signsDatabasesByFamily() {
+        let hash58 = IPodGeneration.allCases.filter { $0.databaseSigning == .hash58 }
+        #expect(hash58 == [.classic6G, .classic6_5G, .classic7G])
+        #expect(IPodGeneration.allCases.filter { $0.databaseSigning == .hashAB } == [.nano7G])
     }
 
     @Test(arguments: [
@@ -45,10 +48,11 @@ struct IPodModelCatalogTests {
         #expect(IPodModelCatalog.classicGeneration(forFirmwareVersion: version) == generation)
     }
 
-    @Test func decidesDatabaseHashFromProductID() {
-        #expect(IPodModelCatalog.requiresDatabaseHash(forProductID: 0x1209) == false)
-        #expect(IPodModelCatalog.requiresDatabaseHash(forProductID: 0x1261) == true)
-        #expect(IPodModelCatalog.requiresDatabaseHash(forProductID: 0x1234) == nil)
+    @Test func decidesDatabaseSigningFromProductID() {
+        #expect(IPodModelCatalog.databaseSigning(forProductID: 0x1209) == .unsigned)
+        #expect(IPodModelCatalog.databaseSigning(forProductID: 0x1261) == .hash58)
+        #expect(IPodModelCatalog.databaseSigning(forProductID: 0x1267) == .hashAB)
+        #expect(IPodModelCatalog.databaseSigning(forProductID: 0x1234) == nil)
     }
 
     @Test func videoIPodWithEmptySysInfoDoesNotRequireHash() {
@@ -58,7 +62,20 @@ struct IPodModelCatalogTests {
                                                              serialNumber: "000A27001234ABCD",
                                                              vendorID: 0x05AC, productID: 0x1209))
         #expect(device.generation == nil)
-        #expect(device.requiresDatabaseHash == false)
+        #expect(device.databaseSigning == .unsigned)
+    }
+
+    @Test func identifiesNano7GFromProductIDAlone() {
+        let device = IPodDevice(id: "1", volumeURL: URL(filePath: "/Volumes/NANO"), volumeName: "NANO",
+                                capacityBytes: nil, availableBytes: nil, sysInfo: .empty,
+                                usbIdentity: IPodUSBIdentity(vendorString: "Apple", productString: "iPod",
+                                                             serialNumber: "000A27002138B5C1",
+                                                             vendorID: 0x05AC, productID: 0x1267))
+        #expect(device.generation == .nano7G)
+        #expect(device.databaseSigning == .hashAB)
+        #expect(throws: IPodSyncError.missingLibraryCommands) {
+            _ = try IPodTrackSyncer(device: device)
+        }
     }
 
     @Test func namesFamilyFromProductID() {

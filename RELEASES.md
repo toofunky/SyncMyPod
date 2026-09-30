@@ -1,6 +1,7 @@
 SyncMyPod-1.5
 - Add Year column to music library/iPod tables.
 - Hide full library path until user hovers over it.
+- Add support for iPod Nanos.
 
 SyncMyPod-1.4
 - Fix issue with library being forgotten.

@@ -6,4 +6,5 @@ nonisolated enum ITunesDBSectionType: UInt32 {
     case podcasts = 3
     case albums = 4
     case smartPlaylists = 5
+    case artists = 8
 }

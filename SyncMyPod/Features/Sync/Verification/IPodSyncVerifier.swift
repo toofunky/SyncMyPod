@@ -9,8 +9,8 @@ nonisolated enum IPodSyncVerifier {
     static func wasOverwritten(_ expectation: IPodSyncExpectation, onVolume volumeURL: URL,
                                after delay: Duration = defaultDelay) async -> Bool {
         guard (try? await Task.sleep(for: delay)) != nil,
-              let data = try? Data(contentsOf: ITunesDBLoader.databaseURL(onVolume: volumeURL)),
-              let database = try? ITunesDBParser(data: data).parse() else { return false }
+              let data = try? Data(contentsOf: ITunesDBLoader.readableDatabaseURL(onVolume: volumeURL)),
+              let database = try? ITunesDBParser(data: ITunesCDB.decompress(data)).parse() else { return false }
         return !expectation.isMet(by: database)
     }
 }

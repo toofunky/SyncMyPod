@@ -8,6 +8,8 @@ nonisolated struct IPodDevice: Identifiable, Equatable, Sendable {
     let availableBytes: Int64?
     let sysInfo: IPodSysInfo
     let usbIdentity: IPodUSBIdentity?
+    /// The SQL the nano 6G/7G asks for after its library tables are written, from SysInfoExtended.
+    var libraryCommands: NanoPostProcessCommands?
 
     // SysInfo is the authoritative source when iTunes has populated it, but it can be an
     // empty placeholder file (e.g. on a device iTunes never fully synced); the USB
@@ -23,15 +25,18 @@ nonisolated struct IPodDevice: Identifiable, Equatable, Sendable {
         if let generation = modelNumber.flatMap(IPodModelCatalog.generation(forModelNumber:)) {
             return generation
         }
+        if let generation = usbIdentity?.productID.flatMap(IPodModelCatalog.generation(forProductID:)) {
+            return generation
+        }
         guard usbIdentity?.productID == IPodModelCatalog.classicProductID else { return nil }
         return firmwareVersion.flatMap(IPodModelCatalog.classicGeneration(forFirmwareVersion:))
     }
 
     /// Falls back to the USB product ID, which settles the question even when the exact
     /// generation can't be pinned down (e.g. a 5G/5.5G with an empty SysInfo).
-    var requiresDatabaseHash: Bool? {
-        generation?.requiresDatabaseHash
-            ?? usbIdentity?.productID.flatMap(IPodModelCatalog.requiresDatabaseHash(forProductID:))
+    var databaseSigning: IPodDatabaseSigning? {
+        generation?.databaseSigning
+            ?? usbIdentity?.productID.flatMap(IPodModelCatalog.databaseSigning(forProductID:))
     }
 
     var generationDescription: String? {
@@ -57,7 +62,7 @@ nonisolated struct IPodDevice: Identifiable, Equatable, Sendable {
         capacityBytes = values?.volumeTotalCapacity.map(Int64.init)
         availableBytes = values?.volumeAvailableCapacity.map(Int64.init)
         usbIdentity = IPodUSBIdentity(volumeURL: url)
-        sysInfo = Self.loadSysInfo(controlDirectory: controlDir, usbIdentity: usbIdentity)
+        (sysInfo, libraryCommands) = Self.loadSysInfo(controlDirectory: controlDir, usbIdentity: usbIdentity)
         id = sysInfo.firewireGUID ?? usbIdentity?.serialNumber ?? url.path
     }
 
@@ -72,14 +77,22 @@ nonisolated struct IPodDevice: Identifiable, Equatable, Sendable {
         self.usbIdentity = usbIdentity
     }
 
-    private static func loadSysInfo(controlDirectory: URL, usbIdentity: IPodUSBIdentity?) -> IPodSysInfo {
+    /// Reads SysInfoExtended over USB when the files on disk are missing fields, or when a hashAB model's
+    /// disk copy lacks the library commands.
+    private static func loadSysInfo(controlDirectory: URL,
+                                    usbIdentity: IPodUSBIdentity?) -> (IPodSysInfo, NanoPostProcessCommands?) {
         var sysInfo = IPodSysInfo(loadingFrom: controlDirectory) ?? .empty
-        if sysInfo.isMissingExtendedFields,
+        let diskXML = try? String(contentsOf: controlDirectory.appending(path: "Device/SysInfoExtended"), encoding: .utf8)
+        var commands = diskXML.flatMap(NanoPostProcessCommands.init(sysInfoExtended:))
+        let needsCommands = commands == nil
+            && usbIdentity?.productID.flatMap(IPodModelCatalog.databaseSigning(forProductID:)) == .hashAB
+        if sysInfo.isMissingExtendedFields || needsCommands,
            let locationID = usbIdentity?.locationID,
            let xml = IPodUSBSysInfoReader.readSysInfoExtended(locationID: locationID) {
             sysInfo.mergeExtended(SysInfoExtendedParser.scalarValues(in: xml))
+            commands = commands ?? NanoPostProcessCommands(sysInfoExtended: xml)
         }
-        return sysInfo
+        return (sysInfo, commands)
     }
 }
 

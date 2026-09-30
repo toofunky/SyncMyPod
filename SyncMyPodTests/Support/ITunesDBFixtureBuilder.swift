@@ -9,6 +9,8 @@ struct ITunesDBFixtureBuilder {
     var includesAlbumSection = false
     var includesRawSection = false
     var includesPodcastSection = false
+    /// Nano 5G+ databases use 0xF4 so the header can hold the hashAB field.
+    var databaseHeaderLength = 0xBC
 
     func build() -> Data {
         var sections = [
@@ -25,7 +27,7 @@ struct ITunesDBFixtureBuilder {
         if includesRawSection {
             sections.append(section(type: 9, list: Data("13b7d9f0c2a4e6f8".utf8)))
         }
-        var database = record("mhbd", headerLength: 0xBC, children: sections.reduce(Data(), +))
+        var database = record("mhbd", headerLength: databaseHeaderLength, children: sections.reduce(Data(), +))
         database.write(UInt32(1), at: 0x0C)
         database.write(UInt32(0x19), at: 0x10)
         database.write(UInt32(sections.count), at: 0x14)

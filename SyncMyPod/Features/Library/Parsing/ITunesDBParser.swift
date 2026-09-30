@@ -7,10 +7,13 @@ nonisolated struct ITunesDBParser {
         reader = BinaryReader(data: data)
     }
 
+    /// Nano 5G+ databases from iTunes have only the podcast-aware playlist section, so it stands in for the
+    /// standard one when that's missing.
     func parse() throws -> ITunesDatabase {
         try reader.expectTag("mhbd", at: 0)
         var tracks: [ITunesTrack] = []
-        var playlists: [ITunesPlaylist] = []
+        var playlists: [ITunesPlaylist]?
+        var podcastPlaylists: [ITunesPlaylist] = []
         var cursor = try reader.int(at: 0x04)
         for _ in 0..<(try reader.int(at: 0x14)) {
             try reader.expectTag("mhsd", at: cursor)
@@ -18,12 +21,13 @@ nonisolated struct ITunesDBParser {
             switch ITunesDBSectionType(rawValue: try reader.uint32(at: cursor + 0x0C)) {
             case .tracks: tracks = try parseTracks(at: listOffset)
             case .playlists: playlists = try parsePlaylists(at: listOffset)
+            case .podcasts: podcastPlaylists = try parsePlaylists(at: listOffset)
             default: break
             }
             cursor += try reader.recordLength(at: cursor)
         }
         return try ITunesDatabase(version: reader.uint32(at: 0x10), databaseID: reader.uint64(at: 0x18),
-                                  tracks: tracks, playlists: playlists)
+                                  tracks: tracks, playlists: playlists ?? podcastPlaylists)
     }
 
     private func parseTracks(at offset: Int) throws -> [ITunesTrack] {
