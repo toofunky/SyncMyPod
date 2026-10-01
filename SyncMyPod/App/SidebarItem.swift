@@ -3,9 +3,9 @@ import Foundation
 enum SidebarItem: Hashable, Identifiable {
     case library
     case device
-    case playlist(UUID)
+    case playlists
 
-    static let fixedItems: [SidebarItem] = [.library, .device]
+    static let fixedItems: [SidebarItem] = [.library, .playlists, .device]
 
     var id: Self { self }
 
@@ -13,15 +13,15 @@ enum SidebarItem: Hashable, Identifiable {
         switch self {
         case .library: "Music Library"
         case .device: "iPod"
-        case .playlist: "Playlist"
+        case .playlists: "Playlists"
         }
     }
 
     var systemImage: String {
         switch self {
-        case .library: "music.note.list"
+        case .library: "music.note"
         case .device: "ipod"
-        case .playlist: "music.note.list"
+        case .playlists: "music.note.list"
         }
     }
 }
