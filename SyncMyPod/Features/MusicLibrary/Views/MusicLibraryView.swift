@@ -3,42 +3,27 @@ import SwiftUI
 import UniformTypeIdentifiers
 
 struct MusicLibraryView: View {
-    private static let tagEditorMinWidth = 260.0
-    private static let tagEditorIdealWidth = 300.0
-    private static let tagEditorMaxWidth = 420.0
-
+    let model: MusicLibraryModel
+    @Binding var selection: Set<LibraryTrack.ID>
     var showPlaylist: ((LibraryPlaylist) -> Void)?
 
     @Environment(\.modelContext) private var context
     @Environment(IPodMountWatcher.self) private var watcher
     @Query private var folders: [LibraryFolder]
     @Query private var tracks: [LibraryTrack]
-    @State private var model = MusicLibraryModel()
     @Environment(IPodSyncModel.self) private var syncModel
     @State private var isChoosingFolder = false
-    @State private var isShowingTagEditor = false
-    @State private var selection = Set<LibraryTrack.ID>()
     @State private var searchText = ""
     @AppStorage(AppAppearance.storageKey) private var appearance = AppAppearance.system
     @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
         content
-            .inspector(isPresented: $isShowingTagEditor) {
-                TagEditorView(tracks: selectedTracks, isLocked: model.isScanning || syncModel.isSyncing)
-                    .inspectorColumnWidth(min: Self.tagEditorMinWidth, ideal: Self.tagEditorIdealWidth,
-                                          max: Self.tagEditorMaxWidth)
-            }
             .toolbar { toolbarContent }
-            .searchable(text: $searchText, prompt: "Search Library")
             .fileImporter(isPresented: $isChoosingFolder, allowedContentTypes: [.folder]) { result in
                 if case .success(let url) = result { model.chooseFolder(url, in: context) }
             }
             .syncProgressSheet()
-    }
-
-    private var selectedTracks: [LibraryTrack] {
-        tracks.filter { selection.contains($0.id) }
     }
 
     private var addToIPod: (([LibraryTrack]) -> Void)? {
@@ -72,11 +57,12 @@ struct MusicLibraryView: View {
 
     @ToolbarContentBuilder
     private var toolbarContent: some ToolbarContent {
+        ToolbarItem {
+            ToolbarSearchField(prompt: "Search Library", text: $searchText)
+                .disabled(folders.isEmpty)
+        }
+//        ToolbarSpacer(.fixed)
         ToolbarItemGroup {
-            if syncModel.isSyncing {
-                ProgressView()
-                    .controlSize(.small)
-            }
             Button("Choose Folder…", systemImage: "folder.badge.plus") { isChoosingFolder = true }
                 .disabled(model.isScanning)
             Button("Rescan", systemImage: "arrow.clockwise") { model.rescan(in: context) }
@@ -85,22 +71,32 @@ struct MusicLibraryView: View {
                    systemImage: AppAppearance.toggleSymbolName(for: colorScheme)) {
                 appearance = AppAppearance.toggled(from: colorScheme)
             }
-            Button("Tag Editor", systemImage: "sidebar.trailing") { isShowingTagEditor.toggle() }
-                .disabled(folders.isEmpty)
+            if syncModel.isSyncing {
+                ProgressView()
+                    .controlSize(.small)
+            }
         }
+//            ToolbarSpacer(.flexible)
+//            ToolbarItem(placement: .primaryAction) {
+//                trailingButton
+                //            Button("Tag Editor", systemImage: "sidebar.trailing") { isShowingTagEditor.toggle() }
+                //                .disabled(folders.isEmpty)
+//            }
     }
 }
 
 #if DEBUG
 #Preview("Library") {
-    MusicLibraryView()
+    @Previewable @State var selection = Set<LibraryTrack.ID>()
+    MusicLibraryView(model: MusicLibraryModel(), selection: $selection)
         .environment(IPodMountWatcher.preview(connectedDevice: .preview))
         .environment(IPodSyncModel())
         .modelContainer(.preview)
 }
 
 #Preview("Empty") {
-    MusicLibraryView()
+    @Previewable @State var selection = Set<LibraryTrack.ID>()
+    MusicLibraryView(model: MusicLibraryModel(), selection: $selection)
         .environment(IPodMountWatcher.preview())
         .environment(IPodSyncModel())
         .modelContainer(.emptyPreview)
