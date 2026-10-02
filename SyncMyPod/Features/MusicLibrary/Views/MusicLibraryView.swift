@@ -4,7 +4,10 @@ import UniformTypeIdentifiers
 
 struct MusicLibraryView: View {
     let model: MusicLibraryModel
+    var section = LibrarySection.songs
     @Binding var selection: Set<LibraryTrack.ID>
+    @Binding var albumSelection: LibraryAlbum.ID?
+    @Binding var artistSelection: LibraryArtist.ID?
     var showPlaylist: ((LibraryPlaylist) -> Void)?
 
     @Environment(\.modelContext) private var context
@@ -41,8 +44,7 @@ struct MusicLibraryView: View {
                 LibraryScanStatusView(folderPath: folder.path, trackCount: tracks.count,
                                       lastScanDate: folder.lastScanDate, state: model.state,
                                       onCancel: model.cancelScan)
-                LibraryTrackTableView(tracks: tracks, selection: $selection, searchText: searchText,
-                                      addToIPod: addToIPod, showPlaylist: showPlaylist)
+                sectionContent
             }
         } else {
             ContentUnavailableView {
@@ -55,13 +57,26 @@ struct MusicLibraryView: View {
         }
     }
 
+    @ViewBuilder
+    private var sectionContent: some View {
+        switch section {
+        case .songs:
+            LibraryTrackTableView(tracks: tracks, selection: $selection, searchText: searchText,
+                                  addToIPod: addToIPod, showPlaylist: showPlaylist)
+        case .albums:
+            AlbumGridView(tracks: tracks, searchText: searchText, selection: $albumSelection)
+        case .artists:
+            ArtistsView(tracks: tracks, searchText: searchText, selection: $artistSelection)
+        }
+    }
+
     @ToolbarContentBuilder
     private var toolbarContent: some ToolbarContent {
         ToolbarItem {
             ToolbarSearchField(prompt: "Search Library", text: $searchText)
                 .disabled(folders.isEmpty)
         }
-//        ToolbarSpacer(.fixed)
+        ToolbarSpacer(.fixed)
         ToolbarItemGroup {
             Button("Choose Folder…", systemImage: "folder.badge.plus") { isChoosingFolder = true }
                 .disabled(model.isScanning)
@@ -86,9 +101,19 @@ struct MusicLibraryView: View {
 }
 
 #if DEBUG
-#Preview("Library") {
+#Preview("Songs") {
     @Previewable @State var selection = Set<LibraryTrack.ID>()
-    MusicLibraryView(model: MusicLibraryModel(), selection: $selection)
+    MusicLibraryView(model: MusicLibraryModel(), selection: $selection, albumSelection: .constant(nil),
+                     artistSelection: .constant(nil))
+        .environment(IPodMountWatcher.preview(connectedDevice: .preview))
+        .environment(IPodSyncModel())
+        .modelContainer(.preview)
+}
+
+#Preview("Albums") {
+    @Previewable @State var albumSelection: LibraryAlbum.ID?
+    MusicLibraryView(model: MusicLibraryModel(), section: .albums, selection: .constant([]),
+                     albumSelection: $albumSelection, artistSelection: .constant(nil))
         .environment(IPodMountWatcher.preview(connectedDevice: .preview))
         .environment(IPodSyncModel())
         .modelContainer(.preview)
@@ -96,7 +121,8 @@ struct MusicLibraryView: View {
 
 #Preview("Empty") {
     @Previewable @State var selection = Set<LibraryTrack.ID>()
-    MusicLibraryView(model: MusicLibraryModel(), selection: $selection)
+    MusicLibraryView(model: MusicLibraryModel(), selection: $selection, albumSelection: .constant(nil),
+                     artistSelection: .constant(nil))
         .environment(IPodMountWatcher.preview())
         .environment(IPodSyncModel())
         .modelContainer(.emptyPreview)

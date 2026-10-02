@@ -5,7 +5,7 @@ struct PlaylistTrackListView: View {
     @Bindable var playlist: LibraryPlaylist
     let entries: [PlaylistEntry]
 
-    @State private var selection = Set<PlaylistEntry.ID>()
+    @Binding var selection: Set<PlaylistEntry.ID>
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -22,6 +22,16 @@ struct PlaylistTrackListView: View {
     }
 
     private var trackList: some View {
+        ScrollViewReader { proxy in
+            list
+                .onAppear {
+                    guard let first = selection.filter({ $0 < entries.count }).min() else { return }
+                    proxy.scrollTo(first, anchor: .center)
+                }
+        }
+    }
+
+    private var list: some View {
         List(selection: $selection) {
             ForEach(entries) { PlaylistTrackRow(entry: $0) }
                 .onMove { offsets, destination in
@@ -46,7 +56,8 @@ struct PlaylistTrackListView: View {
 #Preview {
     let playlist = LibraryPlaylist.preview
     PlaylistTrackListView(playlist: playlist,
-                          entries: PlaylistEntry.entries(of: playlist, in: LibraryTrack.previewTracks))
+                          entries: PlaylistEntry.entries(of: playlist, in: LibraryTrack.previewTracks),
+                          selection: .constant([]))
         .modelContainer(.emptyPreview)
 }
 #endif

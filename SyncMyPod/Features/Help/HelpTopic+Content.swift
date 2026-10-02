@@ -28,8 +28,9 @@ extension HelpTopic {
                     body: "You need an iPod (video) 5G or 5.5G, or an iPod classic 6G, 6.5G or 7G. Turn on disk mode "
                         + "so the iPod mounts as a volume in Finder. You don't need iTunes, Music or Finder to sync."),
         HelpSection(heading: "1. Choose Your Music Folder",
-                    body: "Select **Music Library** in the sidebar, click **Choose Folder…**, then pick the folder "
-                        + "that contains your music. SyncMyPod scans it and lists every song it finds."),
+                    body: "Select **Songs** in the sidebar, click **Choose Folder…**, then pick "
+                        + "the folder that contains your music. SyncMyPod scans it and lists every song it finds. "
+                        + "Select **Albums** to browse your library by cover art."),
         HelpSection(heading: "2. Connect Your iPod",
                     body: "Plug in your iPod with a USB cable. Select **iPod** in the sidebar to see its songs, "
                         + "sync options and device details."),
@@ -59,7 +60,7 @@ extension HelpTopic {
 
     private static let tagEditorSections = [
         HelpSection(heading: "Opening the Tag Editor",
-                    body: "Select one or more songs in Music Library, then click **Tag Editor** in the toolbar. "
+                    body: "Select one or more songs in Songs, then click **Tag Editor** in the toolbar. "
                         + "The editor opens on the right side of the window."),
         HelpSection(heading: "Editing Several Songs",
                     body: "When the selected songs have different values for a field, the field shows **Mixed**. "
@@ -79,10 +80,10 @@ extension HelpTopic {
 
     private static let playlistSections = [
         HelpSection(heading: "Creating a Playlist",
-                    body: "Click the **+** button next to **Playlists** in the sidebar. Type a name at the top "
+                    body: "Select **Playlists** in the sidebar, then click the **+** button at the top right. Type a name at the top "
                         + "of the playlist."),
         HelpSection(heading: "Adding Songs",
-                    body: "In Music Library, select songs, Control-click, then choose **Add to Playlist**. Pick "
+                    body: "In Songs, select songs, Control-click, then choose **Add to Playlist**. Pick "
                         + "a playlist, or choose **New Playlist** to create one from the selection."),
         HelpSection(heading: "Arranging and Removing Songs",
                     body: "Drag songs to change their order. To take songs out, select them, Control-click, then "

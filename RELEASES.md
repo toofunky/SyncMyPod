@@ -1,7 +1,7 @@
 SyncMyPod-1.6
 - Add support for iPod Nanos.
 - Move playlists into subview
--  Simplify sidebar.
+-  Simplify sidebar and add Artists, Albums, and Songs view.
 - Update toolbar layout on library view.
 
 SyncMyPod-1.5

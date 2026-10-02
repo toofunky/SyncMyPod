@@ -16,9 +16,21 @@ struct LibraryTrackTableView: View {
     @State private var sortKeys: [LibraryTrackSortKey] = []
     @State private var sortedBy: KeyPathComparator<LibraryTrack>?
     @State private var filteredBy = ""
+    @State private var scrollTarget: LibraryTrack.ID?
     @AppStorage("libraryTableColumns") private var columnCustomization = TableColumnCustomization<LibraryTrack>()
 
     var body: some View {
+        ScrollViewReader { proxy in
+            table
+                .onChange(of: scrollTarget) {
+                    guard let scrollTarget else { return }
+                    proxy.scrollTo(scrollTarget, anchor: .center)
+                    self.scrollTarget = nil
+                }
+        }
+    }
+
+    private var table: some View {
         Table(sortedTracks, selection: $selection, sortOrder: $sortOrder,
               columnCustomization: $columnCustomization) {
             positionColumns
@@ -42,12 +54,16 @@ struct LibraryTrackTableView: View {
             Button("Show in Finder", systemImage: "folder") { showInFinder(ids) }
                 .disabled(ids.isEmpty)
         }
-        .onChange(of: tracks, initial: true) {
+        .onChange(of: tracks) {
             sortKeys = LibraryTrack.sortKeys(for: tracks)
             updateRows()
         }
-        .onChange(of: sortOrder) { updateRows() }
-        .onChange(of: searchText) { updateRows() }
+        .onAppear {
+            sortKeys = LibraryTrack.sortKeys(for: tracks)
+            updateRows(revealingSelection: true)
+        }
+        .onChange(of: sortOrder) { updateRows(revealingSelection: true) }
+        .onChange(of: searchText) { updateRows(revealingSelection: true) }
     }
 
     @TableColumnBuilder<LibraryTrack, KeyPathComparator<LibraryTrack>>
@@ -104,7 +120,8 @@ struct LibraryTrackTableView: View {
     }
 
     /// Also drops hidden tracks from the selection so the tag editor never edits rows the search hides.
-    private func updateRows() {
+    /// Revealing scrolls to the first selected row, since a rebuilt table starts at the top.
+    private func updateRows(revealingSelection: Bool = false) {
         sortedBy = sortOrder.first
         filteredBy = searchText
         let query = TrackSearchQuery(searchText)
@@ -115,6 +132,9 @@ struct LibraryTrackTableView: View {
             sortedTracks = keys.map { tracks[$0.index] }
         }
         selection.formIntersection(sortedTracks.map(\.id))
+        if revealingSelection {
+            scrollTarget = sortedTracks.first { selection.contains($0.id) }?.id
+        }
     }
 
     /// Adds in the order shown; `nil` makes a new playlist of them.

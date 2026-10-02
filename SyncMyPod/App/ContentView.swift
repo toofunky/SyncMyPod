@@ -3,43 +3,74 @@ import SwiftUI
 
 struct ContentView: View {
     @Environment(IPodSyncModel.self) private var syncModel
-    @State private var selection: SidebarItem? = .library
+    @State private var selection: SidebarItem? = .library(.artists)
     @State private var selectedPlaylistID: UUID?
+    @State private var playlistTrackSelections: [UUID: Set<PlaylistEntry.ID>] = [:]
     @State private var libraryModel = MusicLibraryModel()
     @State private var librarySelection = Set<LibraryTrack.ID>()
+    @State private var selectedAlbumID: LibraryAlbum.ID?
+    @State private var selectedArtistID: LibraryArtist.ID?
     @State private var isShowingTagEditor = false
+    @State private var isShowingAlbum = false
 
     var body: some View {
         NavigationSplitView {
-            List(selection: $selection) {
-                ForEach(SidebarItem.fixedItems) { item in
-                    if item == .device {
-                        DeviceSidebarRow()
-                    } else {
-                        Label(item.title, systemImage: item.systemImage)
-                    }
-                }
-            }
+            sidebar
         } detail: {
             switch selection {
             case .device: DeviceDetectionView()
-            case .playlists: PlaylistsView(selection: $selectedPlaylistID)
-            case .library, nil:
-                MusicLibraryView(model: libraryModel, selection: $librarySelection, showPlaylist: show)
+            case .playlists: PlaylistsView(selection: $selectedPlaylistID, trackSelections: $playlistTrackSelections)
+            case .library(let section):
+                libraryView(section)
+            case nil:
+                libraryView(.artists)
             }
         }
-        .inspector(isPresented: tagEditorPresented) {
-            LibraryTagEditorInspector(selection: librarySelection,
-                                      isLocked: libraryModel.isScanning || syncModel.isSyncing,
-                                      isShowing: $isShowingTagEditor)
+        .inspector(isPresented: inspectorPresented) {
+            LibraryInspector(section: librarySection, trackSelection: librarySelection,
+                             albumID: selectedAlbumID, isLocked: libraryModel.isScanning || syncModel.isSyncing,
+                             isShowingTagEditor: $isShowingTagEditor, isShowingAlbum: $isShowingAlbum)
         }
+        .onChange(of: selectedAlbumID) { isShowingAlbum = selectedAlbumID != nil }
         .frame(minWidth: 420, minHeight: 320)
     }
 
-    /// The tag editor only belongs to the music library, so it hides while another section is showing.
-    private var tagEditorPresented: Binding<Bool> {
-        Binding(get: { isShowingTagEditor && selection == .library },
-                set: { isShowingTagEditor = $0 })
+    private var sidebar: some View {
+        List(selection: $selection) {
+            ForEach(SidebarItem.allItems) { item in
+                if item == .device {
+                    DeviceSidebarRow()
+                } else {
+                    Label(item.title, systemImage: item.systemImage)
+                }
+            }
+        }
+    }
+
+    private func libraryView(_ section: LibrarySection) -> some View {
+        MusicLibraryView(model: libraryModel, section: section, selection: $librarySelection,
+                         albumSelection: $selectedAlbumID, artistSelection: $selectedArtistID, showPlaylist: show)
+    }
+
+    private var librarySection: LibrarySection? {
+        if case .library(let section) = selection { section } else { nil }
+    }
+
+    /// Songs show the tag editor and Albums show the selected album, so each keeps its own toggle.
+    private var inspectorPresented: Binding<Bool> {
+        Binding(get: {
+            switch librarySection {
+            case .songs: isShowingTagEditor
+            case .albums: isShowingAlbum && selectedAlbumID != nil
+            default: false
+            }
+        }, set: { isPresented in
+            switch librarySection {
+            case .songs: isShowingTagEditor = isPresented
+            case .albums: isShowingAlbum = isPresented
+            default: break
+            }
+        })
     }
 
     private func show(_ playlist: LibraryPlaylist) {
