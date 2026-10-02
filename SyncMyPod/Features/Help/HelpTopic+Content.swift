@@ -80,7 +80,7 @@ extension HelpTopic {
 
     private static let playlistSections = [
         HelpSection(heading: "Creating a Playlist",
-                    body: "Click the **+** button next to **Playlists** in the sidebar. Type a name at the top "
+                    body: "Select **Playlists** in the sidebar, then click the **+** button at the top right. Type a name at the top "
                         + "of the playlist."),
         HelpSection(heading: "Adding Songs",
                     body: "In Songs, select songs, Control-click, then choose **Add to Playlist**. Pick "
