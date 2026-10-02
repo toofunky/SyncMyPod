@@ -21,4 +21,4 @@
 - [x] Show in Finder context menu item
 - [x] Show in Playlist context menu item
 - [x] Album grid view
-- [ ] Artists view
+- [x] Artists view

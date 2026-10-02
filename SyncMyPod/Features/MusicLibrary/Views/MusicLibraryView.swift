@@ -7,6 +7,7 @@ struct MusicLibraryView: View {
     var section = LibrarySection.songs
     @Binding var selection: Set<LibraryTrack.ID>
     @Binding var albumSelection: LibraryAlbum.ID?
+    @Binding var artistSelection: LibraryArtist.ID?
     var showPlaylist: ((LibraryPlaylist) -> Void)?
 
     @Environment(\.modelContext) private var context
@@ -65,8 +66,7 @@ struct MusicLibraryView: View {
         case .albums:
             AlbumGridView(tracks: tracks, searchText: searchText, selection: $albumSelection)
         case .artists:
-            ContentUnavailableView("Artists", systemImage: "music.mic",
-                                   description: Text("Browsing by artist is coming soon."))
+            ArtistsView(tracks: tracks, searchText: searchText, selection: $artistSelection)
         }
     }
 
@@ -74,9 +74,9 @@ struct MusicLibraryView: View {
     private var toolbarContent: some ToolbarContent {
         ToolbarItem {
             ToolbarSearchField(prompt: "Search Library", text: $searchText)
-                .disabled(folders.isEmpty || section == .artists)
+                .disabled(folders.isEmpty)
         }
-//        ToolbarSpacer(.fixed)
+        ToolbarSpacer(.fixed)
         ToolbarItemGroup {
             Button("Choose Folder…", systemImage: "folder.badge.plus") { isChoosingFolder = true }
                 .disabled(model.isScanning)
@@ -103,7 +103,8 @@ struct MusicLibraryView: View {
 #if DEBUG
 #Preview("Songs") {
     @Previewable @State var selection = Set<LibraryTrack.ID>()
-    MusicLibraryView(model: MusicLibraryModel(), selection: $selection, albumSelection: .constant(nil))
+    MusicLibraryView(model: MusicLibraryModel(), selection: $selection, albumSelection: .constant(nil),
+                     artistSelection: .constant(nil))
         .environment(IPodMountWatcher.preview(connectedDevice: .preview))
         .environment(IPodSyncModel())
         .modelContainer(.preview)
@@ -112,7 +113,7 @@ struct MusicLibraryView: View {
 #Preview("Albums") {
     @Previewable @State var albumSelection: LibraryAlbum.ID?
     MusicLibraryView(model: MusicLibraryModel(), section: .albums, selection: .constant([]),
-                     albumSelection: $albumSelection)
+                     albumSelection: $albumSelection, artistSelection: .constant(nil))
         .environment(IPodMountWatcher.preview(connectedDevice: .preview))
         .environment(IPodSyncModel())
         .modelContainer(.preview)
@@ -120,7 +121,8 @@ struct MusicLibraryView: View {
 
 #Preview("Empty") {
     @Previewable @State var selection = Set<LibraryTrack.ID>()
-    MusicLibraryView(model: MusicLibraryModel(), selection: $selection, albumSelection: .constant(nil))
+    MusicLibraryView(model: MusicLibraryModel(), selection: $selection, albumSelection: .constant(nil),
+                     artistSelection: .constant(nil))
         .environment(IPodMountWatcher.preview())
         .environment(IPodSyncModel())
         .modelContainer(.emptyPreview)

@@ -12,16 +12,10 @@ struct AlbumTracksHeader: View {
                 .fontWeight(.semibold)
             Text(album.artist)
                 .foregroundStyle(.secondary)
-            Text(details)
+            Text(album.summary(duration: duration))
                 .font(.caption)
                 .foregroundStyle(.secondary)
         }
-    }
-
-    private var details: String {
-        let songs = album.trackCount == 1 ? "1 song" : "\(album.trackCount) songs"
-        let minutes = Int((duration / 60).rounded())
-        return [album.yearText, songs, "\(minutes) min"].filter { !$0.isEmpty }.joined(separator: " · ")
     }
 }
 

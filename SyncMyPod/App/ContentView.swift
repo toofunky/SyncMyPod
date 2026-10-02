@@ -3,12 +3,13 @@ import SwiftUI
 
 struct ContentView: View {
     @Environment(IPodSyncModel.self) private var syncModel
-    @State private var selection: SidebarItem? = .library(.albums)
+    @State private var selection: SidebarItem? = .library(.artists)
     @State private var selectedPlaylistID: UUID?
     @State private var playlistTrackSelections: [UUID: Set<PlaylistEntry.ID>] = [:]
     @State private var libraryModel = MusicLibraryModel()
     @State private var librarySelection = Set<LibraryTrack.ID>()
     @State private var selectedAlbumID: LibraryAlbum.ID?
+    @State private var selectedArtistID: LibraryArtist.ID?
     @State private var isShowingTagEditor = false
     @State private var isShowingAlbum = false
 
@@ -22,7 +23,7 @@ struct ContentView: View {
             case .library(let section):
                 libraryView(section)
             case nil:
-                libraryView(.albums)
+                libraryView(.artists)
             }
         }
         .inspector(isPresented: inspectorPresented) {
@@ -48,7 +49,7 @@ struct ContentView: View {
 
     private func libraryView(_ section: LibrarySection) -> some View {
         MusicLibraryView(model: libraryModel, section: section, selection: $librarySelection,
-                         albumSelection: $selectedAlbumID, showPlaylist: show)
+                         albumSelection: $selectedAlbumID, artistSelection: $selectedArtistID, showPlaylist: show)
     }
 
     private var librarySection: LibrarySection? {
