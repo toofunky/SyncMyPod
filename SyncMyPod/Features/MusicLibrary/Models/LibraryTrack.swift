@@ -93,22 +93,28 @@ nonisolated final class LibraryTrack {
 
 #if DEBUG
 extension LibraryTrack {
-    static func preview(_ title: String, artist: String, album: String,
-                        duration: TimeInterval) -> LibraryTrack {
+    static func preview(_ title: String, artist: String, album: String, duration: TimeInterval,
+                        trackNumber: Int = 1, year: Int = 0) -> LibraryTrack {
         let track = LibraryTrack(filePath: "/Music/\(artist)/\(album)/\(title).m4a")
         track.title = title
         track.artist = artist
         track.album = album
         track.duration = duration
+        track.trackNumber = trackNumber
+        track.discNumber = 1
+        track.year = year
         track.bitrate = 256
         track.sampleRate = 44_100
         return track
     }
 
     static let previewTracks: [LibraryTrack] = [
-        .preview("Hey Ya!", artist: "OutKast", album: "Speakerboxxx/The Love Below", duration: 235),
-        .preview("Mr. Brightside", artist: "The Killers", album: "Hot Fuss", duration: 222),
-        .preview("Float On", artist: "Modest Mouse", album: "Good News", duration: 208),
+        .preview("Hey Ya!", artist: "OutKast", album: "Speakerboxxx/The Love Below", duration: 235,
+                 trackNumber: 9, year: 2003),
+        .preview("Roses", artist: "OutKast", album: "Speakerboxxx/The Love Below", duration: 369,
+                 trackNumber: 15, year: 2003),
+        .preview("Mr. Brightside", artist: "The Killers", album: "Hot Fuss", duration: 222, trackNumber: 2, year: 2004),
+        .preview("Float On", artist: "Modest Mouse", album: "Good News", duration: 208, trackNumber: 3, year: 2004),
     ]
 }
 #endif

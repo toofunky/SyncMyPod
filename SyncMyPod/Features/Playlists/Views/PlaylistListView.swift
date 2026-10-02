@@ -8,6 +8,16 @@ struct PlaylistListView: View {
     @Query(sort: LibraryPlaylist.sidebarOrder) private var playlists: [LibraryPlaylist]
 
     var body: some View {
+        ScrollViewReader { proxy in
+            list
+                .onAppear {
+                    selectFirstIfNeeded()
+                    if let selection { proxy.scrollTo(selection, anchor: .center) }
+                }
+        }
+    }
+
+    private var list: some View {
         List(selection: $selection) {
             Section {
                 ForEach(playlists) { playlist in
@@ -22,7 +32,6 @@ struct PlaylistListView: View {
                 header
             }
         }
-        .onAppear(perform: selectFirstIfNeeded)
     }
 
     private var header: some View {
