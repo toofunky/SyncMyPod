@@ -53,6 +53,10 @@ struct ContentView: View {
                 }
             }
         }
+        .safeAreaInset(edge: .bottom) {
+            BuyMeACoffeeButton()
+                .padding()
+        }
     }
 
     private func libraryView(_ section: LibrarySection) -> some View {

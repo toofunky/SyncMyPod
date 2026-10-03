@@ -1,3 +1,6 @@
+SyncMyPod-1.8
+- Add Buy Me a Coffee button to About dialog and sidebar.
+
 SyncMyPod-1.7
 - Add music player.
 - Add ability to sort albums by year ascending or descending.
