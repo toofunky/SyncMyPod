@@ -15,6 +15,8 @@ struct DeviceDetailView: View {
             switch device {
             case .iPod(let iPod)?:
                 IPodDeviceView(device: iPod)
+            case .audioPlayer(let player)?:
+                AudioPlayerDeviceView(device: player)
             case nil:
                 NoDeviceView()
             }

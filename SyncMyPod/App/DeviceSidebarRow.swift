@@ -11,9 +11,11 @@ struct DeviceSidebarRow: View {
         HStack {
             Label(device.displayName, systemImage: device.systemImage)
             Spacer()
-            ejectButton
+            if device.isEjectable {
+                ejectButton
+            }
         }
-        .alert("Couldn't Eject \(device.kindName)", isPresented: isShowingError, presenting: ejectError) { _ in
+        .alert("Couldn't Eject \(device.kindName.deviceKindTitle)", isPresented: isShowingError, presenting: ejectError) { _ in
             Button("OK") {}
         } message: { message in
             Text(message)
@@ -47,8 +49,8 @@ struct DeviceSidebarRow: View {
 
 #if DEBUG
 #Preview {
-    List {
-        DeviceSidebarRow(device: .iPod(.preview))
+    List(ConnectedDevice.previewDevices) { device in
+        DeviceSidebarRow(device: device)
     }
     .environment(DeviceMountWatcher.preview(connectedDevices: [.iPod(.preview)]))
     .environment(DeviceSyncModel())

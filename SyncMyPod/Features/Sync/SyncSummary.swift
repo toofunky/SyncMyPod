@@ -10,6 +10,8 @@ nonisolated struct SyncSummary: Equatable, Sendable {
     var wasCancelled = false
     /// "iPod", for example, as shown in the result's title and message.
     var deviceKind: String
+    /// `false` for a player synced to a folder inside a drive, which has nothing to eject.
+    var suggestsEject = true
 
     var changedCount: Int { added + updated + removed + syncedPlaylistCount }
 }

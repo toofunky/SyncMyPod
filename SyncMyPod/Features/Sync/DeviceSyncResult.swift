@@ -10,7 +10,7 @@ nonisolated enum DeviceSyncResult: Equatable, Sendable {
         switch self {
         case .finished(let summary) where summary.wasCancelled: "Sync Cancelled"
         case .finished: "Sync Complete"
-        case .failed(_, let deviceKind): "Couldn't Sync \(deviceKind)"
+        case .failed(_, let deviceKind): "Couldn't Sync \(deviceKind.deviceKindTitle)"
         case .overwritten: "iPod Changes Were Undone"
         }
     }
@@ -34,7 +34,7 @@ nonisolated enum DeviceSyncResult: Equatable, Sendable {
             parts.append("Synced \(count(summary.syncedPlaylistCount, "playlist")).")
         }
         if summary.skipped > 0 { parts.append("\(summary.skipped) already on the \(summary.deviceKind).") }
-        if summary.changedCount > 0 { parts.append("Eject the \(summary.deviceKind) before unplugging it.") }
+        if summary.changedCount > 0, summary.suggestsEject { parts.append("Eject the \(summary.deviceKind) before unplugging it.") }
         return parts.joined(separator: " ")
     }
 

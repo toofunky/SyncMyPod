@@ -24,10 +24,10 @@ struct SyncProgressSheet: View {
 
     @ViewBuilder
     private func progressContent(_ progress: SyncProgress) -> some View {
-        Text("Syncing \(deviceKind)")
+        Text("Syncing \(deviceKind.deviceKindTitle)")
             .font(.headline)
         ProgressView(value: progress.fractionCompleted) {
-            Text(progress.currentTitle.map { "Copying “\($0)”" } ?? "Updating \(deviceKind) database…")
+            Text(progress.currentTitle.map { "Copying “\($0)”" } ?? finishingMessage)
                 .lineLimit(1)
                 .truncationMode(.middle)
         } currentValueLabel: {
@@ -39,6 +39,10 @@ struct SyncProgressSheet: View {
             Button("Cancel", role: .cancel, action: onCancel)
                 .disabled(isCancelling)
         }
+    }
+
+    private var finishingMessage: String {
+        deviceKind == "iPod" ? "Updating iPod database…" : "Writing playlists…"
     }
 
     @ViewBuilder

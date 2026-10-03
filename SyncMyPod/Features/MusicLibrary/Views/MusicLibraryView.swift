@@ -36,8 +36,15 @@ struct MusicLibraryView: View {
     private var addToDevice: ((ConnectedDevice, [LibraryTrack]) -> Void)? {
         guard !addTargets.isEmpty else { return nil }
         return { device, tracks in
-            let preserves = IPodSyncSettings.settings(for: device.id, in: context).preservesAlbumArtist
+            let preserves = preservesAlbumArtist(on: device)
             syncModel.sync(tracks.map { $0.syncRequest(preservingAlbumArtist: preserves) }, to: device)
+        }
+    }
+
+    private func preservesAlbumArtist(on device: ConnectedDevice) -> Bool {
+        switch device {
+        case .iPod: IPodSyncSettings.settings(for: device.id, in: context).preservesAlbumArtist
+        case .audioPlayer(let player): player.config.preserveAlbumArtist
         }
     }
 

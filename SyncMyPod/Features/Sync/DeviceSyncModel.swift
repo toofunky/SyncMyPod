@@ -23,6 +23,27 @@ final class DeviceSyncModel {
         switch device {
         case .iPod(let iPod):
             syncIPod(iPod, adding: requests, removing: removals, playlists: playlists, as: device)
+        case .audioPlayer(let player):
+            addToPlayer(requests, player: player, as: device)
+        }
+    }
+
+    /// Carries out a plan made on the player's Sync tab.
+    func sync(_ plan: PlayerSyncPlan, to player: AudioPlayerDevice) {
+        guard !isSyncing, !plan.isEmpty else { return }
+        let syncer = PlayerTrackSyncer(device: player)
+        start(on: .audioPlayer(player), total: plan.writes.count) { report in
+            try await syncer.sync(plan, progress: report)
+        }
+    }
+
+    /// Copies songs chosen in the library without removing anything or touching playlists.
+    private func addToPlayer(_ requests: [IPodSyncRequest], player: AudioPlayerDevice, as device: ConnectedDevice) {
+        let syncer = PlayerTrackSyncer(device: player)
+        start(on: device, total: requests.count) { report in
+            let contents = await PlayerDeviceContents.load(from: player)
+            let plan = contents.planner(for: player.config).plan(selected: requests, playlists: nil)
+            return try await syncer.sync(plan, progress: report)
         }
     }
 

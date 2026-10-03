@@ -32,19 +32,10 @@ struct SyncSettingsForm: View {
             }
             .frame(maxWidth: .infinity, alignment: .leading)
                 .padding([.horizontal, .top])
-            Picker("Sync", selection: $settings.mode) {
-                ForEach(SyncMode.allCases) { Text($0.title).tag($0) }
-            }
-            .pickerStyle(.radioGroup)
-            .horizontalRadioGroupLayout()
-            .labelsHidden()
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding()
-            Divider()
-            selection
+            SyncSelectionEditor(settings: settings, library: library)
             Divider()
             let input = planInput
-            SyncSummaryBar(plan: plan, isCalculating: plannedInput != input, freeBytes: freeBytes,
+            SyncSummaryBar(totals: plan?.totals, isCalculating: plannedInput != input, freeBytes: freeBytes,
                            isSyncing: isSyncing) { plan.map(start) }
                 .task(id: input) { await replan(input) }
         }
@@ -52,24 +43,6 @@ struct SyncSettingsForm: View {
             Button("Sync and Remove", role: .destructive) { onSync(plan) }
         } message: { plan in
             Text(removalMessage(plan))
-        }
-    }
-
-    @ViewBuilder
-    private var selection: some View {
-        switch settings.mode {
-        case .allSongs:
-            ContentUnavailableView("All Songs", systemImage: "music.note.list",
-                                   description: Text("Every song and playlist in your music library will be copied "
-                                                     + "to the iPod."))
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-        case .custom:
-            SyncCustomSelectionView(artists: library.artists, genres: library.genres,
-                                    playlists: library.playlistNodes,
-                                    albumSelection: $settings.selectedAlbums,
-                                    genreSelection: $settings.selectedGenres,
-                                    playlistSelection: $settings.selectedPlaylists)
-                .padding(.top)
         }
     }
 

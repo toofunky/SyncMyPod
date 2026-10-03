@@ -2,16 +2,14 @@ import SwiftUI
 
 struct SyncSummaryBar: View {
     /// `nil` until the first plan has been worked out.
-    let plan: SyncPlan?
+    let totals: SyncPlanTotals?
+    var deviceKind = "iPod"
     let isCalculating: Bool
     let freeBytes: Int64?
     let isSyncing: Bool
     let onSync: () -> Void
 
-    private var fits: Bool {
-        guard let plan, let freeBytes else { return true }
-        return plan.byteCount + plan.updatedByteCount < freeBytes + plan.removedByteCount
-    }
+    private var fits: Bool { totals?.fits(in: freeBytes) ?? true }
 
     var body: some View {
         HStack {
@@ -28,28 +26,27 @@ struct SyncSummaryBar: View {
             }
             Button("Sync Now", systemImage: "arrow.triangle.2.circlepath", action: onSync)
                 .buttonStyle(.borderedProminent)
-                .disabled(plan?.isEmpty ?? true || isCalculating || isSyncing || !fits)
+                .disabled(totals?.isEmpty ?? true || isCalculating || isSyncing || !fits)
         }
         .padding()
     }
 
     private var headline: String {
-        guard let plan else { return "Calculating…" }
-        guard !plan.isEmpty else {
-            return plan.selectedCount == 0 ? "Nothing selected" : "The iPod is up to date"
+        guard let totals else { return "Calculating…" }
+        guard !totals.isEmpty else {
+            return totals.selectedCount == 0 ? "Nothing selected" : "The \(deviceKind) is up to date"
         }
         var parts: [String] = []
-        if !plan.requests.isEmpty {
-            parts.append("\(songs(plan.requests.count)) to add · \(bytes(plan.byteCount))")
+        if totals.addCount > 0 { parts.append("\(songs(totals.addCount)) to add · \(bytes(totals.addBytes))") }
+        if totals.updateCount > 0 {
+            parts.append("\(songs(totals.updateCount)) to update · \(bytes(totals.updateBytes))")
         }
-        if !plan.updates.isEmpty {
-            parts.append("\(songs(plan.updates.count)) to update · \(bytes(plan.updatedByteCount))")
+        if totals.moveCount > 0 { parts.append("\(songs(totals.moveCount)) to rename") }
+        if totals.removeCount > 0 {
+            parts.append("\(songs(totals.removeCount)) to remove · \(bytes(totals.removeBytes))")
         }
-        if !plan.removals.isEmpty {
-            parts.append("\(songs(plan.removals.count)) to remove · \(bytes(plan.removedByteCount))")
-        }
-        if plan.playlistChangeCount > 0 {
-            let count = plan.playlistChangeCount
+        if totals.playlistChangeCount > 0 {
+            let count = totals.playlistChangeCount
             parts.append("\(count) \(count == 1 ? "playlist" : "playlists") to update")
         }
         return parts.joined(separator: " · ")
@@ -57,9 +54,9 @@ struct SyncSummaryBar: View {
 
     private var detail: String {
         let free = freeBytes.map { "\(bytes($0)) free" } ?? "Free space unknown"
-        guard fits else { return "Not enough space on the iPod · \(free)" }
-        guard let plan else { return free }
-        return "\(plan.alreadyOnDeviceCount) already on the iPod · \(free)"
+        guard fits else { return "Not enough space on the \(deviceKind) · \(free)" }
+        guard let totals else { return free }
+        return "\(totals.alreadyOnDeviceCount) already on the \(deviceKind) · \(free)"
     }
 
     private func songs(_ count: Int) -> String { "\(count) \(count == 1 ? "song" : "songs")" }
@@ -68,17 +65,17 @@ struct SyncSummaryBar: View {
 
 #if DEBUG
 #Preview("Adding and removing") {
-    SyncSummaryBar(plan: SyncPlan(requests: [LibraryTrack.previewTracks[0].syncRequest(preservingAlbumArtist: false)],
-                                  removals: [ITunesDatabase.preview.tracks[0]], selectedCount: 3),
+    SyncSummaryBar(totals: SyncPlanTotals(addCount: 1, addBytes: 8_000_000, moveCount: 2, removeCount: 1,
+                                          removeBytes: 6_000_000, selectedCount: 3),
                    isCalculating: false, freeBytes: 38_000_000_000, isSyncing: false, onSync: {})
 }
 
 #Preview("Up to date") {
-    SyncSummaryBar(plan: SyncPlan(requests: [], removals: [], selectedCount: 3), isCalculating: false,
+    SyncSummaryBar(totals: SyncPlanTotals(selectedCount: 3), deviceKind: "Player", isCalculating: false,
                    freeBytes: 38_000_000_000, isSyncing: false, onSync: {})
 }
 
 #Preview("Calculating") {
-    SyncSummaryBar(plan: nil, isCalculating: true, freeBytes: 38_000_000_000, isSyncing: false, onSync: {})
+    SyncSummaryBar(totals: nil, isCalculating: true, freeBytes: 38_000_000_000, isSyncing: false, onSync: {})
 }
 #endif

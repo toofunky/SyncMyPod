@@ -7,8 +7,10 @@ struct AppSidebar: View {
 
     var body: some View {
         List(selection: $selection) {
-            ForEach(SidebarItem.libraryItems) { item in
-                Label(item.title, systemImage: item.systemImage)
+            Section("Library") {
+                ForEach(SidebarItem.libraryItems) { item in
+                    Label(item.title, systemImage: item.systemImage)
+                }
             }
             Section("Devices") {
                 if watcher.connectedDevices.isEmpty {
@@ -21,6 +23,10 @@ struct AppSidebar: View {
                             .tag(SidebarItem.device(id: device.id))
                     }
                 }
+                AddAudioPlayerButton()
+                    .buttonStyle(.borderless)
+                    .foregroundStyle(.secondary)
+                    .selectionDisabled()
             }
         }
         .safeAreaInset(edge: .bottom) {

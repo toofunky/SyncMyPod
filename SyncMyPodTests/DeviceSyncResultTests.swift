@@ -24,6 +24,11 @@ struct DeviceSyncResultTests {
         #expect(result.message == "Added 0 songs. 3 already on the iPod.")
     }
 
+    @Test func foldersInsideADriveAreNotEjected() {
+        let result = DeviceSyncResult.finished(SyncSummary(added: 1, deviceKind: "player", suggestsEject: false))
+        #expect(result.message == "Added 1 song.")
+    }
+
     @Test func failureAndCancellationTitles() {
         #expect(DeviceSyncResult.failed("Disk full", deviceKind: "iPod").title == "Couldn't Sync iPod")
         #expect(DeviceSyncResult.finished(SyncSummary(wasCancelled: true, deviceKind: "iPod")).title == "Sync Cancelled")
