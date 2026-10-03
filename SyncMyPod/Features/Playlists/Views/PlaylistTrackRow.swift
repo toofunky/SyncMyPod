@@ -1,18 +1,15 @@
 import SwiftUI
 
 struct PlaylistTrackRow: View {
-    private static let indicatorWidth = 20.0
+    private static let artworkSize = 32.0
 
     let entry: PlaylistEntry
 
     var body: some View {
         if let track = entry.track {
             HStack {
-                NowPlayingIndicator(track: track) {
-                    Image(systemName: "speaker.wave.2.fill")
-                        .hidden()
-                }
-                .frame(width: Self.indicatorWidth)
+                PlaylistTrackArtwork(track: track)
+                    .frame(width: Self.artworkSize, height: Self.artworkSize)
                 VStack(alignment: .leading) {
                     Text(track.title)
                     Text([track.artist, track.album].filter { !$0.isEmpty }.joined(separator: " — "))
