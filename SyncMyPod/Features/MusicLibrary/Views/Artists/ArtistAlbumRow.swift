@@ -7,6 +7,7 @@ struct ArtistAlbumRow: View {
     private static let columnSpacing = 20.0
 
     let section: ArtistAlbumSection
+    var onPlay: ((LibraryTrack) -> Void)?
 
     var body: some View {
         HStack(alignment: .top, spacing: Self.columnSpacing) {
@@ -38,6 +39,8 @@ struct ArtistAlbumRow: View {
                     .foregroundStyle(.secondary)
             }
             AlbumTrackRow(track: track, albumArtist: section.album.artist)
+                .contentShape(.rect)
+                .onTapGesture(count: 2) { onPlay?(track) }
         }
     }
 

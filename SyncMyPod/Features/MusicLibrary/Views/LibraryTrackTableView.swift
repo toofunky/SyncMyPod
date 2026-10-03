@@ -10,6 +10,7 @@ struct LibraryTrackTableView: View {
     var showPlaylist: ((LibraryPlaylist) -> Void)?
 
     @Environment(\.modelContext) private var context
+    @Environment(MusicPlayerModel.self) private var player: MusicPlayerModel?
     @Query(sort: LibraryPlaylist.sidebarOrder) private var playlists: [LibraryPlaylist]
     @State private var sortOrder = [KeyPathComparator(\LibraryTrack.albumArtist)]
     @State private var sortedTracks: [LibraryTrack] = []
@@ -53,6 +54,8 @@ struct LibraryTrackTableView: View {
                 .disabled(showPlaylist == nil || ids.isEmpty)
             Button("Show in Finder", systemImage: "folder") { showInFinder(ids) }
                 .disabled(ids.isEmpty)
+        } primaryAction: { ids in
+            play(ids)
         }
         .onChange(of: tracks) {
             sortKeys = LibraryTrack.sortKeys(for: tracks)
@@ -145,6 +148,12 @@ struct LibraryTrackTableView: View {
         } else {
             context.insert(LibraryPlaylist(trackPaths: selected.map(\.filePath)))
         }
+    }
+
+    /// Plays the first double-clicked song, then the ones after it in the order shown.
+    private func play(_ ids: Set<LibraryTrack.ID>) {
+        guard let index = sortedTracks.firstIndex(where: { ids.contains($0.id) }) else { return }
+        player?.play(sortedTracks, startingAt: index)
     }
 
     private func playlists(containing ids: Set<LibraryTrack.ID>) -> [LibraryPlaylist] {
