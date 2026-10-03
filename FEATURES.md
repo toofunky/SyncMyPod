@@ -23,3 +23,4 @@
 - [x] Album grid view
 - [x] Artists view
 - [x] Music player
+- [x] Buy Me a Coffee button
