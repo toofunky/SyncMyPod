@@ -19,7 +19,7 @@ nonisolated struct IPodTrackSyncer {
     @concurrent
     func sync(adding requests: [IPodSyncRequest], removing removals: Set<UInt64> = [],
               playlists: [IPodPlaylistRequest]? = nil,
-              progress: @escaping @Sendable (IPodSyncProgress) async -> Void = { _ in }) async throws -> IPodSyncOutcome {
+              progress: @escaping @Sendable (SyncProgress) async -> Void = { _ in }) async throws -> IPodSyncOutcome {
         let files = IPodControlFiles(volumeURL: volumeURL)
         var editor = try openEditor(store)
         let mergedPlayCounts = mergePlayStatistics(into: &editor, files: files)
@@ -58,7 +58,7 @@ nonisolated struct IPodTrackSyncer {
             try await write(batch, with: &writer)
             if let playlists = batch.playlists { writer.writePlaylists(playlists, resolver: batch.resolver) }
             let done = writer.outcome.addedCount + writer.outcome.updatedCount
-            await batch.progress(IPodSyncProgress(completed: done, total: batch.items.count, currentTitle: nil))
+            await batch.progress(SyncProgress(completed: done, total: batch.items.count, currentTitle: nil))
             try writer.artwork.save()
             try saveDatabase(writer.editor.serialized(), to: store)
         } catch {
@@ -95,7 +95,7 @@ nonisolated struct IPodTrackSyncer {
 
     private func write(_ batch: SyncBatch, with writer: inout IPodBatchWriter) async throws {
         for (index, item) in batch.items.enumerated() {
-            await batch.progress(IPodSyncProgress(completed: index, total: batch.items.count,
+            await batch.progress(SyncProgress(completed: index, total: batch.items.count,
                                                   currentTitle: item.request.draft.title))
             guard !Task.isCancelled else {
                 writer.outcome.wasCancelled = true
@@ -108,7 +108,7 @@ nonisolated struct IPodTrackSyncer {
     /// Updates first, then additions, each file and each iPod track at most once.
     private static func batch(for requests: [IPodSyncRequest], playlists: [IPodPlaylistRequest]?,
                               device: ITunesDatabase, manifest: SyncManifest,
-                              progress: @escaping @Sendable (IPodSyncProgress) async -> Void) -> SyncBatch {
+                              progress: @escaping @Sendable (SyncProgress) async -> Void) -> SyncBatch {
         let plan = SyncPlanner(manifest: manifest, onDevice: device.tracks).plan(selected: requests, unselected: [])
         var updatedIDs: Set<UInt64> = []
         var seenKeys: Set<IPodTrackMatchKey> = []

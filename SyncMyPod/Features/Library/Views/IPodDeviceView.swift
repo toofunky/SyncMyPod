@@ -1,7 +1,7 @@
 import SwiftData
 import SwiftUI
 
-struct ConnectedDeviceView: View {
+struct IPodDeviceView: View {
     let device: IPodDevice
 
     var body: some View {
@@ -22,9 +22,9 @@ struct ConnectedDeviceView: View {
 
 #if DEBUG
 #Preview {
-    ConnectedDeviceView(device: .preview)
+    IPodDeviceView(device: .preview)
         .environment(\.iTunesDBLoader, .preview)
-        .environment(IPodSyncModel())
+        .environment(DeviceSyncModel())
         .modelContainer(.preview)
 }
 #endif

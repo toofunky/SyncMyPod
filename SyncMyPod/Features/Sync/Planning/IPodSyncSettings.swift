@@ -43,6 +43,10 @@ nonisolated final class IPodSyncSettings {
         set { selectedGenreKeys = newValue.sorted() }
     }
 
+    var selection: SyncSelection {
+        SyncSelection(mode: mode, albums: selectedAlbums, genres: selectedGenres, playlists: selectedPlaylists)
+    }
+
     @MainActor
     static func settings(for deviceID: String, in context: ModelContext) -> IPodSyncSettings {
         let descriptor = FetchDescriptor<IPodSyncSettings>(predicate: #Predicate { $0.deviceID == deviceID })

@@ -8,7 +8,8 @@ struct LibraryTrackTableView: View {
     let tracks: [LibraryTrack]
     @Binding var selection: Set<LibraryTrack.ID>
     var searchText = ""
-    var addToIPod: (([LibraryTrack]) -> Void)?
+    var addTargets: [ConnectedDevice] = []
+    var addToDevice: ((ConnectedDevice, [LibraryTrack]) -> Void)?
     var showPlaylist: ((LibraryPlaylist) -> Void)?
 
     @Environment(\.modelContext) private var context
@@ -46,10 +47,8 @@ struct LibraryTrackTableView: View {
         .id(sortedBy)
         .id(filteredBy)
         .contextMenu(forSelectionType: LibraryTrack.ID.self) { ids in
-            Button("Add to iPod", systemImage: "ipod") {
-                addToIPod?(tracks.filter { ids.contains($0.id) })
-            }
-            .disabled(addToIPod == nil || ids.isEmpty)
+            AddToDeviceMenu(devices: addTargets) { addToDevice?($0, tracks.filter { ids.contains($0.id) }) }
+                .disabled(addToDevice == nil || ids.isEmpty)
             AddToPlaylistMenu(playlists: playlists) { add(ids, to: $0) }
                 .disabled(ids.isEmpty)
             Divider()
@@ -182,7 +181,8 @@ struct LibraryTrackTableView: View {
 
 #if DEBUG
 #Preview {
-    LibraryTrackTableView(tracks: LibraryTrack.previewTracks, selection: .constant([]), addToIPod: { _ in })
+    LibraryTrackTableView(tracks: LibraryTrack.previewTracks, selection: .constant([]),
+                          addTargets: [.iPod(.preview)], addToDevice: { _, _ in })
         .modelContainer(.emptyPreview)
 }
 #endif

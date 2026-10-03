@@ -1,9 +1,9 @@
 @testable import SyncMyPod
 
 actor ProgressRecorder {
-    private(set) var updates: [IPodSyncProgress] = []
+    private(set) var updates: [SyncProgress] = []
 
-    func record(_ update: IPodSyncProgress) {
+    func record(_ update: SyncProgress) {
         updates.append(update)
     }
 }

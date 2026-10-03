@@ -114,5 +114,15 @@ nonisolated extension IPodDevice {
         usbIdentity: IPodUSBIdentity(vendorString: "Apple", productString: "iPod",
                                       serialNumber: "000A270015D4335D", vendorID: 1452, productID: 4617)
     )
+
+    static let previewNano = IPodDevice(
+        id: "000A27001C8F2E11",
+        volumeURL: URL(fileURLWithPath: "/Volumes/NANO"),
+        volumeName: "Michael's nano",
+        capacityBytes: 15_923_150_848,
+        availableBytes: 4_102_553_600,
+        sysInfo: IPodSysInfo(),
+        usbIdentity: nil
+    )
 }
 #endif

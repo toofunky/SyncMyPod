@@ -3,8 +3,9 @@ import SwiftUI
 struct SyncProgressSheet: View {
     private static let width: CGFloat = 380
 
-    let progress: IPodSyncProgress?
-    let result: IPodSyncResult?
+    let progress: SyncProgress?
+    let result: DeviceSyncResult?
+    var deviceKind = "iPod"
     let isCancelling: Bool
     let onCancel: () -> Void
     let onDone: () -> Void
@@ -22,11 +23,11 @@ struct SyncProgressSheet: View {
     }
 
     @ViewBuilder
-    private func progressContent(_ progress: IPodSyncProgress) -> some View {
-        Text("Syncing iPod")
+    private func progressContent(_ progress: SyncProgress) -> some View {
+        Text("Syncing \(deviceKind)")
             .font(.headline)
         ProgressView(value: progress.fractionCompleted) {
-            Text(progress.currentTitle.map { "Copying “\($0)”" } ?? "Updating iPod database…")
+            Text(progress.currentTitle.map { "Copying “\($0)”" } ?? "Updating \(deviceKind) database…")
                 .lineLimit(1)
                 .truncationMode(.middle)
         } currentValueLabel: {
@@ -41,7 +42,7 @@ struct SyncProgressSheet: View {
     }
 
     @ViewBuilder
-    private func resultContent(_ result: IPodSyncResult) -> some View {
+    private func resultContent(_ result: DeviceSyncResult) -> some View {
         Label(result.title, systemImage: symbol(for: result))
             .font(.headline)
         Text(result.message)
@@ -53,7 +54,7 @@ struct SyncProgressSheet: View {
         }
     }
 
-    private func symbol(for result: IPodSyncResult) -> String {
+    private func symbol(for result: DeviceSyncResult) -> String {
         switch result {
         case .finished: "checkmark.circle"
         case .failed, .overwritten: "exclamationmark.triangle"
@@ -62,13 +63,13 @@ struct SyncProgressSheet: View {
 }
 
 #Preview("Copying") {
-    SyncProgressSheet(progress: IPodSyncProgress(completed: 3, total: 12, currentTitle: "The Scientist"),
+    SyncProgressSheet(progress: SyncProgress(completed: 3, total: 12, currentTitle: "The Scientist"),
                       result: nil, isCancelling: false, onCancel: {}, onDone: {})
 }
 
 #Preview("Finished") {
     SyncProgressSheet(progress: nil,
-                      result: .finished(IPodSyncOutcome(addedDatabaseIDs: ["/a.m4a": 1, "/b.m4a": 2], skipped: 3)),
+                      result: .finished(SyncSummary(added: 2, skipped: 3, deviceKind: "iPod")),
                       isCancelling: false, onCancel: {}, onDone: {})
 }
 
@@ -77,6 +78,7 @@ struct SyncProgressSheet: View {
 }
 
 #Preview("Failed") {
-    SyncProgressSheet(progress: nil, result: .failed("The iPod's iTunesDB has no master playlist."),
+    SyncProgressSheet(progress: nil,
+                      result: .failed("The iPod's iTunesDB has no master playlist.", deviceKind: "iPod"),
                       isCancelling: false, onCancel: {}, onDone: {})
 }

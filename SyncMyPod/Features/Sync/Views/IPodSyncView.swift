@@ -6,7 +6,7 @@ struct IPodSyncView: View {
 
     @Environment(\.modelContext) private var context
     @Environment(\.iTunesDBLoader) private var loader
-    @Environment(IPodSyncModel.self) private var syncModel
+    @Environment(DeviceSyncModel.self) private var syncModel
     @Query private var tracks: [LibraryTrack]
     @Query private var folders: [LibraryFolder]
     @Query(sort: \LibraryPlaylist.createdAt) private var playlists: [LibraryPlaylist]
@@ -37,7 +37,7 @@ struct IPodSyncView: View {
                              onDevice: onDevice,
                              manifest: manifest, freeBytes: freeBytes ?? device.availableBytes,
                              isSyncing: syncModel.isSyncing) {
-                syncModel.sync($0.syncRequests, removing: $0.removalIDs, playlists: $0.playlists, to: device)
+                syncModel.sync($0.syncRequests, removing: $0.removalIDs, playlists: $0.playlists, to: .iPod(device))
             }
         } else {
             ProgressView("Reading iPod…")
@@ -68,7 +68,7 @@ struct IPodSyncView: View {
 #Preview {
     IPodSyncView(device: .preview)
         .environment(\.iTunesDBLoader, .preview)
-        .environment(IPodSyncModel())
+        .environment(DeviceSyncModel())
         .modelContainer(.preview)
 }
 #endif

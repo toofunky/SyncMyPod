@@ -21,9 +21,7 @@ struct SyncSettingsForm: View {
     @State private var pendingRemoval: SyncPlan?
 
     private var planInput: SyncPlanInput {
-        SyncPlanInput(library: library, mode: settings.mode, selectedAlbums: settings.selectedAlbums,
-                      selectedGenres: settings.selectedGenres, selectedPlaylists: settings.selectedPlaylists,
-                      onDevice: onDevice, manifest: manifest)
+        SyncPlanInput(library: library, selection: settings.selection, onDevice: onDevice, manifest: manifest)
     }
 
     var body: some View {
