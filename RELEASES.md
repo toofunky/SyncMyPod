@@ -1,3 +1,6 @@
+SyncMyPod-1.9
+- Support non-Apple digital audio players (directory syncing)
+
 SyncMyPod-1.8
 - Add Buy Me a Coffee button to About dialog and sidebar.
 - Fix music player not starting the next song when a song ends

@@ -23,3 +23,7 @@
 - [x] Album grid view
 - [x] Artists view
 - [x] Music player
+- [x] Support non-Apple digital audio players (directory syncing)
+- [x] Sync multiple devices
+- [x] Resize cover files
+- [x] Preserve track sorting
