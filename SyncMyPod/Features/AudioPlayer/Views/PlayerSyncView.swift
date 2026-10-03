@@ -12,11 +12,17 @@ struct PlayerSyncView: View {
     @State private var settings: IPodSyncSettings?
     @State private var contents: PlayerDeviceContents?
     @State private var missingSources: Set<String> = []
+    @State private var sidecars = LibrarySidecars()
     @State private var freeBytes: Int64?
+
+    /// Reloads after a sync, and when covers or lyrics are turned on so the library is looked through for them.
+    private var reloadID: String {
+        "\(device.id)#\(syncModel.completedSyncCount)#\(device.config.copyCovers)#\(device.config.copyLyricFiles)"
+    }
 
     var body: some View {
         content
-            .task(id: "\(device.id)#\(syncModel.completedSyncCount)") { await reload() }
+            .task(id: reloadID) { await reload() }
             .syncProgressSheet()
     }
 
@@ -30,7 +36,8 @@ struct PlayerSyncView: View {
                            library: SyncLibrarySnapshot(tracks: tracks, playlists: playlists,
                                                         preservingAlbumArtist: device.config.preserveAlbumArtist),
                            contents: contents, config: device.config, missingSources: missingSources,
-                           freeBytes: freeBytes ?? device.availableBytes, isSyncing: syncModel.isSyncing) {
+                           sidecars: sidecars, freeBytes: freeBytes ?? device.availableBytes,
+                           isSyncing: syncModel.isSyncing) {
                 syncModel.sync($0, to: device)
             }
         } else {
@@ -43,10 +50,12 @@ struct PlayerSyncView: View {
     private func reload() async {
         settings = IPodSyncSettings.settings(for: device.id, in: context)
         let loaded = await PlayerDeviceContents.load(from: device)
-        let libraryPaths = Set(tracks.map(\.filePath))
+        let libraryPaths = tracks.map(\.filePath)
         missingSources = folders.first.map {
-            MissingSourceFinder(folderPath: $0.path).missing(loaded.manifest.entries.keys, notIn: libraryPaths)
+            MissingSourceFinder(folderPath: $0.path).missing(loaded.manifest.entries.keys, notIn: Set(libraryPaths))
         } ?? []
+        sidecars = await LibrarySidecarFinder.find(besideSongsAt: libraryPaths, covers: device.config.copyCovers,
+                                                   lyrics: device.config.copyLyricFiles)
         contents = loaded
         let values = try? device.volumeURL.resourceValues(forKeys: [.volumeAvailableCapacityKey])
         freeBytes = values?.volumeAvailableCapacity.map(Int64.init)

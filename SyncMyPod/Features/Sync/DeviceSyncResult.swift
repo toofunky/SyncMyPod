@@ -33,6 +33,9 @@ nonisolated enum DeviceSyncResult: Equatable, Sendable {
         if summary.syncedPlaylistCount > 0 {
             parts.append("Synced \(count(summary.syncedPlaylistCount, "playlist")).")
         }
+        if summary.sidecarChangeCount > 0 {
+            parts.append("Updated \(count(summary.sidecarChangeCount, "cover and lyric file")).")
+        }
         if summary.skipped > 0 { parts.append("\(summary.skipped) already on the \(summary.deviceKind).") }
         if summary.changedCount > 0, summary.suggestsEject { parts.append("Eject the \(summary.deviceKind) before unplugging it.") }
         return parts.joined(separator: " ")

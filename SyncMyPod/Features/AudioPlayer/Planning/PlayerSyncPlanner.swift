@@ -10,10 +10,13 @@ nonisolated struct PlayerSyncPlanner {
     var missingSources: Set<String> = []
     /// The playlist folder's `.m3u8` files, keyed by path, so unchanged ones aren't counted or rewritten.
     var existingPlaylists: [String: String] = [:]
+    /// Covers and lyric files beside the library's songs, copied when the config asks for them.
+    var sidecars = LibrarySidecars()
 
     private var builder: PlayerPathBuilder { PlayerPathBuilder(config: config) }
 
-    /// `nil` `playlists` leaves the player's playlists alone.
+    /// `nil` `playlists` leaves the player's playlists alone, and leaves covers and lyrics copied for songs
+    /// that aren't in `selected`, as when adding a few songs.
     func plan(selected: [IPodSyncRequest], unselected: [IPodSyncRequest] = [],
               playlists: [IPodPlaylistRequest]?) -> PlayerSyncPlan {
         let selected = Self.unique(selected)
@@ -25,6 +28,8 @@ nonisolated struct PlayerSyncPlanner {
             classify(request, destination: destination, into: &plan)
         }
         if let playlists { add(playlists, destinations: destinations, to: &plan) }
+        PlayerSidecarPlanner(config: config, manifest: manifest, presentSizes: presentSizes, sidecars: sidecars)
+            .plan(selected, destinations: destinations, pruning: playlists != nil, into: &plan)
         return plan
     }
 

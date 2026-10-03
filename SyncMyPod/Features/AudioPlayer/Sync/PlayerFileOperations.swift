@@ -7,10 +7,19 @@ nonisolated struct PlayerFileOperations {
     let device: AudioPlayerDevice
     private var manager: FileManager { .default }
 
-    /// Copies, and retags, beside the destination first, so a cancelled or failed copy never leaves a truncated
-    /// or half-tagged song.
+    /// Retags the copy, when its album artist is preserved, before it replaces anything.
     func copy(_ request: IPodSyncRequest, to path: String) async throws {
-        let source = request.sourceURL
+        try await copy(request.sourceURL, to: path) { staged in
+            if let tags = request.playerTagChanges {
+                try await TagWriter().write(tags, to: staged, codec: request.draft.codec)
+            }
+        }
+    }
+
+    /// Copies, and `prepare`s, beside the destination first, so a cancelled or failed copy never leaves a
+    /// truncated or half-changed file.
+    func copy(_ source: URL, to path: String,
+              preparing prepare: (URL) async throws -> Void = { _ in }) async throws {
         guard manager.fileExists(atPath: source.path(percentEncoded: false)) else {
             throw PlayerSyncError.missingSource(source.lastPathComponent)
         }
@@ -20,9 +29,7 @@ nonisolated struct PlayerFileOperations {
         let staged = folder.appending(path: ".syncmypod-\(UUID().uuidString).tmp")
         do {
             try manager.copyItem(at: source, to: staged)
-            if let tags = request.playerTagChanges {
-                try await TagWriter().write(tags, to: staged, codec: request.draft.codec)
-            }
+            try await prepare(staged)
             try replace(destination, with: staged)
         } catch {
             try? manager.removeItem(at: staged)

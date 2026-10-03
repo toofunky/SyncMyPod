@@ -37,12 +37,16 @@ final class DeviceSyncModel {
         }
     }
 
-    /// Copies songs chosen in the library without removing anything or touching playlists.
+    /// Copies songs chosen in the library, with their covers and lyrics, without removing anything or
+    /// touching playlists.
     private func addToPlayer(_ requests: [IPodSyncRequest], player: AudioPlayerDevice, as device: ConnectedDevice) {
         let syncer = PlayerTrackSyncer(device: player)
+        let config = player.config
         start(on: device, total: requests.count) { report in
             let contents = await PlayerDeviceContents.load(from: player)
-            let plan = contents.planner(for: player.config).plan(selected: requests, playlists: nil)
+            let sidecars = await LibrarySidecarFinder.find(besideSongsAt: requests.map(\.sourcePath),
+                                                           covers: config.copyCovers, lyrics: config.copyLyricFiles)
+            let plan = contents.planner(for: config, sidecars: sidecars).plan(selected: requests, playlists: nil)
             return try await syncer.sync(plan, progress: report)
         }
     }

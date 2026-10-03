@@ -15,16 +15,18 @@ nonisolated struct PlayerDeviceContents: Equatable, Sendable {
                                     playlists: playlists(on: device))
     }
 
-    func planner(for config: AudioPlayerConfig, missingSources: Set<String> = []) -> PlayerSyncPlanner {
+    func planner(for config: AudioPlayerConfig, missingSources: Set<String> = [],
+                 sidecars: LibrarySidecars = LibrarySidecars()) -> PlayerSyncPlanner {
         PlayerSyncPlanner(config: config, manifest: manifest, presentSizes: presentSizes,
-                          missingSources: missingSources, existingPlaylists: playlists)
+                          missingSources: missingSources, existingPlaylists: playlists, sidecars: sidecars)
     }
 
+    /// Covers both songs and the covers and lyric files copied beside them.
     private static func sizes(of manifest: PlayerSyncManifest, on device: AudioPlayerDevice) -> [String: Int64] {
         var sizes: [String: Int64] = [:]
-        for entry in manifest.entries.values {
-            let values = try? device.url(forPath: entry.path).resourceValues(forKeys: [.fileSizeKey])
-            if let size = values?.fileSize { sizes[entry.path] = Int64(size) }
+        for path in manifest.entries.values.map(\.path) + manifest.sidecars.keys {
+            let values = try? device.url(forPath: path).resourceValues(forKeys: [.fileSizeKey])
+            if let size = values?.fileSize { sizes[path] = Int64(size) }
         }
         return sizes
     }

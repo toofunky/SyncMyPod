@@ -16,11 +16,15 @@ nonisolated struct PlayerTrackSyncer {
                                                          deviceKind: "player", suggestsEject: device.isEjectable))
         defer { finish(state) }
         remove(plan.removals, state: &state)
+        removeSidecars(plan.sidecarRemovals, state: &state)
         try move(plan.moves, state: &state)
         try await write(plan, state: &state, progress: progress)
-        if !state.summary.wasCancelled, let playlists = plan.playlists {
-            try write(playlists, removing: plan.stalePlaylistPaths, state: &state)
-            state.summary.syncedPlaylistCount = plan.playlistChangeCount
+        if !state.summary.wasCancelled {
+            if let playlists = plan.playlists {
+                try write(playlists, removing: plan.stalePlaylistPaths, state: &state)
+                state.summary.syncedPlaylistCount = plan.playlistChangeCount
+            }
+            await copySidecars(plan.sidecarCopies, state: &state)
         }
         await progress(SyncProgress(completed: plan.writes.count, total: plan.writes.count, currentTitle: nil))
         return state.summary
@@ -79,11 +83,29 @@ nonisolated struct PlayerTrackSyncer {
         state.manifest.playlistPaths = Set(playlists.map(\.path))
     }
 
+    private func removeSidecars(_ paths: [String], state: inout PlayerSyncState) {
+        for path in paths {
+            files.remove(path)
+            state.manifest.sidecars[path] = nil
+            state.vacatedPaths.append(path)
+        }
+        state.summary.sidecarChangeCount += paths.count
+    }
+
+    /// A cover or lyric file that disappeared from the library since planning is skipped, not an error.
+    private func copySidecars(_ copies: [PlayerSidecarCopy], state: inout PlayerSyncState) async {
+        for copy in copies {
+            guard (try? await files.copy(copy.source.url, to: copy.destination)) != nil else { continue }
+            state.manifest.sidecars[copy.destination] = copy.source
+            state.summary.sidecarChangeCount += 1
+        }
+    }
+
     private func ensureFreeSpace(for totals: SyncPlanTotals) throws {
         let values = try device.volumeURL.resourceValues(forKeys: [.volumeAvailableCapacityKey])
         let available = Int64(values.volumeAvailableCapacity ?? 0)
         guard totals.fits(in: available) else {
-            throw PlayerSyncError.insufficientSpace(required: totals.addBytes + totals.updateBytes,
+            throw PlayerSyncError.insufficientSpace(required: totals.requiredBytes,
                                                     available: available + totals.removeBytes)
         }
     }

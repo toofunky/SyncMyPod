@@ -25,6 +25,8 @@ struct AudioPlayerConfigTests {
         let config = AudioPlayerConfig(name: "Player", rootPath: "")
         #expect(!config.preserveTrackSorting)
         #expect(!config.preserveAlbumArtist)
+        #expect(!config.copyCovers)
+        #expect(!config.copyLyricFiles)
     }
 
     @Test func configsSavedWithoutTheOptionsStillLoad() throws {

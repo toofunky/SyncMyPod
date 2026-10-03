@@ -36,8 +36,23 @@ final class TemporaryPlayerVolume {
                                source: SyncSource(fileSize: bytes, modificationDate: modified, artworkFingerprint: nil))
     }
 
+    /// A cover or lyric file in the library, `name` relative to the library folder.
+    @discardableResult
+    func librarySidecar(_ name: String, contents: String = "sidecar") throws -> URL {
+        let url = libraryURL.appending(path: name)
+        try FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
+        try Data(contents.utf8).write(to: url)
+        return url
+    }
+
     func fileExists(_ path: String) -> Bool {
         FileManager.default.fileExists(atPath: volumeURL.appending(path: path).path(percentEncoded: false))
+    }
+
+    /// The exact names in a folder on the volume, since the temporary volume ignores case like FAT does.
+    func names(in folder: String) -> Set<String> {
+        let path = volumeURL.appending(path: folder).path(percentEncoded: false)
+        return Set((try? FileManager.default.contentsOfDirectory(atPath: path)) ?? [])
     }
 
     func contents(of path: String) throws -> String {

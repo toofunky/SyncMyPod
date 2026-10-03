@@ -10,17 +10,22 @@ nonisolated struct SyncPlanTotals: Equatable, Sendable {
     var removeCount = 0
     var removeBytes: Int64 = 0
     var playlistChangeCount = 0
+    /// Covers and lyric files to copy or remove on a player.
+    var sidecarChangeCount = 0
+    var sidecarBytes: Int64 = 0
     var selectedCount = 0
 
     var isEmpty: Bool {
         addCount == 0 && updateCount == 0 && moveCount == 0 && removeCount == 0 && playlistChangeCount == 0
+            && sidecarChangeCount == 0
     }
 
     var alreadyOnDeviceCount: Int { selectedCount - addCount - updateCount }
+    var requiredBytes: Int64 { addBytes + updateBytes + sidecarBytes }
 
     func fits(in freeBytes: Int64?) -> Bool {
         guard let freeBytes else { return true }
-        return addBytes + updateBytes < freeBytes + removeBytes
+        return requiredBytes < freeBytes + removeBytes
     }
 }
 

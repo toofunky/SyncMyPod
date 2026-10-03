@@ -9,6 +9,7 @@ struct PlayerSyncForm: View {
     let contents: PlayerDeviceContents
     let config: AudioPlayerConfig
     let missingSources: Set<String>
+    var sidecars = LibrarySidecars()
     let freeBytes: Int64?
     let isSyncing: Bool
     let onSync: (PlayerSyncPlan) -> Void
@@ -19,7 +20,7 @@ struct PlayerSyncForm: View {
 
     private var planInput: PlayerPlanInput {
         PlayerPlanInput(library: library, selection: settings.selection, contents: contents, config: config,
-                        missingSources: missingSources)
+                        missingSources: missingSources, sidecars: sidecars)
     }
 
     var body: some View {

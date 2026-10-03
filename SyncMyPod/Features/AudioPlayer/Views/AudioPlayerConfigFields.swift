@@ -9,6 +9,12 @@ struct AudioPlayerConfigFields: View {
         + "player is tagged with the album artist as its artist and the guest artist is added to the title — for "
         + "example, \"Song — Guest Artist\". This keeps albums together when you browse by artist. Your music "
         + "files aren't changed."
+    private static let coversInfo = "An album folder's cover.jpg, folder.jpg, cover.png or folder.png is copied "
+        + "into the album's folder on the player, for players that show folder artwork instead of artwork "
+        + "embedded in songs."
+    private static let lyricsInfo = "A song's .lrc lyric file, in the same folder and with the same name, is "
+        + "copied beside it and renamed to match the song on the player — for example, \"01 Clocks.lrc\" beside "
+        + "\"01 Clocks.m4a\" — so the player shows synced lyrics."
     private static let blankFolderPrompt = "Leave blank to use the root folder"
 
     @Binding var config: AudioPlayerConfig
@@ -31,6 +37,9 @@ struct AudioPlayerConfigFields: View {
                    infoTitle: "Preserve Track Sorting", info: Self.trackSortingInfo)
             option("Preserve Album Artist?", isOn: $config.preserveAlbumArtist,
                    infoTitle: "Preserve Album Artist", info: Self.albumArtistInfo)
+            option("Copy Covers?", isOn: $config.copyCovers, infoTitle: "Copy Covers", info: Self.coversInfo)
+            option("Copy Lyric Files?", isOn: $config.copyLyricFiles,
+                   infoTitle: "Copy Lyric Files", info: Self.lyricsInfo)
         }
     }
 

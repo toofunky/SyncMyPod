@@ -14,24 +14,29 @@ nonisolated struct AudioPlayerConfig: Codable, Hashable, Sendable {
     var preserveTrackSorting = false
     /// Tags copies with the album artist as their artist and moves a guest artist into the title.
     var preserveAlbumArtist = false
+    /// Copies an album folder's cover.jpg, folder.jpg, cover.png or folder.png beside its songs.
+    var copyCovers = false
+    /// Copies each song's .lrc lyric file, renamed to match the song's name on the player.
+    var copyLyricFiles = false
 
     init(id: String = UUID().uuidString, name: String, rootPath: String, musicFolder: String = "",
-         playlistFolder: String = "", preserveTrackSorting: Bool = false, preserveAlbumArtist: Bool = false) {
+         playlistFolder: String = "") {
         self.id = id
         self.name = name
         self.rootPath = Self.cleanedPath(rootPath)
         self.musicFolder = Self.cleanedPath(musicFolder)
         self.playlistFolder = Self.cleanedPath(playlistFolder)
-        self.preserveTrackSorting = preserveTrackSorting
-        self.preserveAlbumArtist = preserveAlbumArtist
     }
 
     /// With folders cleaned up as typed by hand, and the volume's name when the name was left blank.
     func cleaned(defaultName: String) -> AudioPlayerConfig {
+        var config = self
         let trimmedName = name.trimmingCharacters(in: .whitespaces)
-        return AudioPlayerConfig(id: id, name: trimmedName.isEmpty ? defaultName : trimmedName, rootPath: rootPath,
-                                 musicFolder: musicFolder, playlistFolder: playlistFolder,
-                                 preserveTrackSorting: preserveTrackSorting, preserveAlbumArtist: preserveAlbumArtist)
+        config.name = trimmedName.isEmpty ? defaultName : trimmedName
+        config.rootPath = Self.cleanedPath(rootPath)
+        config.musicFolder = Self.cleanedPath(musicFolder)
+        config.playlistFolder = Self.cleanedPath(playlistFolder)
+        return config
     }
 
     /// The music folder relative to the volume.
@@ -63,5 +68,7 @@ nonisolated extension AudioPlayerConfig {
         playlistFolder = try container.decodeIfPresent(String.self, forKey: .playlistFolder) ?? ""
         preserveTrackSorting = try container.decodeIfPresent(Bool.self, forKey: .preserveTrackSorting) ?? false
         preserveAlbumArtist = try container.decodeIfPresent(Bool.self, forKey: .preserveAlbumArtist) ?? false
+        copyCovers = try container.decodeIfPresent(Bool.self, forKey: .copyCovers) ?? false
+        copyLyricFiles = try container.decodeIfPresent(Bool.self, forKey: .copyLyricFiles) ?? false
     }
 }

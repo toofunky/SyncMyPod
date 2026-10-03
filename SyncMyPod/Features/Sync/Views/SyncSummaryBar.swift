@@ -49,6 +49,10 @@ struct SyncSummaryBar: View {
             let count = totals.playlistChangeCount
             parts.append("\(count) \(count == 1 ? "playlist" : "playlists") to update")
         }
+        if totals.sidecarChangeCount > 0 {
+            let count = totals.sidecarChangeCount
+            parts.append("\(count) cover and lyric \(count == 1 ? "file" : "files") to update")
+        }
         return parts.joined(separator: " · ")
     }
 

@@ -7,13 +7,15 @@ nonisolated struct SyncSummary: Equatable, Sendable {
     var removed = 0
     var skipped = 0
     var syncedPlaylistCount = 0
+    /// Covers and lyric files copied to or removed from a player.
+    var sidecarChangeCount = 0
     var wasCancelled = false
     /// "iPod", for example, as shown in the result's title and message.
     var deviceKind: String
     /// `false` for a player synced to a folder inside a drive, which has nothing to eject.
     var suggestsEject = true
 
-    var changedCount: Int { added + updated + removed + syncedPlaylistCount }
+    var changedCount: Int { added + updated + removed + syncedPlaylistCount + sidecarChangeCount }
 }
 
 nonisolated extension SyncSummary {
