@@ -4,6 +4,7 @@ nonisolated enum AlbumSortOrder: String, CaseIterable, Identifiable, Sendable {
     case albumArtist
     case album
     case year
+    case yearDescending
     case genre
 
     var id: Self { self }
@@ -12,7 +13,8 @@ nonisolated enum AlbumSortOrder: String, CaseIterable, Identifiable, Sendable {
         switch self {
         case .albumArtist: "Album Artist"
         case .album: "Album"
-        case .year: "Year"
+        case .year: "Year (Ascending)"
+        case .yearDescending: "Year (Descending)"
         case .genre: "Genre"
         }
     }
@@ -33,6 +35,7 @@ nonisolated enum AlbumSortOrder: String, CaseIterable, Identifiable, Sendable {
         case .albumArtist: [Self.byArtist, Self.byYear, Self.byTitle]
         case .album: [Self.byTitle, Self.byArtist]
         case .year: [Self.byYear, Self.byArtist, Self.byTitle]
+        case .yearDescending: [Self.byYearDescending, Self.byArtist, Self.byTitle]
         case .genre: [Self.byGenre, Self.byArtist, Self.byYear, Self.byTitle]
         }
     }
@@ -55,5 +58,13 @@ nonisolated enum AlbumSortOrder: String, CaseIterable, Identifiable, Sendable {
         let right = rhs.year > 0 ? rhs.year : .max
         if left == right { return .orderedSame }
         return left < right ? .orderedAscending : .orderedDescending
+    }
+
+    /// Newest first, with albums without a year still sorting after dated ones.
+    private static func byYearDescending(_ lhs: LibraryAlbum, _ rhs: LibraryAlbum) -> ComparisonResult {
+        let left = lhs.year > 0 ? lhs.year : .min
+        let right = rhs.year > 0 ? rhs.year : .min
+        if left == right { return .orderedSame }
+        return left > right ? .orderedAscending : .orderedDescending
     }
 }
