@@ -87,16 +87,22 @@ nonisolated struct PlayerTrackSyncer {
         for path in paths {
             files.remove(path)
             state.manifest.sidecars[path] = nil
+            state.manifest.coverPixelLimits[path] = nil
             state.vacatedPaths.append(path)
         }
         state.summary.sidecarChangeCount += paths.count
     }
 
-    /// A cover or lyric file that disappeared from the library since planning is skipped, not an error.
+    /// Covers are scaled down before they replace anything. A cover or lyric file that disappeared from the
+    /// library since planning, or an image that can't be read, is skipped rather than failing the sync.
     private func copySidecars(_ copies: [PlayerSidecarCopy], state: inout PlayerSyncState) async {
         for copy in copies {
-            guard (try? await files.copy(copy.source.url, to: copy.destination)) != nil else { continue }
+            let copied = try? await files.copy(copy.source.url, to: copy.destination) { staged in
+                if let limit = copy.pixelLimit { try CoverResizer.fit(imageAt: staged, within: limit) }
+            }
+            guard copied != nil else { continue }
             state.manifest.sidecars[copy.destination] = copy.source
+            state.manifest.coverPixelLimits[copy.destination] = copy.pixelLimit
             state.summary.sidecarChangeCount += 1
         }
     }

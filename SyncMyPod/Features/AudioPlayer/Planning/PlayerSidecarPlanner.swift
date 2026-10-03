@@ -13,10 +13,17 @@ nonisolated struct PlayerSidecarPlanner {
               into plan: inout PlayerSyncPlan) {
         let wanted = wantedSidecars(requests, destinations: destinations)
         plan.sidecarCopies = wanted.sorted { $0.key < $1.key }.compactMap { path, source in
+            let limit = pixelLimit(forSidecarAt: path)
             let isCurrent = manifest.sidecars[path] == source && presentSizes[path] != nil
-            return isCurrent ? nil : PlayerSidecarCopy(source: source, destination: path)
+                && manifest.coverPixelLimits[path] == limit
+            return isCurrent ? nil : PlayerSidecarCopy(source: source, destination: path, pixelLimit: limit)
         }
         plan.sidecarRemovals = pruning ? manifest.sidecars.keys.filter { wanted[$0] == nil }.sorted() : []
+    }
+
+    /// Lyric files are never resized.
+    private func pixelLimit(forSidecarAt path: String) -> Int? {
+        path.lowercased().hasSuffix(".lrc") ? nil : config.coverPixelLimit
     }
 
     private func wantedSidecars(_ requests: [IPodSyncRequest], destinations: [String: String]) -> [String: SidecarFile] {

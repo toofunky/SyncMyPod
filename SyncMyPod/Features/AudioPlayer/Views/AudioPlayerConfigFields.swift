@@ -12,6 +12,9 @@ struct AudioPlayerConfigFields: View {
     private static let coversInfo = "An album folder's cover.jpg, folder.jpg, cover.png or folder.png is copied "
         + "into the album's folder on the player, for players that show folder artwork instead of artwork "
         + "embedded in songs."
+    private static let resizeInfo = "Covers larger than the maximum size are scaled down so their longer side "
+        + "fits, keeping their shape, for players that are slow with or can't show large images. Smaller covers "
+        + "are copied as they are. Your library's covers aren't changed."
     private static let lyricsInfo = "A song's .lrc lyric file, in the same folder and with the same name, is "
         + "copied beside it and renamed to match the song on the player — for example, \"01 Clocks.lrc\" beside "
         + "\"01 Clocks.m4a\" — so the player shows synced lyrics."
@@ -38,6 +41,19 @@ struct AudioPlayerConfigFields: View {
             option("Preserve Album Artist?", isOn: $config.preserveAlbumArtist,
                    infoTitle: "Preserve Album Artist", info: Self.albumArtistInfo)
             option("Copy Covers?", isOn: $config.copyCovers, infoTitle: "Copy Covers", info: Self.coversInfo)
+            if config.copyCovers {
+                option("Resize Covers?", isOn: $config.resizeCovers, infoTitle: "Resize Covers", info: Self.resizeInfo)
+                if config.resizeCovers {
+                    LabeledContent("Maximum Size") {
+                        HStack {
+                            TextField("Maximum Size", value: $config.maxCoverSize, format: .number)
+                                .labelsHidden()
+                                .multilineTextAlignment(.trailing)
+                            Text("px")
+                        }
+                    }
+                }
+            }
             option("Copy Lyric Files?", isOn: $config.copyLyricFiles,
                    infoTitle: "Copy Lyric Files", info: Self.lyricsInfo)
         }

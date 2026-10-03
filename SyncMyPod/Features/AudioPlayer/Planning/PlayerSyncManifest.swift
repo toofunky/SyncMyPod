@@ -8,14 +8,17 @@ nonisolated struct PlayerSyncManifest: Codable, Equatable, Sendable {
     var playlistPaths: Set<String> = []
     /// Covers and lyric files this app copied, keyed by their path relative to the volume.
     var sidecars: [String: SidecarFile] = [:]
+    /// The size covers were scaled to fit, keyed like `sidecars`; absent for covers copied as they are.
+    var coverPixelLimits: [String: Int] = [:]
 }
 
 nonisolated extension PlayerSyncManifest {
-    /// Manifests saved before covers and lyrics were copied have no `sidecars`.
+    /// Manifests saved by older versions lack the newer records.
     init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         entries = try container.decodeIfPresent([String: PlayerManifestEntry].self, forKey: .entries) ?? [:]
         playlistPaths = try container.decodeIfPresent(Set<String>.self, forKey: .playlistPaths) ?? []
         sidecars = try container.decodeIfPresent([String: SidecarFile].self, forKey: .sidecars) ?? [:]
+        coverPixelLimits = try container.decodeIfPresent([String: Int].self, forKey: .coverPixelLimits) ?? [:]
     }
 }

@@ -16,8 +16,17 @@ nonisolated struct AudioPlayerConfig: Codable, Hashable, Sendable {
     var preserveAlbumArtist = false
     /// Copies an album folder's cover.jpg, folder.jpg, cover.png or folder.png beside its songs.
     var copyCovers = false
+    /// Scales copied covers down so neither side is larger than `maxCoverSize` pixels.
+    var resizeCovers = false
+    var maxCoverSize = Self.defaultMaxCoverSize
     /// Copies each song's .lrc lyric file, renamed to match the song's name on the player.
     var copyLyricFiles = false
+
+    static let defaultMaxCoverSize = 300
+    static let coverSizeRange = 16...10_000
+
+    /// The size covers are scaled to fit, or `nil` to copy them as they are.
+    var coverPixelLimit: Int? { copyCovers && resizeCovers ? maxCoverSize : nil }
 
     init(id: String = UUID().uuidString, name: String, rootPath: String, musicFolder: String = "",
          playlistFolder: String = "") {
@@ -36,6 +45,7 @@ nonisolated struct AudioPlayerConfig: Codable, Hashable, Sendable {
         config.rootPath = Self.cleanedPath(rootPath)
         config.musicFolder = Self.cleanedPath(musicFolder)
         config.playlistFolder = Self.cleanedPath(playlistFolder)
+        config.maxCoverSize = min(max(maxCoverSize, Self.coverSizeRange.lowerBound), Self.coverSizeRange.upperBound)
         return config
     }
 
@@ -69,6 +79,8 @@ nonisolated extension AudioPlayerConfig {
         preserveTrackSorting = try container.decodeIfPresent(Bool.self, forKey: .preserveTrackSorting) ?? false
         preserveAlbumArtist = try container.decodeIfPresent(Bool.self, forKey: .preserveAlbumArtist) ?? false
         copyCovers = try container.decodeIfPresent(Bool.self, forKey: .copyCovers) ?? false
+        resizeCovers = try container.decodeIfPresent(Bool.self, forKey: .resizeCovers) ?? false
+        maxCoverSize = try container.decodeIfPresent(Int.self, forKey: .maxCoverSize) ?? Self.defaultMaxCoverSize
         copyLyricFiles = try container.decodeIfPresent(Bool.self, forKey: .copyLyricFiles) ?? false
     }
 }
