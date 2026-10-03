@@ -91,13 +91,14 @@ final class MusicPlayerModel {
         elapsed = seconds.isFinite ? seconds : 0
     }
 
-    /// The player keeps its rate across items, so a new song plays only if the last one was playing.
+    /// The player pauses itself when an item ends, so restart it if we were playing.
     private func loadCurrentTrack() {
         endObserver?.cancel()
         elapsed = 0
         guard let track = currentTrack else { return player.replaceCurrentItem(with: nil) }
         let item = AVPlayerItem(url: URL(filePath: track.filePath))
         player.replaceCurrentItem(with: item)
+        if isPlaying { player.play() }
         endObserver = Task { [weak self] in
             let ends = NotificationCenter.default.notifications(named: AVPlayerItem.didPlayToEndTimeNotification,
                                                                 object: item)

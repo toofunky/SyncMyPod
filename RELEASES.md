@@ -1,5 +1,6 @@
 SyncMyPod-1.8
 - Add Buy Me a Coffee button to About dialog and sidebar.
+- Fix music player not starting the next song when a song ends
 
 SyncMyPod-1.7
 - Add music player.
