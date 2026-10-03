@@ -1,9 +1,9 @@
 import SwiftUI
 
-/// Floating playback controls under the current song's title and artist, with its cover beside them.
+/// Floating playback controls between the current song's title and its progress, with its cover beside them.
 struct MusicPlayerOverlay: View {
     /// How far scrolling content must reach past the overlay to show its last rows.
-    static let clearance = 110.0
+    static let clearance = 130.0
 
     private static let artworkSize = 64.0
     private static let controlSpacing = 14.0
@@ -23,6 +23,7 @@ struct MusicPlayerOverlay: View {
             VStack(spacing: Self.lineSpacing) {
                 nowPlaying
                 controls
+                PlaybackProgressBar(player: player)
             }
             .frame(width: Self.infoWidth)
         }

@@ -5,14 +5,18 @@ import Observation
 final class MusicPlayerModel {
     /// Skipping back this far into a song restarts it instead of going to the previous one.
     private static let restartThreshold = 3.0
+    private static let progressInterval = Duration.milliseconds(250)
 
     private(set) var queue = PlaybackQueue()
     private(set) var isPlaying = false
     private(set) var isShuffled = false
     private(set) var isRepeating = false
+    /// Seconds into the current song, refreshed while it plays.
+    private(set) var elapsed: TimeInterval = 0
 
     @ObservationIgnored private let player = AVPlayer()
     @ObservationIgnored private var endObserver: Task<Void, Never>?
+    @ObservationIgnored private var progressUpdates: Task<Void, Never>?
 
     var currentTrack: LibraryTrack? { queue.current }
     var canSkipForward: Bool { queue.hasNext || (isRepeating && currentTrack != nil) }
@@ -38,11 +42,16 @@ final class MusicPlayerModel {
     }
 
     func skipBackward() {
-        if player.currentTime().seconds > Self.restartThreshold || !queue.retreat(wrapping: isRepeating) {
-            player.seek(to: .zero)
+        if elapsed > Self.restartThreshold || !queue.retreat(wrapping: isRepeating) {
+            seek(to: 0)
         } else {
             loadCurrentTrack()
         }
+    }
+
+    func seek(to seconds: TimeInterval) {
+        elapsed = seconds
+        player.seek(to: CMTime(seconds: seconds, preferredTimescale: 600))
     }
 
     func toggleShuffle() {
@@ -58,16 +67,34 @@ final class MusicPlayerModel {
         guard currentTrack != nil else { return }
         player.play()
         isPlaying = true
+        trackProgress()
     }
 
     private func pause() {
         player.pause()
         isPlaying = false
+        progressUpdates?.cancel()
+    }
+
+    private func trackProgress() {
+        progressUpdates?.cancel()
+        progressUpdates = Task { [weak self] in
+            while !Task.isCancelled {
+                self?.updateElapsed()
+                try? await Task.sleep(for: Self.progressInterval)
+            }
+        }
+    }
+
+    private func updateElapsed() {
+        let seconds = player.currentTime().seconds
+        elapsed = seconds.isFinite ? seconds : 0
     }
 
     /// The player keeps its rate across items, so a new song plays only if the last one was playing.
     private func loadCurrentTrack() {
         endObserver?.cancel()
+        elapsed = 0
         guard let track = currentTrack else { return player.replaceCurrentItem(with: nil) }
         let item = AVPlayerItem(url: URL(filePath: track.filePath))
         player.replaceCurrentItem(with: item)
@@ -84,7 +111,7 @@ final class MusicPlayerModel {
         if queue.advance(wrapping: isRepeating) {
             loadCurrentTrack()
         } else {
-            player.seek(to: .zero)
+            seek(to: 0)
             pause()
         }
     }
