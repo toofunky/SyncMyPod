@@ -8,6 +8,9 @@ struct AboutView: View {
 
     private static let websiteURL = URL(string: "https://github.com/toofunky/SyncMyPod")
     private static let releaseNotesURL = URL(string: "https://github.com/toofunky/SyncMyPod/blob/main/RELEASES.md")
+    private static let buyMeACoffeeURL = URL(string: "https://buymeacoffee.com/Ogr7PoWL9a")
+    private static let coffeeIconSize: CGFloat = 16
+    private static let coffeeIconCornerRadius: CGFloat = 3
 
     private var appName: String {
         Bundle.main.object(forInfoDictionaryKey: "CFBundleName") as? String ?? "SyncMyPod"
@@ -47,6 +50,22 @@ struct AboutView: View {
                     isShowingAcknowledgements = true
                 }
             }
+            Button {
+                if let url = Self.buyMeACoffeeURL {
+                    openURL(url)
+                }
+            } label: {
+                Label {
+                    Text("Buy Me a Coffee")
+                } icon: {
+                    Image("BuyMeACoffee")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(height: Self.coffeeIconSize)
+                        .clipShape(.rect(cornerRadius: Self.coffeeIconCornerRadius))
+                }
+            }
+            .buttonStyle(.borderedProminent)
         }
         .padding()
         .frame(minWidth: 280)
