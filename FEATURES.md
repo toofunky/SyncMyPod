@@ -27,3 +27,5 @@
 - [x] Sync multiple devices
 - [x] Resize cover files
 - [x] Preserve track sorting
+- [x] Support lyric files (.LRC)
+- [x] Support cover files (cover.jpg/cover.png/folder.jpg/folder.png)
