@@ -3,6 +3,8 @@ import SwiftData
 import SwiftUI
 
 struct LibraryTrackTableView: View {
+    private static let nowPlayingColumnWidth = 16.0
+
     let tracks: [LibraryTrack]
     @Binding var selection: Set<LibraryTrack.ID>
     var searchText = ""
@@ -10,6 +12,7 @@ struct LibraryTrackTableView: View {
     var showPlaylist: ((LibraryPlaylist) -> Void)?
 
     @Environment(\.modelContext) private var context
+    @Environment(MusicPlayerModel.self) private var player: MusicPlayerModel?
     @Query(sort: LibraryPlaylist.sidebarOrder) private var playlists: [LibraryPlaylist]
     @State private var sortOrder = [KeyPathComparator(\LibraryTrack.albumArtist)]
     @State private var sortedTracks: [LibraryTrack] = []
@@ -33,6 +36,7 @@ struct LibraryTrackTableView: View {
     private var table: some View {
         Table(sortedTracks, selection: $selection, sortOrder: $sortOrder,
               columnCustomization: $columnCustomization) {
+            nowPlayingColumn
             positionColumns
             tagColumns
             audioColumns
@@ -53,6 +57,8 @@ struct LibraryTrackTableView: View {
                 .disabled(showPlaylist == nil || ids.isEmpty)
             Button("Show in Finder", systemImage: "folder") { showInFinder(ids) }
                 .disabled(ids.isEmpty)
+        } primaryAction: { ids in
+            play(ids)
         }
         .onChange(of: tracks) {
             sortKeys = LibraryTrack.sortKeys(for: tracks)
@@ -64,6 +70,16 @@ struct LibraryTrackTableView: View {
         }
         .onChange(of: sortOrder) { updateRows(revealingSelection: true) }
         .onChange(of: searchText) { updateRows(revealingSelection: true) }
+    }
+
+    /// Every column must sort; file paths aren't a sort field, so clicking this one restores the default order.
+    private var nowPlayingColumn: some TableColumnContent<LibraryTrack, KeyPathComparator<LibraryTrack>> {
+        TableColumn("", sortUsing: KeyPathComparator(\LibraryTrack.filePath)) { track in
+            NowPlayingIndicator(track: track)
+        }
+        .width(Self.nowPlayingColumnWidth)
+        .customizationID("nowPlaying")
+        .disabledCustomizationBehavior(.all)
     }
 
     @TableColumnBuilder<LibraryTrack, KeyPathComparator<LibraryTrack>>
@@ -145,6 +161,12 @@ struct LibraryTrackTableView: View {
         } else {
             context.insert(LibraryPlaylist(trackPaths: selected.map(\.filePath)))
         }
+    }
+
+    /// Plays the first double-clicked song, then the ones after it in the order shown.
+    private func play(_ ids: Set<LibraryTrack.ID>) {
+        guard let index = sortedTracks.firstIndex(where: { ids.contains($0.id) }) else { return }
+        player?.play(sortedTracks, startingAt: index)
     }
 
     private func playlists(containing ids: Set<LibraryTrack.ID>) -> [LibraryPlaylist] {

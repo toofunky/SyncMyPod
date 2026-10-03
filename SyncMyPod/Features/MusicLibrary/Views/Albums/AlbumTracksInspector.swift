@@ -9,6 +9,7 @@ struct AlbumTracksInspector: View {
     let albumID: LibraryAlbum.ID?
     @Binding var isShowing: Bool
 
+    @Environment(MusicPlayerModel.self) private var player: MusicPlayerModel?
     @Query private var tracks: [LibraryTrack]
     @State private var albumTracks: [LibraryTrack] = []
 
@@ -44,6 +45,8 @@ struct AlbumTracksInspector: View {
     private func discSection(_ disc: Int) -> some View {
         let rows = ForEach(albumTracks.filter { $0.discNumber == disc }) { track in
             AlbumTrackRow(track: track, albumArtist: albumTracks[0].syncArtist)
+                .contentShape(.rect)
+                .onTapGesture(count: 2) { play(track) }
         }
         if discNumbers.count > 1 {
             Section(disc > 0 ? "Disc \(disc)" : "Other") { rows }
@@ -55,6 +58,11 @@ struct AlbumTracksInspector: View {
     private var discNumbers: [Int] {
         var seen = Set<Int>()
         return albumTracks.map(\.discNumber).filter { seen.insert($0).inserted }
+    }
+
+    private func play(_ track: LibraryTrack) {
+        guard let index = albumTracks.firstIndex(where: { $0.id == track.id }) else { return }
+        player?.play(albumTracks, startingAt: index)
     }
 
     private func updateAlbumTracks() {

@@ -1,10 +1,11 @@
 import SwiftUI
 
 struct AlbumArtworkView: View {
-    private static let cornerRadius = 6.0
+    static let cornerRadius = 6.0
 
     let path: String?
     let fingerprint: String?
+    var placeholderFont: Font = .largeTitle
 
     @Environment(\.albumArtworkLoader) private var loader
     @State private var image: CGImage?
@@ -26,7 +27,7 @@ struct AlbumArtworkView: View {
                 .scaledToFill()
         } else {
             Image(systemName: "music.note")
-                .font(.largeTitle)
+                .font(placeholderFont)
                 .foregroundStyle(.secondary)
         }
     }

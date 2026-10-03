@@ -3,6 +3,7 @@ import SwiftUI
 
 struct ContentView: View {
     @Environment(IPodSyncModel.self) private var syncModel
+    @Environment(MusicPlayerModel.self) private var player: MusicPlayerModel?
     @State private var selection: SidebarItem? = .library(.artists)
     @State private var selectedPlaylistID: UUID?
     @State private var playlistTrackSelections: [UUID: Set<PlaylistEntry.ID>] = [:]
@@ -31,6 +32,13 @@ struct ContentView: View {
                              albumID: selectedAlbumID, isLocked: libraryModel.isScanning || syncModel.isSyncing,
                              isShowingTagEditor: $isShowingTagEditor, isShowingAlbum: $isShowingAlbum)
         }
+        .contentMargins(.bottom, showsPlayer ? MusicPlayerOverlay.clearance : 0, for: .scrollContent)
+        .overlay(alignment: .bottom) {
+            if let player, showsPlayer {
+                MusicPlayerOverlay(player: player)
+                    .padding()
+            }
+        }
         .onChange(of: selectedAlbumID) { isShowingAlbum = selectedAlbumID != nil }
         .frame(minWidth: 420, minHeight: 320)
     }
@@ -51,6 +59,8 @@ struct ContentView: View {
         MusicLibraryView(model: libraryModel, section: section, selection: $librarySelection,
                          albumSelection: $selectedAlbumID, artistSelection: $selectedArtistID, showPlaylist: show)
     }
+
+    private var showsPlayer: Bool { player != nil && selection != .device }
 
     private var librarySection: LibrarySection? {
         if case .library(let section) = selection { section } else { nil }
@@ -84,6 +94,7 @@ struct ContentView: View {
     ContentView()
         .environment(IPodMountWatcher.preview(connectedDevice: .preview))
         .environment(IPodSyncModel())
+        .environment(MusicPlayerModel())
         .environment(\.iTunesDBLoader, .preview)
         .modelContainer(.preview)
 }

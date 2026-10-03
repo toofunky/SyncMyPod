@@ -37,4 +37,9 @@ struct AlbumSortOrderTests {
         let titles = AlbumSortOrder.year.sorted(albums).map(\.title)
         #expect(titles == ["Abbey Road", "The Wall", "Hot Fuss", "Sam's Town", "Untitled"])
     }
+
+    @Test func yearDescendingPutsNewestFirstAndUndatedAlbumsLast() {
+        let titles = AlbumSortOrder.yearDescending.sorted(albums).map(\.title)
+        #expect(titles == ["Sam's Town", "Hot Fuss", "The Wall", "Abbey Road", "Untitled"])
+    }
 }

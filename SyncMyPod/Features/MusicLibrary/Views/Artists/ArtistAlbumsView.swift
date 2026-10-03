@@ -6,6 +6,8 @@ struct ArtistAlbumsView: View {
     let sections: [ArtistAlbumSection]
     @Binding var sortOrder: AlbumSortOrder
 
+    @Environment(MusicPlayerModel.self) private var player: MusicPlayerModel?
+
     var body: some View {
         VStack(spacing: 0) {
             header
@@ -33,7 +35,7 @@ struct ArtistAlbumsView: View {
         ScrollView {
             LazyVStack(alignment: .leading) {
                 ForEach(sections) { section in
-                    ArtistAlbumRow(section: section)
+                    ArtistAlbumRow(section: section, onPlay: play)
                         .padding(.vertical)
                     if section.id != sections.last?.id {
                         Divider()
@@ -42,6 +44,13 @@ struct ArtistAlbumsView: View {
             }
             .padding(.horizontal)
         }
+    }
+
+    /// Plays on through the rest of the album and then the albums below it.
+    private func play(_ track: LibraryTrack) {
+        let tracks = sections.flatMap(\.tracks)
+        guard let index = tracks.firstIndex(where: { $0.id == track.id }) else { return }
+        player?.play(tracks, startingAt: index)
     }
 }
 

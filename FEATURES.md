@@ -22,3 +22,4 @@
 - [x] Show in Playlist context menu item
 - [x] Album grid view
 - [x] Artists view
+- [x] Music player

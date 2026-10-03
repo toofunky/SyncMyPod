@@ -5,6 +5,7 @@ import SwiftUI
 struct SyncMyPodApp: App {
     @State private var mountWatcher = IPodMountWatcher()
     @State private var syncModel = IPodSyncModel()
+    @State private var player = MusicPlayerModel()
     @State private var updater = AppUpdater()
     private let modelContainer = LibraryStore.makeContainer()
     @AppStorage(AppAppearance.storageKey) private var appearance = AppAppearance.system
@@ -18,6 +19,7 @@ struct SyncMyPodApp: App {
             ContentView()
                 .environment(mountWatcher)
                 .environment(syncModel)
+                .environment(player)
                 .preferredColorScheme(appearance.colorScheme)
         }
         .modelContainer(modelContainer)
