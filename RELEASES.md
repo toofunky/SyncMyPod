@@ -1,6 +1,10 @@
+SyncMyPod-1.7
+- Add music player.
+- Add ability to sort albums by year ascending or descending.
+
 SyncMyPod-1.6
 - Add support for iPod Nanos.
-- Move playlists into subview
+- Move playlists into subview.
 -  Simplify sidebar and add Artists, Albums, and Songs view.
 - Update toolbar layout on library view.
 
