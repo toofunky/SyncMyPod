@@ -3,6 +3,8 @@ import SwiftData
 import SwiftUI
 
 struct LibraryTrackTableView: View {
+    private static let nowPlayingColumnWidth = 16.0
+
     let tracks: [LibraryTrack]
     @Binding var selection: Set<LibraryTrack.ID>
     var searchText = ""
@@ -34,6 +36,7 @@ struct LibraryTrackTableView: View {
     private var table: some View {
         Table(sortedTracks, selection: $selection, sortOrder: $sortOrder,
               columnCustomization: $columnCustomization) {
+            nowPlayingColumn
             positionColumns
             tagColumns
             audioColumns
@@ -67,6 +70,16 @@ struct LibraryTrackTableView: View {
         }
         .onChange(of: sortOrder) { updateRows(revealingSelection: true) }
         .onChange(of: searchText) { updateRows(revealingSelection: true) }
+    }
+
+    /// Every column must sort; file paths aren't a sort field, so clicking this one restores the default order.
+    private var nowPlayingColumn: some TableColumnContent<LibraryTrack, KeyPathComparator<LibraryTrack>> {
+        TableColumn("", sortUsing: KeyPathComparator(\LibraryTrack.filePath)) { track in
+            NowPlayingIndicator(track: track)
+        }
+        .width(Self.nowPlayingColumnWidth)
+        .customizationID("nowPlaying")
+        .disabledCustomizationBehavior(.all)
     }
 
     @TableColumnBuilder<LibraryTrack, KeyPathComparator<LibraryTrack>>

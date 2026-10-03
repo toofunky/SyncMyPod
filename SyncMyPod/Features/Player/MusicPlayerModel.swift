@@ -17,6 +17,10 @@ final class MusicPlayerModel {
     var currentTrack: LibraryTrack? { queue.current }
     var canSkipForward: Bool { queue.hasNext || (isRepeating && currentTrack != nil) }
 
+    func isCurrent(_ track: LibraryTrack) -> Bool {
+        currentTrack?.filePath == track.filePath
+    }
+
     func play(_ tracks: [LibraryTrack], startingAt index: Int) {
         guard tracks.indices.contains(index) else { return }
         queue = PlaybackQueue(tracks: tracks, startingAt: index, shuffled: isShuffled)

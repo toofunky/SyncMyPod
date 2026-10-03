@@ -9,10 +9,12 @@ struct AlbumTrackRow: View {
 
     var body: some View {
         HStack(alignment: .firstTextBaseline) {
-            Text(track.trackNumber > 0 ? String(track.trackNumber) : "")
-                .monospacedDigit()
-                .foregroundStyle(.secondary)
-                .frame(minWidth: Self.numberWidth, alignment: .trailing)
+            NowPlayingIndicator(track: track) {
+                Text(track.trackNumber > 0 ? String(track.trackNumber) : "")
+                    .monospacedDigit()
+                    .foregroundStyle(.secondary)
+            }
+            .frame(minWidth: Self.numberWidth, alignment: .trailing)
             VStack(alignment: .leading, spacing: 0) {
                 Text(track.title)
                 if showsArtist {
