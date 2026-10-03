@@ -1,6 +1,7 @@
 SyncMyPod-1.7
 - Add music player.
 - Add ability to sort albums by year ascending or descending.
+- Add artwork to playlist songs.
 
 SyncMyPod-1.6
 - Add support for iPod Nanos.
