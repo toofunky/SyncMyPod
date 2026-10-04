@@ -15,4 +15,5 @@ nonisolated struct AudioTags: Equatable, Sendable {
     var sortAlbumArtist: String?
     var sortAlbum: String?
     var sortComposer: String?
+    var hasLyrics = false
 }

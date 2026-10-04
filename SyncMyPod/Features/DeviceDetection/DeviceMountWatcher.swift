@@ -4,9 +4,10 @@ import AppKit
 
 @Observable
 @MainActor
-final class IPodMountWatcher {
-    private(set) var connectedDevice: IPodDevice?
-    private(set) var isEjecting = false
+final class DeviceMountWatcher {
+    /// In the order they were attached.
+    private(set) var connectedDevices: [ConnectedDevice] = []
+    private(set) var ejectingDeviceIDs: Set<String> = []
 
     @ObservationIgnored
     nonisolated(unsafe) private var mountObserver: NSObjectProtocol?
@@ -18,13 +19,14 @@ final class IPodMountWatcher {
         scanAlreadyMountedVolumes()
     }
 
-    #if DEBUG
-    private init(previewDevice: IPodDevice?) {
-        connectedDevice = previewDevice
+    /// Doesn't watch volumes; for previews and tests.
+    init(devices: [ConnectedDevice]) {
+        devices.forEach(add)
     }
 
-    static func preview(connectedDevice: IPodDevice? = nil) -> IPodMountWatcher {
-        IPodMountWatcher(previewDevice: connectedDevice)
+    #if DEBUG
+    static func preview(connectedDevices: [ConnectedDevice] = []) -> DeviceMountWatcher {
+        DeviceMountWatcher(devices: connectedDevices)
     }
     #endif
 
@@ -34,12 +36,29 @@ final class IPodMountWatcher {
         if let unmountObserver { center.removeObserver(unmountObserver) }
     }
 
-    func ejectConnectedDevice() async throws {
-        guard let device = connectedDevice, !isEjecting else { return }
-        isEjecting = true
-        defer { isEjecting = false }
+    func device(withID id: String) -> ConnectedDevice? {
+        connectedDevices.first { $0.id == id }
+    }
+
+    func eject(_ device: ConnectedDevice) async throws {
+        guard !ejectingDeviceIDs.contains(device.id) else { return }
+        ejectingDeviceIDs.insert(device.id)
+        defer { ejectingDeviceIDs.remove(device.id) }
         try await Self.unmountAndEject(volumeAt: device.volumeURL)
-        handleVolumeDisappeared(at: device.volumeURL)
+        removeDevice(at: device.volumeURL)
+    }
+
+    /// Replaces a device already listed for the same volume or ID, keeping its place.
+    func add(_ device: ConnectedDevice) {
+        if let index = connectedDevices.firstIndex(where: { $0.volumeURL == device.volumeURL || $0.id == device.id }) {
+            connectedDevices[index] = device
+        } else {
+            connectedDevices.append(device)
+        }
+    }
+
+    func removeDevice(at volumeURL: URL) {
+        connectedDevices.removeAll { $0.volumeURL == volumeURL }
     }
 
     @concurrent
@@ -60,7 +79,7 @@ final class IPodMountWatcher {
                                               object: nil, queue: .main) { [weak self] note in
             guard let url = note.userInfo?[NSWorkspace.volumeURLUserInfoKey] as? URL else { return }
             Task { @MainActor [weak self] in
-                self?.handleVolumeDisappeared(at: url)
+                self?.removeDevice(at: url)
             }
         }
     }
@@ -74,14 +93,9 @@ final class IPodMountWatcher {
 
     private func handleVolumeAppeared(at url: URL) {
         Task {
-            guard let device = await IPodDevice.scan(volumeAt: url),
+            guard let device = await ConnectedDevice.scan(volumeAt: url),
                   FileManager.default.fileExists(atPath: url.path) else { return }
-            connectedDevice = device   // last-attached wins for this slice
+            add(device)
         }
-    }
-
-    private func handleVolumeDisappeared(at url: URL) {
-        guard connectedDevice?.volumeURL == url else { return }
-        connectedDevice = nil
     }
 }

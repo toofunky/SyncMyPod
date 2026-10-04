@@ -1,6 +1,6 @@
 import Foundation
 
-nonisolated struct IPodSyncProgress: Equatable, Sendable {
+nonisolated struct SyncProgress: Equatable, Sendable {
     let completed: Int
     let total: Int
     /// The track being copied, or `nil` once the databases are being written.

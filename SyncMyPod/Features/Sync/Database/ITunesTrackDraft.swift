@@ -27,6 +27,8 @@ nonisolated struct ITunesTrackDraft: Equatable, Sendable {
     var sortAlbumArtist = ""
     var sortAlbum = ""
     var sortComposer = ""
+    /// Whether the file holds lyrics. The iPod only reads them when the track says so.
+    var hasLyrics = false
 
     var albumListArtist: String { albumArtist.isEmpty ? artist : albumArtist }
 }

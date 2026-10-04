@@ -46,6 +46,17 @@ struct AudioMetadataReaderTests {
                                            disc: TagNumberPair(number: 1, count: 2)))
     }
 
+    @Test func notesEmbeddedLyrics() async throws {
+        let folder = try AudioFixtureWriter.makeTemporaryFolder()
+        defer { try? FileManager.default.removeItem(at: folder) }
+        let plain = try MP3FixtureWriter.write(to: folder.appending(path: "plain.mp3"), tags: ["TIT2": "Clocks"])
+        let sung = try MP3FixtureWriter.write(to: folder.appending(path: "sung.mp3"),
+                                              tags: ["TIT2": "Clocks", "USLT": "eng\u{0}Lights go out"])
+
+        #expect(try #require(try await AudioMetadataReader().read(plain)).tags.hasLyrics == false)
+        #expect(try #require(try await AudioMetadataReader().read(sung)).tags.hasLyrics)
+    }
+
     @Test func rejectsFileWithoutAudio() async throws {
         let folder = try AudioFixtureWriter.makeTemporaryFolder()
         defer { try? FileManager.default.removeItem(at: folder) }

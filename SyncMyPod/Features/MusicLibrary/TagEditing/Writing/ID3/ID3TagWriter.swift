@@ -20,7 +20,7 @@ nonisolated struct ID3TagWriter {
         return try ID3TagParser.parse(handle)
     }
 
-    private func apply(_ changes: TagChanges, to tag: inout ID3Tag) {
+    func apply(_ changes: TagChanges, to tag: inout ID3Tag) {
         let yearID: FourCC = tag.majorVersion >= 4 ? .id3RecordingTime : .id3Year
         let texts: [(FourCC, String?)] = [
             (.id3Title, changes.title), (.id3Artist, changes.artist), (.id3Album, changes.album),
@@ -36,6 +36,9 @@ nonisolated struct ID3TagWriter {
         }
         for case let (id, pair?) in [(FourCC.id3Track, changes.track), (.id3Disc, changes.disc)] {
             set([id], pair.number > 0 ? ID3FrameBuilder.numberPair(id, pair) : nil, in: &tag.frames)
+        }
+        if let lyrics = changes.lyrics {
+            set([.id3Lyrics], lyrics.isEmpty ? nil : ID3FrameBuilder.lyrics(lyrics), in: &tag.frames)
         }
         applyArtwork(changes.artwork, to: &tag.frames)
     }

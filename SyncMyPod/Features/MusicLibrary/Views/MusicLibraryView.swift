@@ -11,10 +11,10 @@ struct MusicLibraryView: View {
     var showPlaylist: ((LibraryPlaylist) -> Void)?
 
     @Environment(\.modelContext) private var context
-    @Environment(IPodMountWatcher.self) private var watcher
+    @Environment(DeviceMountWatcher.self) private var watcher
     @Query private var folders: [LibraryFolder]
     @Query private var tracks: [LibraryTrack]
-    @Environment(IPodSyncModel.self) private var syncModel
+    @Environment(DeviceSyncModel.self) private var syncModel
     @State private var isChoosingFolder = false
     @State private var searchText = ""
     @AppStorage(AppAppearance.storageKey) private var appearance = AppAppearance.system
@@ -29,11 +29,28 @@ struct MusicLibraryView: View {
             .syncProgressSheet()
     }
 
-    private var addToIPod: (([LibraryTrack]) -> Void)? {
-        guard let device = watcher.connectedDevice, !syncModel.isSyncing else { return nil }
-        return { tracks in
-            let preserves = IPodSyncSettings.settings(for: device.id, in: context).preservesAlbumArtist
-            syncModel.sync(tracks.map { $0.syncRequest(preservingAlbumArtist: preserves) }, to: device)
+    private var addTargets: [ConnectedDevice] {
+        syncModel.isSyncing ? [] : watcher.connectedDevices
+    }
+
+    private var addToDevice: ((ConnectedDevice, [LibraryTrack]) -> Void)? {
+        guard !addTargets.isEmpty else { return nil }
+        return { device, tracks in
+            syncModel.sync(syncRequests(for: tracks, to: device), to: device)
+        }
+    }
+
+    private func syncRequests(for tracks: [LibraryTrack], to device: ConnectedDevice) -> [IPodSyncRequest] {
+        switch device {
+        case .iPod(let iPod):
+            let settings = IPodSyncSettings.settings(for: device.id, in: context)
+            let embedsLyrics = settings.syncsLyricsSidecars && iPod.showsLyrics
+            return tracks.filter(\.codec.syncsToIPod).map {
+                $0.syncRequest(preservingAlbumArtist: settings.preservesAlbumArtist,
+                               embeddingLyricsSidecar: embedsLyrics)
+            }
+        case .audioPlayer(let player):
+            return tracks.map { $0.syncRequest(preservingAlbumArtist: player.config.preserveAlbumArtist) }
         }
     }
 
@@ -50,7 +67,7 @@ struct MusicLibraryView: View {
             ContentUnavailableView {
                 Label("No Music Library", systemImage: "music.note.house")
             } description: {
-                Text("Choose the folder that contains your AAC, Apple Lossless or MP3 music files.")
+                Text("Choose the folder that contains your AAC, Apple Lossless, MP3, FLAC, AIFF or WAV music files.")
             } actions: {
                 Button("Choose Folder…") { isChoosingFolder = true }
             }
@@ -62,7 +79,7 @@ struct MusicLibraryView: View {
         switch section {
         case .songs:
             LibraryTrackTableView(tracks: tracks, selection: $selection, searchText: searchText,
-                                  addToIPod: addToIPod, showPlaylist: showPlaylist)
+                                  addTargets: addTargets, addToDevice: addToDevice, showPlaylist: showPlaylist)
         case .albums:
             AlbumGridView(tracks: tracks, searchText: searchText, selection: $albumSelection)
         case .artists:
@@ -105,8 +122,8 @@ struct MusicLibraryView: View {
     @Previewable @State var selection = Set<LibraryTrack.ID>()
     MusicLibraryView(model: MusicLibraryModel(), selection: $selection, albumSelection: .constant(nil),
                      artistSelection: .constant(nil))
-        .environment(IPodMountWatcher.preview(connectedDevice: .preview))
-        .environment(IPodSyncModel())
+        .environment(DeviceMountWatcher.preview(connectedDevices: [.iPod(.preview)]))
+        .environment(DeviceSyncModel())
         .modelContainer(.preview)
 }
 
@@ -114,8 +131,8 @@ struct MusicLibraryView: View {
     @Previewable @State var albumSelection: LibraryAlbum.ID?
     MusicLibraryView(model: MusicLibraryModel(), section: .albums, selection: .constant([]),
                      albumSelection: $albumSelection, artistSelection: .constant(nil))
-        .environment(IPodMountWatcher.preview(connectedDevice: .preview))
-        .environment(IPodSyncModel())
+        .environment(DeviceMountWatcher.preview(connectedDevices: [.iPod(.preview)]))
+        .environment(DeviceSyncModel())
         .modelContainer(.preview)
 }
 
@@ -123,8 +140,8 @@ struct MusicLibraryView: View {
     @Previewable @State var selection = Set<LibraryTrack.ID>()
     MusicLibraryView(model: MusicLibraryModel(), selection: $selection, albumSelection: .constant(nil),
                      artistSelection: .constant(nil))
-        .environment(IPodMountWatcher.preview())
-        .environment(IPodSyncModel())
+        .environment(DeviceMountWatcher.preview())
+        .environment(DeviceSyncModel())
         .modelContainer(.emptyPreview)
 }
 #endif

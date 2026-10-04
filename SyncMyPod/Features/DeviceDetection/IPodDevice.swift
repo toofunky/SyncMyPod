@@ -39,6 +39,9 @@ nonisolated struct IPodDevice: Identifiable, Equatable, Sendable {
             ?? usbIdentity?.productID.flatMap(IPodModelCatalog.databaseSigning(forProductID:))
     }
 
+    /// `false` for the nano 6G/7G, which list lyrics in an SQLite table SyncMyPod doesn't write.
+    var showsLyrics: Bool { databaseSigning != .hashAB }
+
     var generationDescription: String? {
         generation?.displayName ?? usbIdentity?.productID.flatMap(IPodModelCatalog.familyName(forProductID:))
     }
@@ -113,6 +116,18 @@ nonisolated extension IPodDevice {
         }(),
         usbIdentity: IPodUSBIdentity(vendorString: "Apple", productString: "iPod",
                                       serialNumber: "000A270015D4335D", vendorID: 1452, productID: 4617)
+    )
+
+    static let previewNano = IPodDevice(
+        id: "000A27001C8F2E11",
+        volumeURL: URL(fileURLWithPath: "/Volumes/NANO"),
+        volumeName: "Michael's nano",
+        capacityBytes: 15_923_150_848,
+        availableBytes: 4_102_553_600,
+        sysInfo: IPodSysInfo(),
+        usbIdentity: IPodUSBIdentity(vendorString: "Apple", productString: "iPod",
+                                      serialNumber: "000A27001C8F2E11", vendorID: 1452,
+                                      productID: IPodModelCatalog.nano7GProductID)
     )
 }
 #endif

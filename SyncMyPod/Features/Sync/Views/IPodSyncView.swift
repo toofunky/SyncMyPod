@@ -6,7 +6,7 @@ struct IPodSyncView: View {
 
     @Environment(\.modelContext) private var context
     @Environment(\.iTunesDBLoader) private var loader
-    @Environment(IPodSyncModel.self) private var syncModel
+    @Environment(DeviceSyncModel.self) private var syncModel
     @Query private var tracks: [LibraryTrack]
     @Query private var folders: [LibraryFolder]
     @Query(sort: \LibraryPlaylist.createdAt) private var playlists: [LibraryPlaylist]
@@ -32,12 +32,13 @@ struct IPodSyncView: View {
                                    description: Text(loadError))
         } else if let settings, let onDevice {
             SyncSettingsForm(settings: settings,
-                             library: SyncLibrarySnapshot(tracks: tracks, playlists: playlists,
-                                                          preservingAlbumArtist: settings.preservesAlbumArtist),
+                             library: SyncLibrarySnapshot(tracks: iPodTracks, playlists: playlists,
+                                                          preservingAlbumArtist: settings.preservesAlbumArtist,
+                                                          embeddingLyricsSidecars: embedsLyricsSidecars(settings)),
                              onDevice: onDevice,
                              manifest: manifest, freeBytes: freeBytes ?? device.availableBytes,
                              isSyncing: syncModel.isSyncing) {
-                syncModel.sync($0.syncRequests, removing: $0.removalIDs, playlists: $0.playlists, to: device)
+                syncModel.sync($0.syncRequests, removing: $0.removalIDs, playlists: $0.playlists, to: .iPod(device))
             }
         } else {
             ProgressView("Reading iPod…")
@@ -45,10 +46,21 @@ struct IPodSyncView: View {
         }
     }
 
+    private var iPodTracks: [LibraryTrack] {
+        tracks.filter(\.codec.syncsToIPod)
+    }
+
+    private func embedsLyricsSidecars(_ settings: IPodSyncSettings) -> Bool {
+        settings.syncsLyricsSidecars && device.showsLyrics
+    }
+
     private func reload() async {
         let settings = IPodSyncSettings.settings(for: device.id, in: context)
         self.settings = settings
-        let requests = tracks.map { $0.syncRequest(preservingAlbumArtist: settings.preservesAlbumArtist) }
+        let requests = iPodTracks.map {
+            $0.syncRequest(preservingAlbumArtist: settings.preservesAlbumArtist,
+                           embeddingLyricsSidecar: embedsLyricsSidecars(settings))
+        }
         do {
             let database = try await loader.load(device.volumeURL)
             manifest = await IPodControlFiles(volumeURL: device.volumeURL)
@@ -68,7 +80,7 @@ struct IPodSyncView: View {
 #Preview {
     IPodSyncView(device: .preview)
         .environment(\.iTunesDBLoader, .preview)
-        .environment(IPodSyncModel())
+        .environment(DeviceSyncModel())
         .modelContainer(.preview)
 }
 #endif

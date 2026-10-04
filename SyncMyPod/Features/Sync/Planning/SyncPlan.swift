@@ -46,14 +46,10 @@ nonisolated struct SyncPlan: Equatable, Sendable {
                      selectedGenres: Set<String>, playlists: [IPodPlaylistRequest], onDevice: [ITunesTrack],
                      devicePlaylists: [ITunesPlaylist], manifest: SyncManifest,
                      strayDatabaseIDs: Set<UInt64>) -> SyncPlan {
-        let playlistPaths = Set(playlists.flatMap { $0.tracks.map(\.sourcePath) })
-        let isSelected = { (track: SyncTrackSnapshot) in
-            mode == .allSongs || selectedAlbums.contains(track.albumKey)
-                || selectedGenres.contains(track.genre) || playlistPaths.contains(track.filePath)
-        }
+        let selection = SyncSelection(mode: mode, albums: selectedAlbums, genres: selectedGenres)
+            .partition(tracks, syncedPlaylists: playlists)
         let plan = SyncPlanner(manifest: manifest, onDevice: onDevice, strayDatabaseIDs: strayDatabaseIDs)
-            .plan(selected: tracks.filter(isSelected).map(\.request),
-                  unselected: tracks.filter { !isSelected($0) }.map(\.request))
+            .plan(selected: selection.selected.map(\.request), unselected: selection.unselected.map(\.request))
         let resolver = PlaylistTrackResolver(manifest: manifest.valid(for: Set(onDevice.map(\.databaseID))),
                                              onDevice: onDevice)
         let changes = PlaylistChangeCounter.count(playlists, resolver: resolver, onDevice: onDevice,

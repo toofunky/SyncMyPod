@@ -2,7 +2,7 @@
 
 - [x] Support iPod 5G, 5.5G, 6G, 6.5G/7G
 - [x] Support iPod nano 7G
-- [x] Sync M4A/AAC, M4A/ALAC and MP3 files
+- [x] Sync M4A/AAC, M4A/ALAC, MP3, FLAC, WAV, AIFF files (the latter three are excluded from iPod)
 - [x] Sync entire library
 - [x] Sync partial library (select artist/album)
 - [x] Create playlists
@@ -23,3 +23,10 @@
 - [x] Album grid view
 - [x] Artists view
 - [x] Music player
+- [x] Support non-Apple digital audio players (directory syncing)
+- [x] Sync multiple devices
+- [x] Resize cover files
+- [x] Preserve track sorting
+- [x] Support lyric files (.LRC)
+- [x] Lyric file editor
+- [x] Support cover files (cover.jpg/cover.png/folder.jpg/folder.png)

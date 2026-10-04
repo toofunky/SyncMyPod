@@ -12,6 +12,9 @@ nonisolated extension AudioCodec {
         case .aac: "AAC audio file"
         case .alac: "Apple Lossless audio file"
         case .mp3: "MPEG audio file"
+        case .flac: "FLAC audio file"
+        case .aiff: "AIFF audio file"
+        case .wav: "WAV audio file"
         }
     }
 

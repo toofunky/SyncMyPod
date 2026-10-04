@@ -25,9 +25,10 @@ extension LibraryTrack {
         return name.isEmpty ? Self.unknownGenre : name
     }
 
-    func syncSnapshot(preservingAlbumArtist: Bool) -> SyncTrackSnapshot {
+    func syncSnapshot(preservingAlbumArtist: Bool, embeddingLyricsSidecar: Bool = false) -> SyncTrackSnapshot {
         SyncTrackSnapshot(filePath: filePath, artist: syncArtist, artistSortName: syncArtistSortName,
                           album: syncAlbum, albumSortName: syncAlbum.sortName(tagged: sortAlbumTag), albumKey: syncAlbumKey,
-                          genre: syncGenre, request: syncRequest(preservingAlbumArtist: preservingAlbumArtist))
+                          genre: syncGenre, request: syncRequest(preservingAlbumArtist: preservingAlbumArtist,
+                                                                 embeddingLyricsSidecar: embeddingLyricsSidecar))
     }
 }

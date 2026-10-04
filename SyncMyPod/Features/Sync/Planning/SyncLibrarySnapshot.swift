@@ -9,8 +9,11 @@ nonisolated struct SyncLibrarySnapshot: Equatable, Sendable {
     let playlistNodes: [SyncPlaylistNode]
 
     @MainActor
-    init(tracks: [LibraryTrack], playlists: [LibraryPlaylist], preservingAlbumArtist: Bool) {
-        let snapshots = tracks.map { $0.syncSnapshot(preservingAlbumArtist: preservingAlbumArtist) }
+    init(tracks: [LibraryTrack], playlists: [LibraryPlaylist], preservingAlbumArtist: Bool,
+         embeddingLyricsSidecars: Bool = false) {
+        let snapshots = tracks.map {
+            $0.syncSnapshot(preservingAlbumArtist: preservingAlbumArtist, embeddingLyricsSidecar: embeddingLyricsSidecars)
+        }
         let requestsByPath = Dictionary(snapshots.map { ($0.filePath, $0.request) },
                                         uniquingKeysWith: { first, _ in first })
         self.tracks = snapshots

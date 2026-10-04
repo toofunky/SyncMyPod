@@ -9,6 +9,7 @@ nonisolated struct TrackRecordBuilder {
     private static let albumIDOffset = 0x120
     private static let artworkIDOffset = 0x160
     private static let dateAddedOffset = 0x68
+    private static let lyricsFlagOffset = 0xB0
 
     let headerLength: Int
 
@@ -59,6 +60,7 @@ nonisolated struct TrackRecordBuilder {
         mhit.set(UInt32(clamping: draft.year), at: 0x34)
         mhit.set(UInt32(clamping: draft.discNumber), at: 0x5C)
         mhit.set(UInt32(clamping: draft.discCount), at: 0x60)
+        mhit.set(UInt8(draft.hasLyrics ? 1 : 0), at: Self.lyricsFlagOffset)
     }
 
     /// Sets both the legacy count/size fields and the iTunes 7.1+ `mhii` link, so either firmware style finds it.

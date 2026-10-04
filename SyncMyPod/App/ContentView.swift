@@ -2,7 +2,7 @@ import SwiftData
 import SwiftUI
 
 struct ContentView: View {
-    @Environment(IPodSyncModel.self) private var syncModel
+    @Environment(DeviceSyncModel.self) private var syncModel
     @Environment(MusicPlayerModel.self) private var player: MusicPlayerModel?
     @State private var selection: SidebarItem? = .library(.artists)
     @State private var selectedPlaylistID: UUID?
@@ -16,10 +16,11 @@ struct ContentView: View {
 
     var body: some View {
         NavigationSplitView {
-            sidebar
+            AppSidebar(selection: $selection)
         } detail: {
             switch selection {
-            case .device: DeviceDetectionView()
+            case .device(let id): DeviceDetailView(deviceID: id)
+            case .noDevice: DeviceDetailView(deviceID: nil)
             case .playlists: PlaylistsView(selection: $selectedPlaylistID, trackSelections: $playlistTrackSelections)
             case .library(let section):
                 libraryView(section)
@@ -43,28 +44,12 @@ struct ContentView: View {
         .frame(minWidth: 420, minHeight: 320)
     }
 
-    private var sidebar: some View {
-        List(selection: $selection) {
-            ForEach(SidebarItem.allItems) { item in
-                if item == .device {
-                    DeviceSidebarRow()
-                } else {
-                    Label(item.title, systemImage: item.systemImage)
-                }
-            }
-        }
-        .safeAreaInset(edge: .bottom) {
-            BuyMeACoffeeButton()
-                .padding()
-        }
-    }
-
     private func libraryView(_ section: LibrarySection) -> some View {
         MusicLibraryView(model: libraryModel, section: section, selection: $librarySelection,
                          albumSelection: $selectedAlbumID, artistSelection: $selectedArtistID, showPlaylist: show)
     }
 
-    private var showsPlayer: Bool { player != nil && selection != .device }
+    private var showsPlayer: Bool { player != nil && selection?.isDevice != true }
 
     private var librarySection: LibrarySection? {
         if case .library(let section) = selection { section } else { nil }
@@ -96,8 +81,8 @@ struct ContentView: View {
 #if DEBUG
 #Preview {
     ContentView()
-        .environment(IPodMountWatcher.preview(connectedDevice: .preview))
-        .environment(IPodSyncModel())
+        .environment(DeviceMountWatcher.preview(connectedDevices: [.iPod(.preview)]))
+        .environment(DeviceSyncModel())
         .environment(MusicPlayerModel())
         .environment(\.iTunesDBLoader, .preview)
         .modelContainer(.preview)

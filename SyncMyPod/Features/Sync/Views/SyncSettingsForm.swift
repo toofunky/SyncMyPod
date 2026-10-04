@@ -3,10 +3,6 @@ import SwiftUI
 
 struct SyncSettingsForm: View {
     private static let listedRemovalLimit = 8
-    private static let preserveAlbumArtistInfo = "When a song's artist differs from its album artist, the song is "
-        + "filed under the album artist on the iPod and the guest artist is added to the title — for example, "
-        + "\"Song — Guest Artist\". This keeps albums together when you browse by artist. Your music files "
-        + "aren't changed."
 
     @Bindable var settings: IPodSyncSettings
     let library: SyncLibrarySnapshot
@@ -21,32 +17,15 @@ struct SyncSettingsForm: View {
     @State private var pendingRemoval: SyncPlan?
 
     private var planInput: SyncPlanInput {
-        SyncPlanInput(library: library, mode: settings.mode, selectedAlbums: settings.selectedAlbums,
-                      selectedGenres: settings.selectedGenres, selectedPlaylists: settings.selectedPlaylists,
-                      onDevice: onDevice, manifest: manifest)
+        SyncPlanInput(library: library, selection: settings.selection, onDevice: onDevice, manifest: manifest)
     }
 
     var body: some View {
         VStack(spacing: 0) {
-            HStack {
-                Toggle("Preserve Album Artist?", isOn: $settings.preservesAlbumArtist)
-                InfoPopoverButton(title: "Preserve Album Artist", message: Self.preserveAlbumArtistInfo)
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-                .padding([.horizontal, .top])
-            Picker("Sync", selection: $settings.mode) {
-                ForEach(SyncMode.allCases) { Text($0.title).tag($0) }
-            }
-            .pickerStyle(.radioGroup)
-            .horizontalRadioGroupLayout()
-            .labelsHidden()
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding()
-            Divider()
-            selection
+            SyncSelectionEditor(settings: settings, library: library)
             Divider()
             let input = planInput
-            SyncSummaryBar(plan: plan, isCalculating: plannedInput != input, freeBytes: freeBytes,
+            SyncSummaryBar(totals: plan?.totals, isCalculating: plannedInput != input, freeBytes: freeBytes,
                            isSyncing: isSyncing) { plan.map(start) }
                 .task(id: input) { await replan(input) }
         }
@@ -54,24 +33,6 @@ struct SyncSettingsForm: View {
             Button("Sync and Remove", role: .destructive) { onSync(plan) }
         } message: { plan in
             Text(removalMessage(plan))
-        }
-    }
-
-    @ViewBuilder
-    private var selection: some View {
-        switch settings.mode {
-        case .allSongs:
-            ContentUnavailableView("All Songs", systemImage: "music.note.list",
-                                   description: Text("Every song and playlist in your music library will be copied "
-                                                     + "to the iPod."))
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-        case .custom:
-            SyncCustomSelectionView(artists: library.artists, genres: library.genres,
-                                    playlists: library.playlistNodes,
-                                    albumSelection: $settings.selectedAlbums,
-                                    genreSelection: $settings.selectedGenres,
-                                    playlistSelection: $settings.selectedPlaylists)
-                .padding(.top)
         }
     }
 

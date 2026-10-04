@@ -17,8 +17,26 @@ nonisolated enum TestImage {
     }
 
     static func pngData(_ image: CGImage) -> Data {
+        data(image, type: .png)
+    }
+
+    static func jpegData(_ image: CGImage) -> Data {
+        data(image, type: .jpeg)
+    }
+
+    /// Width, height and type identifier of the image at `url`.
+    static func dimensions(at url: URL) -> (width: Int, height: Int, type: String)? {
+        guard let source = CGImageSourceCreateWithURL(url as CFURL, nil),
+              let properties = CGImageSourceCopyPropertiesAtIndex(source, 0, nil) as? [CFString: Any],
+              let width = properties[kCGImagePropertyPixelWidth] as? Int,
+              let height = properties[kCGImagePropertyPixelHeight] as? Int,
+              let type = CGImageSourceGetType(source) else { return nil }
+        return (width, height, type as String)
+    }
+
+    private static func data(_ image: CGImage, type: UTType) -> Data {
         let data = NSMutableData()
-        let destination = CGImageDestinationCreateWithData(data, UTType.png.identifier as CFString, 1, nil)!
+        let destination = CGImageDestinationCreateWithData(data, type.identifier as CFString, 1, nil)!
         CGImageDestinationAddImage(destination, image, nil)
         CGImageDestinationFinalize(destination)
         return data as Data

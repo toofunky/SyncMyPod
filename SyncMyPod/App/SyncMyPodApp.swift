@@ -3,8 +3,8 @@ import SwiftUI
 
 @main
 struct SyncMyPodApp: App {
-    @State private var mountWatcher = IPodMountWatcher()
-    @State private var syncModel = IPodSyncModel()
+    @State private var mountWatcher = DeviceMountWatcher()
+    @State private var syncModel = DeviceSyncModel()
     @State private var player = MusicPlayerModel()
     @State private var updater = AppUpdater()
     private let modelContainer = LibraryStore.makeContainer()

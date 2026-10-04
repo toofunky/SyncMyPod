@@ -26,7 +26,19 @@ actor LibraryScanner {
         unseen.values.forEach(modelContext.delete)
         summary.removed += unseen.count
         try modelContext.save()
+        try updateLyrics(besideSongsAt: files.map(\.path))
         return summary
+    }
+
+    /// Checks every song, since adding or removing a lyric file leaves the song itself unchanged.
+    private func updateLyrics(besideSongsAt paths: [String]) throws {
+        let index = LyricsFileIndex(besideSongsAt: paths)
+        for track in try modelContext.fetch(FetchDescriptor<LibraryTrack>()) {
+            let date = index.lyricsDate(forSongAt: track.filePath)
+            if track.hasLyrics != (date != nil) { track.hasLyrics = date != nil }
+            if track.lyricsFileDate != date { track.lyricsFileDate = date }
+        }
+        if modelContext.hasChanges { try modelContext.save() }
     }
 
     private func existingTracksByPath() throws -> [String: LibraryTrack] {

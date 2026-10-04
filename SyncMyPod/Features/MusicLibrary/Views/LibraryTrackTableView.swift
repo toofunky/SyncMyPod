@@ -8,7 +8,8 @@ struct LibraryTrackTableView: View {
     let tracks: [LibraryTrack]
     @Binding var selection: Set<LibraryTrack.ID>
     var searchText = ""
-    var addToIPod: (([LibraryTrack]) -> Void)?
+    var addTargets: [ConnectedDevice] = []
+    var addToDevice: ((ConnectedDevice, [LibraryTrack]) -> Void)?
     var showPlaylist: ((LibraryPlaylist) -> Void)?
 
     @Environment(\.modelContext) private var context
@@ -20,6 +21,8 @@ struct LibraryTrackTableView: View {
     @State private var sortedBy: KeyPathComparator<LibraryTrack>?
     @State private var filteredBy = ""
     @State private var scrollTarget: LibraryTrack.ID?
+    @State private var lyricsTrack: LibraryTrack?
+    @State private var lyricsTrackToRemove: LibraryTrack?
     @AppStorage("libraryTableColumns") private var columnCustomization = TableColumnCustomization<LibraryTrack>()
 
     var body: some View {
@@ -46,12 +49,12 @@ struct LibraryTrackTableView: View {
         .id(sortedBy)
         .id(filteredBy)
         .contextMenu(forSelectionType: LibraryTrack.ID.self) { ids in
-            Button("Add to iPod", systemImage: "ipod") {
-                addToIPod?(tracks.filter { ids.contains($0.id) })
-            }
-            .disabled(addToIPod == nil || ids.isEmpty)
+            AddToDeviceMenu(devices: addTargets) { addToDevice?($0, tracks.filter { ids.contains($0.id) }) }
+                .disabled(addToDevice == nil || ids.isEmpty)
             AddToPlaylistMenu(playlists: playlists) { add(ids, to: $0) }
                 .disabled(ids.isEmpty)
+            Divider()
+            LyricsMenuItems(track: singleTrack(ids)) { lyricsTrack = $0 } remove: { lyricsTrackToRemove = $0 }
             Divider()
             ShowInPlaylistMenu(playlists: playlists(containing: ids)) { showPlaylist?($0) }
                 .disabled(showPlaylist == nil || ids.isEmpty)
@@ -60,6 +63,7 @@ struct LibraryTrackTableView: View {
         } primaryAction: { ids in
             play(ids)
         }
+        .modifier(LyricsEditingModifier(editing: $lyricsTrack, removing: $lyricsTrackToRemove))
         .onChange(of: tracks) {
             sortKeys = LibraryTrack.sortKeys(for: tracks)
             updateRows()
@@ -98,7 +102,7 @@ struct LibraryTrackTableView: View {
 
     @TableColumnBuilder<LibraryTrack, KeyPathComparator<LibraryTrack>>
     private var tagColumns: some TableColumnContent<LibraryTrack, KeyPathComparator<LibraryTrack>> {
-        TableColumn("Title", value: \.title)
+        TableColumn("Title", value: \.title) { LibraryTrackTitleCell(track: $0) }
             .customizationID("title")
             .disabledCustomizationBehavior(.visibility)
         TableColumn("Artist", value: \.artist)
@@ -169,6 +173,10 @@ struct LibraryTrackTableView: View {
         player?.play(sortedTracks, startingAt: index)
     }
 
+    private func singleTrack(_ ids: Set<LibraryTrack.ID>) -> LibraryTrack? {
+        ids.count == 1 ? sortedTracks.first(where: { ids.contains($0.id) }) : nil
+    }
+
     private func playlists(containing ids: Set<LibraryTrack.ID>) -> [LibraryPlaylist] {
         let paths = Set(sortedTracks.filter { ids.contains($0.id) }.map(\.filePath))
         return playlists.filter { !paths.isDisjoint(with: $0.trackPaths) }
@@ -182,7 +190,8 @@ struct LibraryTrackTableView: View {
 
 #if DEBUG
 #Preview {
-    LibraryTrackTableView(tracks: LibraryTrack.previewTracks, selection: .constant([]), addToIPod: { _ in })
+    LibraryTrackTableView(tracks: LibraryTrack.previewTracks, selection: .constant([]),
+                          addTargets: [.iPod(.preview)], addToDevice: { _, _ in })
         .modelContainer(.emptyPreview)
 }
 #endif

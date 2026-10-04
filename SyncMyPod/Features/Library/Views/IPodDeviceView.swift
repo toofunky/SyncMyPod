@@ -1,8 +1,10 @@
 import SwiftData
 import SwiftUI
 
-struct ConnectedDeviceView: View {
+struct IPodDeviceView: View {
     let device: IPodDevice
+
+    private static let tabBarTopPadding: CGFloat = 10
 
     var body: some View {
         TabView {
@@ -12,19 +14,23 @@ struct ConnectedDeviceView: View {
             Tab("Sync", systemImage: "arrow.triangle.2.circlepath") {
                 IPodSyncView(device: device)
             }
+            Tab("Settings", systemImage: "gearshape") {
+                IPodSettingsView(device: device)
+            }
             Tab("Device", systemImage: "info.circle") {
                 DeviceInfoView(device: device)
             }
         }
+        .padding(.top, Self.tabBarTopPadding)
         .id(device.id)
     }
 }
 
 #if DEBUG
 #Preview {
-    ConnectedDeviceView(device: .preview)
+    IPodDeviceView(device: .preview)
         .environment(\.iTunesDBLoader, .preview)
-        .environment(IPodSyncModel())
+        .environment(DeviceSyncModel())
         .modelContainer(.preview)
 }
 #endif

@@ -36,7 +36,7 @@ nonisolated struct IPodBatchWriter {
     }
 
     private mutating func add(_ request: IPodSyncRequest) async throws {
-        var draft = try copy(request)
+        var draft = try await copy(request)
         let prepared = try await artwork.prepare(coverFrom: request.sourceURL,
                                                  albumTracks: albumTracks[IPodAlbumKey(draft)] ?? [])
         draft.artwork = prepared?.trackArtwork
@@ -47,7 +47,7 @@ nonisolated struct IPodBatchWriter {
 
     /// Replaces the audio file and rewrites the record; the cover is redrawn only if it changed.
     private mutating func update(_ update: IPodTrackUpdate) async throws {
-        var draft = try copy(update.request)
+        var draft = try await copy(update.request)
         if update.artworkChanged {
             artwork.removeImages(forTracks: [update.databaseID])
             let others = (albumTracks[IPodAlbumKey(draft)] ?? []).filter { $0 != update.databaseID }
@@ -61,11 +61,17 @@ nonisolated struct IPodBatchWriter {
         outcome.updatedDatabaseIDs[update.request.sourcePath] = update.databaseID
     }
 
-    private mutating func copy(_ request: IPodSyncRequest) throws -> ITunesTrackDraft {
+    private mutating func copy(_ request: IPodSyncRequest) async throws -> ITunesTrackDraft {
         let file = try copier.copy(request.sourceURL)
         copied.append(file.url)
         var draft = request.draft
         draft.location = file.location
+        if request.embedsLyricsSidecar {
+            let size = try await IPodLyricsEmbedder().embed(lyricsOf: request.sourcePath, into: file.url,
+                                                            codec: draft.codec)
+            draft.hasLyrics = size != nil
+            if let size { draft.fileSize = size }
+        }
         return draft
     }
 }

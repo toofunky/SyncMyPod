@@ -1,31 +1,35 @@
 import SwiftUI
 
 struct DeviceSidebarRow: View {
-    @Environment(IPodMountWatcher.self) private var watcher
-    @Environment(IPodSyncModel.self) private var syncModel
+    let device: ConnectedDevice
+
+    @Environment(DeviceMountWatcher.self) private var watcher
+    @Environment(DeviceSyncModel.self) private var syncModel
     @State private var ejectError: String?
 
     var body: some View {
         HStack {
-            Label(SidebarItem.device.title, systemImage: SidebarItem.device.systemImage)
+            Label(device.displayName, systemImage: device.systemImage)
             Spacer()
-            if watcher.connectedDevice != nil {
+            if device.isEjectable {
                 ejectButton
             }
         }
-        .alert("Couldn't Eject iPod", isPresented: isShowingError, presenting: ejectError) { _ in
+        .alert("Couldn't Eject \(device.kindName.deviceKindTitle)", isPresented: isShowingError, presenting: ejectError) { _ in
             Button("OK") {}
         } message: { message in
             Text(message)
         }
     }
 
+    private var isSyncingThisDevice: Bool { syncModel.syncingDeviceID == device.id }
+
     private var ejectButton: some View {
-        Button("Eject iPod", systemImage: "eject.fill", action: eject)
+        Button("Eject \(device.displayName)", systemImage: "eject.fill", action: eject)
             .buttonStyle(.borderless)
             .labelStyle(.iconOnly)
-            .disabled(syncModel.isSyncing || watcher.isEjecting)
-            .help(syncModel.isSyncing ? "Can't eject while a sync is in progress" : "Eject iPod")
+            .disabled(isSyncingThisDevice || watcher.ejectingDeviceIDs.contains(device.id))
+            .help(isSyncingThisDevice ? "Can't eject while a sync is in progress" : "Eject \(device.displayName)")
     }
 
     private var isShowingError: Binding<Bool> {
@@ -35,7 +39,7 @@ struct DeviceSidebarRow: View {
     private func eject() {
         Task {
             do {
-                try await watcher.ejectConnectedDevice()
+                try await watcher.eject(device)
             } catch {
                 ejectError = error.localizedDescription
             }
@@ -44,19 +48,11 @@ struct DeviceSidebarRow: View {
 }
 
 #if DEBUG
-#Preview("Connected") {
-    List {
-        DeviceSidebarRow()
+#Preview {
+    List(ConnectedDevice.previewDevices) { device in
+        DeviceSidebarRow(device: device)
     }
-    .environment(IPodMountWatcher.preview(connectedDevice: .preview))
-    .environment(IPodSyncModel())
-}
-
-#Preview("No Device") {
-    List {
-        DeviceSidebarRow()
-    }
-    .environment(IPodMountWatcher.preview())
-    .environment(IPodSyncModel())
+    .environment(DeviceMountWatcher.preview(connectedDevices: [.iPod(.preview)]))
+    .environment(DeviceSyncModel())
 }
 #endif

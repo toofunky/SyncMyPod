@@ -16,8 +16,10 @@ nonisolated struct FileRegionReplacer {
         }
     }
 
+    /// Read from the file system each time, since `URL` caches resource values from before earlier writes.
     private func fileSize() throws -> Int {
-        try url.resourceValues(forKeys: [.fileSizeKey]).fileSize ?? 0
+        let attributes = try FileManager.default.attributesOfItem(atPath: url.path(percentEncoded: false))
+        return (attributes[.size] as? NSNumber)?.intValue ?? 0
     }
 
     private func overwrite(_ range: Range<Int>, with data: Data, truncating: Bool) throws {

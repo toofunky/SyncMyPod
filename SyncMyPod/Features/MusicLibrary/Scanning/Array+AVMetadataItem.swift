@@ -1,8 +1,11 @@
 import AVFoundation
 
-/// Lookups that accept both iTunes (.m4a) and ID3 (.mp3) identifiers, returning the first that's present.
+/// Lookups that accept iTunes (.m4a), ID3 (.mp3) and Vorbis comment (.flac) identifiers, returning the first
+/// that's present.
 nonisolated extension [AVMetadataItem] {
-    var coverArt: AVMetadataItem? { firstItem(matching: [.iTunesMetadataCoverArt, .id3MetadataAttachedPicture]) }
+    var coverArt: AVMetadataItem? {
+        firstItem(matching: [.iTunesMetadataCoverArt, .id3MetadataAttachedPicture, .vorbisPicture])
+    }
 
     func firstItem(matching identifiers: [AVMetadataIdentifier]) -> AVMetadataItem? {
         identifiers.lazy

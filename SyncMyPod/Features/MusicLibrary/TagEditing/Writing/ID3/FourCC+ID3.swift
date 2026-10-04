@@ -17,4 +17,5 @@ nonisolated extension FourCC {
     static let id3SortAlbumArtist = FourCC("TSO2")
     static let id3SortAlbum = FourCC("TSOA")
     static let id3SortComposer = FourCC("TSOC")
+    static let id3Lyrics = FourCC("USLT")
 }
