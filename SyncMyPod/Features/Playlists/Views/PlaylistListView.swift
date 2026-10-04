@@ -21,13 +21,15 @@ struct PlaylistListView: View {
     private var list: some View {
         List(selection: $selection) {
             ForEach(playlists) { playlist in
-                Label(playlist.name, systemImage: "music.note.list")
+                Label(playlist.name, systemImage: playlist.isFavorites ? "heart.fill" : "music.note.list")
                     .tag(playlist.playlistID)
                     .contextMenu {
                         if let export {
                             Button("Export Playlist…", systemImage: "square.and.arrow.up") { export(playlist) }
                         }
-                        Button("Delete Playlist", systemImage: "trash", role: .destructive) { delete(playlist) }
+                        if !playlist.isFavorites {
+                            Button("Delete Playlist", systemImage: "trash", role: .destructive) { delete(playlist) }
+                        }
                     }
             }
             .onMove { LibraryPlaylist.move(playlists, fromOffsets: $0, toOffset: $1) }

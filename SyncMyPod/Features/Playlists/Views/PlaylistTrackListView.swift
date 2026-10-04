@@ -14,13 +14,18 @@ struct PlaylistTrackListView: View {
             PlaylistHeaderView(playlist: playlist, entries: entries)
             Divider()
             if entries.isEmpty {
-                ContentUnavailableView("No Songs", systemImage: "music.note",
-                                       description: Text("Add songs from Music Library with “Add to Playlist”."))
+                ContentUnavailableView("No Songs", systemImage: "music.note", description: Text(emptyMessage))
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
                 trackList
             }
         }
+    }
+
+    private var emptyMessage: LocalizedStringKey {
+        playlist.isFavorites
+            ? "Right-click songs in Songs and choose “Favorite”."
+            : "Add songs from Music Library with “Add to Playlist”."
     }
 
     private var trackList: some View {

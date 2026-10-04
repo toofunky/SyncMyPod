@@ -11,7 +11,10 @@ struct PlaylistTrackRow: View {
                 PlaylistTrackArtwork(track: track)
                     .frame(width: Self.artworkSize, height: Self.artworkSize)
                 VStack(alignment: .leading) {
-                    Text(track.title)
+                    HStack {
+                        Text(track.title)
+                        TrackStatusIcons(track: track)
+                    }
                     Text([track.artist, track.album].filter { !$0.isEmpty }.joined(separator: " — "))
                         .foregroundStyle(.secondary)
                 }
@@ -39,5 +42,6 @@ struct PlaylistTrackRow: View {
                                               track: LibraryTrack.previewTracks[0]))
         PlaylistTrackRow(entry: PlaylistEntry(id: 1, path: "/Music/Gone/Missing.m4a", track: nil))
     }
+    .environment(\.favoriteTrackPaths, [LibraryTrack.previewTracks[0].filePath])
 }
 #endif
