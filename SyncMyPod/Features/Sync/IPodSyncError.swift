@@ -23,7 +23,9 @@ nonisolated enum IPodSyncError: Error, Equatable, LocalizedError {
         case .unsupportedDevice(let name):
             "SyncMyPod couldn't identify \(name) precisely enough to write its library safely."
         case .missingLibraryCommands:
-            "The iPod nano's library setup couldn't be read over USB, so its library can't be written. Reconnect the iPod and try again."
+            "The iPod nano's library setup couldn't be read over USB, so its library can't be written. If Music is "
+                + "open, quit it, since it can keep SyncMyPod from reaching the iPod. Then reconnect the iPod and "
+                + "try again."
         case .missingFireWireID:
             "This iPod's FireWire ID couldn't be read, so its library can't be signed."
         case .signatureMismatch:

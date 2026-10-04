@@ -120,7 +120,7 @@ extension HelpTopic {
                     body: "Lyrics embedded in a song are shown on the iPod. Turn on **Sync Lyrics Sidecar** in "
                         + "**Settings** to also add the lyrics from a song's .lrc file when the song has none of "
                         + "its own. The iPod shows them as plain text, without timings. Your music files aren't "
-                        + "changed."),
+                        + "changed. Lyrics aren't shown on the iPod nano (6th and 7th generation)."),
         HelpSection(heading: "Play Counts",
                     body: "Songs you play on the iPod are counted, and SyncMyPod merges those play counts during "
                         + "the next sync."),
