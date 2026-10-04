@@ -8,6 +8,8 @@ struct PlaylistsView: View {
 
     @Environment(\.modelContext) private var context
     @Query(sort: LibraryPlaylist.sidebarOrder) private var playlists: [LibraryPlaylist]
+    @State private var isImporting = false
+    @State private var exportTarget: LibraryPlaylist?
 
     var body: some View {
         VStack(spacing: 0) {
@@ -15,6 +17,7 @@ struct PlaylistsView: View {
             Divider()
             splitView
         }
+        .playlistTransfer(isImporting: $isImporting, exportTarget: $exportTarget, selection: $selection)
     }
 
     private var header: some View {
@@ -22,16 +25,21 @@ struct PlaylistsView: View {
             Text("Playlists")
                 .font(.headline)
             Spacer()
-            Button("New Playlist", systemImage: "plus", action: create)
-                .buttonStyle(.borderless)
-                .labelStyle(.iconOnly)
+            Group {
+                Button("Import Playlist…", systemImage: "square.and.arrow.down") { isImporting = true }
+                Button("Export Playlist…", systemImage: "square.and.arrow.up", action: exportSelected)
+                    .disabled(selection == nil)
+                Button("New Playlist", systemImage: "plus", action: create)
+            }
+            .buttonStyle(.borderless)
+            .labelStyle(.iconOnly)
         }
         .padding()
     }
 
     private var splitView: some View {
         HSplitView {
-            PlaylistListView(selection: $selection)
+            PlaylistListView(selection: $selection) { exportTarget = $0 }
                 .frame(minWidth: 160, idealWidth: 200, maxWidth: 320)
             detail
                 .frame(minWidth: 300, maxWidth: .infinity, maxHeight: .infinity)
@@ -54,6 +62,10 @@ struct PlaylistsView: View {
         playlist.sortIndex = LibraryPlaylist.nextSortIndex(after: playlists)
         context.insert(playlist)
         selection = playlist.playlistID
+    }
+
+    private func exportSelected() {
+        exportTarget = playlists.first { $0.playlistID == selection }
     }
 
     private func trackSelection(for playlistID: UUID) -> Binding<Set<PlaylistEntry.ID>> {

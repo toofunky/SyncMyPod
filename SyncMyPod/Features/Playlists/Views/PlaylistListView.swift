@@ -3,6 +3,7 @@ import SwiftUI
 
 struct PlaylistListView: View {
     @Binding var selection: UUID?
+    var export: ((LibraryPlaylist) -> Void)?
 
     @Environment(\.modelContext) private var context
     @Query(sort: LibraryPlaylist.sidebarOrder) private var playlists: [LibraryPlaylist]
@@ -23,6 +24,9 @@ struct PlaylistListView: View {
                 Label(playlist.name, systemImage: "music.note.list")
                     .tag(playlist.playlistID)
                     .contextMenu {
+                        if let export {
+                            Button("Export Playlist…", systemImage: "square.and.arrow.up") { export(playlist) }
+                        }
                         Button("Delete Playlist", systemImage: "trash", role: .destructive) { delete(playlist) }
                     }
             }
