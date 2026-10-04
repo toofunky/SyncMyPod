@@ -23,8 +23,10 @@ struct IPodSettingsView: View {
                 Section {
                     option("Preserve Album Artist?", isOn: Bindable(settings).preservesAlbumArtist,
                            infoTitle: "Preserve Album Artist", info: Self.albumArtistInfo)
-                    option("Sync Lyrics Sidecar?", isOn: Bindable(settings).syncsLyricsSidecars,
-                           infoTitle: "Sync Lyrics Sidecar", info: Self.lyricsInfo)
+                    if device.showsLyrics {
+                        option("Sync Lyrics Sidecar?", isOn: Bindable(settings).syncsLyricsSidecars,
+                               infoTitle: "Sync Lyrics Sidecar", info: Self.lyricsInfo)
+                    }
                 } footer: {
                     Text("Songs already on the iPod are updated to match at the next sync.")
                         .foregroundStyle(.secondary)
@@ -47,6 +49,12 @@ struct IPodSettingsView: View {
 #if DEBUG
 #Preview {
     IPodSettingsView(device: .preview)
+        .environment(DeviceSyncModel())
+        .modelContainer(.preview)
+}
+
+#Preview("iPod nano") {
+    IPodSettingsView(device: .previewNano)
         .environment(DeviceSyncModel())
         .modelContainer(.preview)
 }

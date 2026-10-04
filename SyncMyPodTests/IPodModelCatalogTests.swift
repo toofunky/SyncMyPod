@@ -63,6 +63,7 @@ struct IPodModelCatalogTests {
                                                              vendorID: 0x05AC, productID: 0x1209))
         #expect(device.generation == nil)
         #expect(device.databaseSigning == .unsigned)
+        #expect(device.showsLyrics)
     }
 
     @Test func identifiesNano7GFromProductIDAlone() {
@@ -73,6 +74,7 @@ struct IPodModelCatalogTests {
                                                              vendorID: 0x05AC, productID: 0x1267))
         #expect(device.generation == .nano7G)
         #expect(device.databaseSigning == .hashAB)
+        #expect(!device.showsLyrics)
         #expect(throws: IPodSyncError.missingLibraryCommands) {
             _ = try IPodTrackSyncer(device: device)
         }

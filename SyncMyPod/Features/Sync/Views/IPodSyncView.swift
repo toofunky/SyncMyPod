@@ -34,7 +34,7 @@ struct IPodSyncView: View {
             SyncSettingsForm(settings: settings,
                              library: SyncLibrarySnapshot(tracks: iPodTracks, playlists: playlists,
                                                           preservingAlbumArtist: settings.preservesAlbumArtist,
-                                                          embeddingLyricsSidecars: settings.syncsLyricsSidecars),
+                                                          embeddingLyricsSidecars: embedsLyricsSidecars(settings)),
                              onDevice: onDevice,
                              manifest: manifest, freeBytes: freeBytes ?? device.availableBytes,
                              isSyncing: syncModel.isSyncing) {
@@ -50,12 +50,16 @@ struct IPodSyncView: View {
         tracks.filter(\.codec.syncsToIPod)
     }
 
+    private func embedsLyricsSidecars(_ settings: IPodSyncSettings) -> Bool {
+        settings.syncsLyricsSidecars && device.showsLyrics
+    }
+
     private func reload() async {
         let settings = IPodSyncSettings.settings(for: device.id, in: context)
         self.settings = settings
         let requests = iPodTracks.map {
             $0.syncRequest(preservingAlbumArtist: settings.preservesAlbumArtist,
-                           embeddingLyricsSidecar: settings.syncsLyricsSidecars)
+                           embeddingLyricsSidecar: embedsLyricsSidecars(settings))
         }
         do {
             let database = try await loader.load(device.volumeURL)

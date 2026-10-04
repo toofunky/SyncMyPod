@@ -42,11 +42,12 @@ struct MusicLibraryView: View {
 
     private func syncRequests(for tracks: [LibraryTrack], to device: ConnectedDevice) -> [IPodSyncRequest] {
         switch device {
-        case .iPod:
+        case .iPod(let iPod):
             let settings = IPodSyncSettings.settings(for: device.id, in: context)
+            let embedsLyrics = settings.syncsLyricsSidecars && iPod.showsLyrics
             return tracks.filter(\.codec.syncsToIPod).map {
                 $0.syncRequest(preservingAlbumArtist: settings.preservesAlbumArtist,
-                               embeddingLyricsSidecar: settings.syncsLyricsSidecars)
+                               embeddingLyricsSidecar: embedsLyrics)
             }
         case .audioPlayer(let player):
             return tracks.map { $0.syncRequest(preservingAlbumArtist: player.config.preserveAlbumArtist) }
