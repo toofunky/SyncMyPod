@@ -28,5 +28,5 @@
 - [x] Resize cover files
 - [x] Preserve track sorting
 - [x] Support lyric files (.LRC)
-- [ ] Lyric file editor
+- [x] Lyric file editor
 - [x] Support cover files (cover.jpg/cover.png/folder.jpg/folder.png)
