@@ -4,6 +4,8 @@ import SwiftUI
 struct AudioPlayerDeviceView: View {
     let device: AudioPlayerDevice
 
+    private static let tabBarTopPadding: CGFloat = 10
+
     var body: some View {
         TabView {
             Tab("Sync", systemImage: "arrow.triangle.2.circlepath") {
@@ -14,6 +16,7 @@ struct AudioPlayerDeviceView: View {
                     .id(device.config)
             }
         }
+        .padding(.top, Self.tabBarTopPadding)
         .id(device.id)
     }
 }

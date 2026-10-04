@@ -4,6 +4,8 @@ import SwiftUI
 struct IPodDeviceView: View {
     let device: IPodDevice
 
+    private static let tabBarTopPadding: CGFloat = 10
+
     var body: some View {
         TabView {
             Tab("Library", systemImage: "music.note.list") {
@@ -16,6 +18,7 @@ struct IPodDeviceView: View {
                 DeviceInfoView(device: device)
             }
         }
+        .padding(.top, Self.tabBarTopPadding)
         .id(device.id)
     }
 }
