@@ -43,7 +43,8 @@ extension HelpTopic {
 
     private static let musicLibrarySections = [
         HelpSection(heading: "Supported Files",
-                    body: "SyncMyPod reads AAC and Apple Lossless (`.m4a`) files and MP3 files. Your songs stay "
+                    body: "SyncMyPod reads AAC and Apple Lossless (`.m4a`) files, MP3 files and FLAC files. "
+                        + "iPods can't play FLAC, so FLAC songs sync only to other audio players. Your songs stay "
                         + "where they are on disk. SyncMyPod never moves or renames them."),
         HelpSection(heading: "Choosing and Rescanning",
                     body: "Click **Choose Folder…** in the toolbar to switch to a different folder. When you add, "

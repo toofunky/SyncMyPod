@@ -1,7 +1,7 @@
 import AVFoundation
 import ImageIO
 
-/// Decodes the first embedded cover (`covr` in .m4a, `APIC` in .mp3).
+/// Decodes the first embedded cover (`covr` in .m4a, `APIC` in .mp3, `PICTURE` in .flac).
 nonisolated struct CoverArtReader: Sendable {
     @concurrent
     func read(_ url: URL) async throws -> CoverArt? {

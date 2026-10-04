@@ -3,17 +3,18 @@ import Testing
 @testable import SyncMyPod
 
 struct AudioFileEnumeratorTests {
-    @Test func findsM4AAndMP3FilesRecursivelyAndSkipsOthers() throws {
+    @Test func findsM4AMP3AndFLACFilesRecursivelyAndSkipsOthers() throws {
         let folder = try AudioFixtureWriter.makeTemporaryFolder()
         defer { try? FileManager.default.removeItem(at: folder) }
-        for name in ["a.m4a", "Album/b.M4A", "c.mp3", "Album/d.MP3", "e.flac", ".hidden.mp3", "notes.txt"] {
+        for name in ["a.m4a", "Album/b.M4A", "c.mp3", "Album/d.MP3", "e.flac", "Album/f.FLAC", ".hidden.mp3",
+                     "notes.txt", "g.wav"] {
             let url = folder.appending(path: name)
             try FileManager.default.createDirectory(at: url.deletingLastPathComponent(),
                                                     withIntermediateDirectories: true)
             try Data([1, 2, 3]).write(to: url)
         }
         let names = try AudioFileEnumerator().files(in: folder).map(\.url.lastPathComponent)
-        #expect(Set(names) == ["a.m4a", "b.M4A", "c.mp3", "d.MP3"])
+        #expect(Set(names) == ["a.m4a", "b.M4A", "c.mp3", "d.MP3", "e.flac", "f.FLAC"])
     }
 
     @Test func throwsForMissingFolder() {

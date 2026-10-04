@@ -37,8 +37,14 @@ struct MusicLibraryView: View {
         guard !addTargets.isEmpty else { return nil }
         return { device, tracks in
             let preserves = preservesAlbumArtist(on: device)
-            syncModel.sync(tracks.map { $0.syncRequest(preservingAlbumArtist: preserves) }, to: device)
+            syncModel.sync(syncable(tracks, to: device).map { $0.syncRequest(preservingAlbumArtist: preserves) },
+                           to: device)
         }
+    }
+
+    private func syncable(_ tracks: [LibraryTrack], to device: ConnectedDevice) -> [LibraryTrack] {
+        guard case .iPod = device else { return tracks }
+        return tracks.filter(\.codec.syncsToIPod)
     }
 
     private func preservesAlbumArtist(on device: ConnectedDevice) -> Bool {
@@ -61,7 +67,7 @@ struct MusicLibraryView: View {
             ContentUnavailableView {
                 Label("No Music Library", systemImage: "music.note.house")
             } description: {
-                Text("Choose the folder that contains your AAC, Apple Lossless or MP3 music files.")
+                Text("Choose the folder that contains your AAC, Apple Lossless, MP3 or FLAC music files.")
             } actions: {
                 Button("Choose Folder…") { isChoosingFolder = true }
             }

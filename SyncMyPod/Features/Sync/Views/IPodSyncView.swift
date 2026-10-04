@@ -32,7 +32,7 @@ struct IPodSyncView: View {
                                    description: Text(loadError))
         } else if let settings, let onDevice {
             SyncSettingsForm(settings: settings,
-                             library: SyncLibrarySnapshot(tracks: tracks, playlists: playlists,
+                             library: SyncLibrarySnapshot(tracks: iPodTracks, playlists: playlists,
                                                           preservingAlbumArtist: settings.preservesAlbumArtist),
                              onDevice: onDevice,
                              manifest: manifest, freeBytes: freeBytes ?? device.availableBytes,
@@ -45,10 +45,14 @@ struct IPodSyncView: View {
         }
     }
 
+    private var iPodTracks: [LibraryTrack] {
+        tracks.filter(\.codec.syncsToIPod)
+    }
+
     private func reload() async {
         let settings = IPodSyncSettings.settings(for: device.id, in: context)
         self.settings = settings
-        let requests = tracks.map { $0.syncRequest(preservingAlbumArtist: settings.preservesAlbumArtist) }
+        let requests = iPodTracks.map { $0.syncRequest(preservingAlbumArtist: settings.preservesAlbumArtist) }
         do {
             let database = try await loader.load(device.volumeURL)
             manifest = await IPodControlFiles(volumeURL: device.volumeURL)

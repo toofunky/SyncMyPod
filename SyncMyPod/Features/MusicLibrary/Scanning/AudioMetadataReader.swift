@@ -1,7 +1,7 @@
 import AVFoundation
 
 nonisolated struct AudioMetadataReader: Sendable {
-    /// Returns `nil` when the file's audio isn't AAC, Apple Lossless or MP3.
+    /// Returns `nil` when the file's audio isn't AAC, Apple Lossless, MP3 or FLAC.
     @concurrent
     func read(_ url: URL) async throws -> AudioFileMetadata? {
         let asset = AVURLAsset(url: url)

@@ -1,7 +1,7 @@
 import Foundation
 
 nonisolated struct AudioFileEnumerator {
-    private static let fileExtensions: Set = ["m4a", "mp3"]
+    private static let fileExtensions: Set = ["m4a", "mp3", "flac"]
     private static let resourceKeys: [URLResourceKey] = [
         .isRegularFileKey, .fileSizeKey, .contentModificationDateKey,
     ]
