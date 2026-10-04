@@ -97,10 +97,13 @@ nonisolated struct PlayerTrackSyncer {
     /// library since planning, or an image that can't be read, is skipped rather than failing the sync.
     private func copySidecars(_ copies: [PlayerSidecarCopy], state: inout PlayerSyncState) async {
         for copy in copies {
-            let copied = try? await files.copy(copy.source.url, to: copy.destination) { staged in
-                if let limit = copy.pixelLimit { try CoverResizer.fit(imageAt: staged, within: limit) }
+            do {
+                try await files.copy(copy.source.url, to: copy.destination) { staged in
+                    if let limit = copy.pixelLimit { try CoverResizer.fit(imageAt: staged, within: limit) }
+                }
+            } catch {
+                continue
             }
-            guard copied != nil else { continue }
             state.manifest.sidecars[copy.destination] = copy.source
             state.manifest.coverPixelLimits[copy.destination] = copy.pixelLimit
             state.summary.sidecarChangeCount += 1
