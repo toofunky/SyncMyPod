@@ -4,7 +4,7 @@ SyncMyPod-1.9
 - Add support for lyric files (.lrc) (iPod and non-Apple digital audio players) (iPod Nanos are out of scope).
 - Add support for FLAC, WAV, and AIFF files (non-Apple digital audio players).
 - Move Preserve Album Artist option to Settings tab on iPod view.
-- Add support for embedded lyrics during iPod sycing (iPod Nanos are out of scope).
+- Add support for embedded lyrics during iPod syncing (iPod Nanos are out of scope).
 
 SyncMyPod-1.8
 - Add Buy Me a Coffee button to About dialog and sidebar.
