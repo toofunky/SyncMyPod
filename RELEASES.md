@@ -5,6 +5,7 @@ SyncMyPod-1.9
 - Add support for FLAC, WAV, and AIFF files (non-Apple digital audio players).
 - Move Preserve Album Artist option to Settings tab on iPod view.
 - Add support for embedded lyrics during iPod syncing (iPod Nanos are out of scope).
+- Add/update Help topics to cover changes from this release.
 
 SyncMyPod-1.8
 - Add Buy Me a Coffee button to About dialog and sidebar.

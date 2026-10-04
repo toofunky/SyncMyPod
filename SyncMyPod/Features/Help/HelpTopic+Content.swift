@@ -8,6 +8,7 @@ extension HelpTopic {
         case .tagEditor: "Fix song details and cover art without leaving the app."
         case .playlists: "Build playlists in SyncMyPod and take them with you on your iPod."
         case .syncing: "Choose what goes on your iPod and keep it up to date."
+        case .audioPlayer: "Take your music to a digital audio player or memory card."
         case .troubleshooting: "Solutions to common problems."
         }
     }
@@ -19,6 +20,7 @@ extension HelpTopic {
         case .tagEditor: Self.tagEditorSections
         case .playlists: Self.playlistSections
         case .syncing: Self.syncingSections
+        case .audioPlayer: Self.audioPlayerSections
         case .troubleshooting: Self.troubleshootingSections
         }
     }
@@ -126,6 +128,39 @@ extension HelpTopic {
                         + "the next sync."),
     ]
 
+    private static let audioPlayerSections = [
+        HelpSection(heading: "Adding a Player",
+                    body: "Connect your player so its drive or memory card appears in Finder. Click **Add Player…** "
+                        + "under Devices in the sidebar, choose the folder to sync music into, give the player a "
+                        + "name, then click **Add Player**. The setup is saved on the player itself, so it's "
+                        + "recognized whenever you connect it, on any Mac."),
+        HelpSection(heading: "Music and Playlist Folders",
+                    body: "Choose where songs and playlists go inside the player's folder, or leave them blank to "
+                        + "use the folder itself. Songs are filed in folders by album artist and album, and "
+                        + "playlists are saved as .m3u8 files that most players understand."),
+        HelpSection(heading: "Sync All Songs or Custom Sync",
+                    body: "In the **Sync** tab, **Sync All Songs** copies every song and playlist in your music "
+                        + "library. **Custom Sync** lets you check artists and albums, genres, and playlists. "
+                        + "FLAC, AIFF and WAV songs are copied too. SyncMyPod remembers your choices for each player."),
+        HelpSection(heading: "Before You Sync",
+                    body: "The bar at the bottom shows how many songs will be added, updated and removed, and how "
+                        + "much free space the player has. Click **Sync Now** and wait for the sync to finish "
+                        + "before you eject the player."),
+        HelpSection(heading: "Removing Songs",
+                    body: "Songs that are no longer selected or whose files were deleted are removed from the "
+                        + "player. SyncMyPod asks first, and only removes songs it copied. Anything else on the "
+                        + "player is left alone, and your music library isn't affected."),
+        HelpSection(heading: "Player Settings",
+                    body: "The **Settings** tab tailors the copies to your player. Add track numbers to file "
+                        + "names for players that sort by name, keep albums together under the album artist, "
+                        + "copy and resize album covers, and copy .lrc files for synced lyrics. Click the info "
+                        + "button beside an option to learn more."),
+        HelpSection(heading: "Changing or Forgetting a Player",
+                    body: "If you change the music folder, songs already on the player are moved at the next "
+                        + "sync. Click **Forget Player…** to stop SyncMyPod recognizing the player. The music "
+                        + "and playlists on it stay where they are."),
+    ]
+
     private static let troubleshootingSections = [
         HelpSection(heading: "My iPod Doesn't Appear",
                     body: "Make sure disk mode is on and the iPod appears in Finder. Only click-wheel iPods with "
@@ -138,7 +173,13 @@ extension HelpTopic {
         HelpSection(heading: "Not Enough Space",
                     body: "Use **Custom Sync** to choose fewer albums, genres or playlists until the selection fits."),
         HelpSection(heading: "Songs Are Missing From the Library",
-                    body: "Check that the files are AAC, Apple Lossless or MP3 and are inside your music folder, "
-                        + "then click **Rescan**."),
+                    body: "Check that the files are AAC, Apple Lossless, MP3, FLAC, AIFF or WAV and are inside your "
+                        + "music folder, then click **Rescan**. FLAC, AIFF and WAV songs appear in your library "
+                        + "but sync only to other audio players. They're never copied to an iPod."),
+        HelpSection(heading: "Songs Are Missing on an Audio Player After Syncing",
+                    body: "Some audio players don't notice new music until they rescan their storage. If synced "
+                        + "songs don't appear, eject the player, then run a library scan or media update from its "
+                        + "settings. Some players scan automatically when restarted. Check your player's manual "
+                        + "for details."),
     ]
 }
