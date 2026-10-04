@@ -17,6 +17,8 @@ nonisolated struct TagChanges: Equatable, Sendable {
     var sortAlbumArtist: String?
     var sortAlbum: String?
     var sortComposer: String?
+    /// Plain, unsynced lyrics.
+    var lyrics: String?
 
     var isEmpty: Bool { self == TagChanges() }
 }

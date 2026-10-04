@@ -33,19 +33,23 @@ final class LyricsEditorModel {
     /// Returns whether the file was written, so the editor can close.
     func save() async -> Bool {
         let text = text, path = track.filePath
-        return await update(hasLyrics: true) { try await LyricsFile.write(text, forSongAt: path) }
+        return await update(hasLyrics: true) { try await LyricsFile.write(text, forSongAt: path) ?? .now }
     }
 
     func delete() async -> Bool {
         let path = track.filePath
-        return await update(hasLyrics: false) { try await LyricsFile.remove(forSongAt: path) }
+        return await update(hasLyrics: false) {
+            try await LyricsFile.remove(forSongAt: path)
+            return nil
+        }
     }
 
-    private func update(hasLyrics: Bool, _ operation: () async throws -> Void) async -> Bool {
+    /// `operation` returns the lyric file's new modification date, or `nil` once it's gone.
+    private func update(hasLyrics: Bool, _ operation: () async throws -> Date?) async -> Bool {
         isSaving = true
         defer { isSaving = false }
         do {
-            try await operation()
+            track.lyricsFileDate = try await operation()
             track.hasLyrics = hasLyrics
             try track.modelContext?.save()
             return true

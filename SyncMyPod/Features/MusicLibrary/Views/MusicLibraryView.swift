@@ -36,21 +36,20 @@ struct MusicLibraryView: View {
     private var addToDevice: ((ConnectedDevice, [LibraryTrack]) -> Void)? {
         guard !addTargets.isEmpty else { return nil }
         return { device, tracks in
-            let preserves = preservesAlbumArtist(on: device)
-            syncModel.sync(syncable(tracks, to: device).map { $0.syncRequest(preservingAlbumArtist: preserves) },
-                           to: device)
+            syncModel.sync(syncRequests(for: tracks, to: device), to: device)
         }
     }
 
-    private func syncable(_ tracks: [LibraryTrack], to device: ConnectedDevice) -> [LibraryTrack] {
-        guard case .iPod = device else { return tracks }
-        return tracks.filter(\.codec.syncsToIPod)
-    }
-
-    private func preservesAlbumArtist(on device: ConnectedDevice) -> Bool {
+    private func syncRequests(for tracks: [LibraryTrack], to device: ConnectedDevice) -> [IPodSyncRequest] {
         switch device {
-        case .iPod: IPodSyncSettings.settings(for: device.id, in: context).preservesAlbumArtist
-        case .audioPlayer(let player): player.config.preserveAlbumArtist
+        case .iPod:
+            let settings = IPodSyncSettings.settings(for: device.id, in: context)
+            return tracks.filter(\.codec.syncsToIPod).map {
+                $0.syncRequest(preservingAlbumArtist: settings.preservesAlbumArtist,
+                               embeddingLyricsSidecar: settings.syncsLyricsSidecars)
+            }
+        case .audioPlayer(let player):
+            return tracks.map { $0.syncRequest(preservingAlbumArtist: player.config.preserveAlbumArtist) }
         }
     }
 

@@ -14,6 +14,9 @@ struct IPodDeviceView: View {
             Tab("Sync", systemImage: "arrow.triangle.2.circlepath") {
                 IPodSyncView(device: device)
             }
+            Tab("Settings", systemImage: "gearshape") {
+                IPodSettingsView(device: device)
+            }
             Tab("Device", systemImage: "info.circle") {
                 DeviceInfoView(device: device)
             }

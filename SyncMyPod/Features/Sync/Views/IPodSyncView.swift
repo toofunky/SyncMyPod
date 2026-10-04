@@ -33,7 +33,8 @@ struct IPodSyncView: View {
         } else if let settings, let onDevice {
             SyncSettingsForm(settings: settings,
                              library: SyncLibrarySnapshot(tracks: iPodTracks, playlists: playlists,
-                                                          preservingAlbumArtist: settings.preservesAlbumArtist),
+                                                          preservingAlbumArtist: settings.preservesAlbumArtist,
+                                                          embeddingLyricsSidecars: settings.syncsLyricsSidecars),
                              onDevice: onDevice,
                              manifest: manifest, freeBytes: freeBytes ?? device.availableBytes,
                              isSyncing: syncModel.isSyncing) {
@@ -52,7 +53,10 @@ struct IPodSyncView: View {
     private func reload() async {
         let settings = IPodSyncSettings.settings(for: device.id, in: context)
         self.settings = settings
-        let requests = iPodTracks.map { $0.syncRequest(preservingAlbumArtist: settings.preservesAlbumArtist) }
+        let requests = iPodTracks.map {
+            $0.syncRequest(preservingAlbumArtist: settings.preservesAlbumArtist,
+                           embeddingLyricsSidecar: settings.syncsLyricsSidecars)
+        }
         do {
             let database = try await loader.load(device.volumeURL)
             manifest = await IPodControlFiles(volumeURL: device.volumeURL)

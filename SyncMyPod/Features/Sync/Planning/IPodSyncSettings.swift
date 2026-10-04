@@ -13,6 +13,8 @@ nonisolated final class IPodSyncSettings {
     var selectedGenreKeys: [String]?
     /// Optional because settings saved before this option existed hold `NULL`.
     var preserveAlbumArtistValue: Bool?
+    /// Optional, like `preserveAlbumArtistValue`, because settings saved before this option existed hold `NULL`.
+    var syncLyricsSidecarValue: Bool?
 
     init(deviceID: String) {
         self.deviceID = deviceID
@@ -26,6 +28,11 @@ nonisolated final class IPodSyncSettings {
     var preservesAlbumArtist: Bool {
         get { preserveAlbumArtistValue ?? false }
         set { preserveAlbumArtistValue = newValue }
+    }
+
+    var syncsLyricsSidecars: Bool {
+        get { syncLyricsSidecarValue ?? false }
+        set { syncLyricsSidecarValue = newValue }
     }
 
     var selectedAlbums: Set<String> {

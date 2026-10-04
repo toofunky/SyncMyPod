@@ -1,12 +1,14 @@
 SyncMyPod-1.9
-- Support non-Apple digital audio players (directory syncing)
-- Add support for cover files (cover.jpg/cover.png/folder.jpg/folder.png) (non-Apple digital audio players)
-- Add support for lyric files (.lrc) (non-Apple digital audio players)
-- Add support for FLAC, WAV, and AIFF files (non-Apple digital audio players)
+- Support non-Apple digital audio players (directory syncing).
+- Add support for cover files (cover.jpg/cover.png/folder.jpg/folder.png) (non-Apple digital audio players).
+- Add support for lyric files (.lrc) (iPod and non-Apple digital audio players).
+- Add support for FLAC, WAV, and AIFF files (non-Apple digital audio players).
+- Move Preserve Album Artist option to Settings tab on iPod view.
+- Add support for embedded lyrics during iPod sycing.
 
 SyncMyPod-1.8
 - Add Buy Me a Coffee button to About dialog and sidebar.
-- Fix music player not starting the next song when a song ends
+- Fix music player not starting the next song when a song ends.
 
 SyncMyPod-1.7
 - Add music player.

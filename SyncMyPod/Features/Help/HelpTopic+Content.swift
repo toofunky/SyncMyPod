@@ -99,7 +99,8 @@ extension HelpTopic {
     private static let syncingSections = [
         HelpSection(heading: "The iPod Tabs",
                     body: "**Library** shows the songs and playlists already on the iPod. **Sync** is where you "
-                        + "choose what to copy. **Device** shows the model, capacity and other details."),
+                        + "choose what to copy. **Settings** holds options for how songs are copied. **Device** "
+                        + "shows the model, capacity and other details."),
         HelpSection(heading: "Sync All Songs or Custom Sync",
                     body: "**Sync All Songs** copies every song and playlist in your music library. **Custom Sync** "
                         + "lets you check artists and albums, genres, and playlists. SyncMyPod remembers your "
@@ -112,9 +113,14 @@ extension HelpTopic {
                         + "song are removed from the iPod. SyncMyPod asks before it removes anything. Your music "
                         + "library isn't affected."),
         HelpSection(heading: "Preserve Album Artist",
-                    body: "When a song's artist differs from its album artist, this option files the song under "
-                        + "the album artist and adds the guest artist to the title. This keeps albums together "
-                        + "when you browse by artist. Your music files aren't changed."),
+                    body: "When a song's artist differs from its album artist, this option in **Settings** files "
+                        + "the song under the album artist and adds the guest artist to the title. This keeps "
+                        + "albums together when you browse by artist. Your music files aren't changed."),
+        HelpSection(heading: "Lyrics",
+                    body: "Lyrics embedded in a song are shown on the iPod. Turn on **Sync Lyrics Sidecar** in "
+                        + "**Settings** to also add the lyrics from a song's .lrc file when the song has none of "
+                        + "its own. The iPod shows them as plain text, without timings. Your music files aren't "
+                        + "changed."),
         HelpSection(heading: "Play Counts",
                     body: "Songs you play on the iPod are counted, and SyncMyPod merges those play counts during "
                         + "the next sync."),

@@ -19,17 +19,24 @@ nonisolated enum LyricsFile {
     }
 
     /// Replaces an existing file under its own name, so "Clocks.LRC" isn't joined by "Clocks.lrc".
+    /// Returns the written file's modification date.
     @concurrent
-    static func write(_ text: String, forSongAt path: String) async throws {
+    @discardableResult
+    static func write(_ text: String, forSongAt path: String) async throws -> Date? {
         let url = existingURL(forSongAt: path)
             ?? URL(filePath: path).deletingPathExtension().appendingPathExtension(fileExtension)
         try Data(text.utf8).write(to: url, options: .atomic)
+        return modificationDate(of: url)
     }
 
     @concurrent
     static func remove(forSongAt path: String) async throws {
         guard let url = existingURL(forSongAt: path) else { return }
         try FileManager.default.removeItem(at: url)
+    }
+
+    static func modificationDate(of url: URL) -> Date? {
+        try? url.resourceValues(forKeys: [.contentModificationDateKey]).contentModificationDate
     }
 
     private static func existingURL(forSongAt path: String) -> URL? {

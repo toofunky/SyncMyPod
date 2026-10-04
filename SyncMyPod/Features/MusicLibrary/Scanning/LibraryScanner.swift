@@ -34,8 +34,9 @@ actor LibraryScanner {
     private func updateLyrics(besideSongsAt paths: [String]) throws {
         let index = LyricsFileIndex(besideSongsAt: paths)
         for track in try modelContext.fetch(FetchDescriptor<LibraryTrack>()) {
-            let hasLyrics = index.hasLyrics(forSongAt: track.filePath)
-            if track.hasLyrics != hasLyrics { track.hasLyrics = hasLyrics }
+            let date = index.lyricsDate(forSongAt: track.filePath)
+            if track.hasLyrics != (date != nil) { track.hasLyrics = date != nil }
+            if track.lyricsFileDate != date { track.lyricsFileDate = date }
         }
         if modelContext.hasChanges { try modelContext.save() }
     }

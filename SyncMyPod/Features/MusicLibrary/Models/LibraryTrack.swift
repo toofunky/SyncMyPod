@@ -40,6 +40,8 @@ nonisolated final class LibraryTrack {
     var sortComposerTag: String?
     /// Optional, like `composerTag`, because rows scanned before lyric files were found hold `NULL`.
     var hasLyricsFile: Bool?
+    /// The lyric file's modification date, for noticing edits; `nil` when there's no lyric file.
+    var lyricsFileDate: Date?
     /// Optional, like `composerTag`, because rows scanned before embedded lyrics were noted hold `NULL`.
     var hasLyricsTag: Bool?
     var scanVersion = 0

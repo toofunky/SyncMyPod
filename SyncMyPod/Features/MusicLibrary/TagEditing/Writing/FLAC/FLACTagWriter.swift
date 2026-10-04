@@ -30,7 +30,7 @@ nonisolated struct FLACTagWriter {
             (["GENRE"], changes.genre), (["DATE", "YEAR"], changes.year.map { $0 > 0 ? String($0) : "" }),
             (["TITLESORT"], changes.sortTitle), (["ARTISTSORT"], changes.sortArtist),
             (["ALBUMARTISTSORT"], changes.sortAlbumArtist), (["ALBUMSORT"], changes.sortAlbum),
-            (["COMPOSERSORT"], changes.sortComposer),
+            (["COMPOSERSORT"], changes.sortComposer), (["LYRICS", "UNSYNCEDLYRICS"], changes.lyrics),
         ]
         for case let (fields, value?) in texts { comment.set(fields, to: value) }
         if let track = changes.track {

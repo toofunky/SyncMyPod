@@ -35,6 +35,7 @@ struct LyricsEditingModifier: ViewModifier {
         do {
             try await LyricsFile.remove(forSongAt: track.filePath)
             track.hasLyrics = false
+            track.lyricsFileDate = nil
             try track.modelContext?.save()
         } catch {
             errorMessage = error.localizedDescription

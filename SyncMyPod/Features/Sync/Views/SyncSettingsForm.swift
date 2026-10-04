@@ -3,10 +3,6 @@ import SwiftUI
 
 struct SyncSettingsForm: View {
     private static let listedRemovalLimit = 8
-    private static let preserveAlbumArtistInfo = "When a song's artist differs from its album artist, the song is "
-        + "filed under the album artist on the iPod and the guest artist is added to the title — for example, "
-        + "\"Song — Guest Artist\". This keeps albums together when you browse by artist. Your music files "
-        + "aren't changed."
 
     @Bindable var settings: IPodSyncSettings
     let library: SyncLibrarySnapshot
@@ -26,12 +22,6 @@ struct SyncSettingsForm: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            HStack {
-                Toggle("Preserve Album Artist?", isOn: $settings.preservesAlbumArtist)
-                InfoPopoverButton(title: "Preserve Album Artist", message: Self.preserveAlbumArtistInfo)
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-                .padding([.horizontal, .top])
             SyncSelectionEditor(settings: settings, library: library)
             Divider()
             let input = planInput

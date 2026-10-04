@@ -1,20 +1,25 @@
 import Foundation
 
 extension LibraryTrack {
-    /// `preservingAlbumArtist` changes only the tags written to the iPod, never the file.
-    func syncRequest(preservingAlbumArtist: Bool) -> IPodSyncRequest {
+    /// `preservingAlbumArtist` and `embeddingLyricsSidecar` change only the copy on the iPod, never the file.
+    /// A lyric file is embedded only in songs without lyrics of their own.
+    func syncRequest(preservingAlbumArtist: Bool, embeddingLyricsSidecar: Bool = false) -> IPodSyncRequest {
         let preserves = preservingAlbumArtist && draft.artistDiffersFromAlbumArtist
-        return IPodSyncRequest(sourceURL: URL(filePath: filePath),
-                               draft: preserves ? draft.preservingAlbumArtist() : draft,
-                               source: syncSource(preservedAlbumArtist: preserves))
+        let embeds = embeddingLyricsSidecar && hasLyrics && !hasEmbeddedLyrics
+        var draft = preserves ? draft.preservingAlbumArtist() : draft
+        draft.hasLyrics = hasEmbeddedLyrics || embeds
+        return IPodSyncRequest(sourceURL: URL(filePath: filePath), draft: draft,
+                               source: syncSource(preservedAlbumArtist: preserves, embeddedLyricsSidecar: embeds),
+                               embedsLyricsSidecar: embeds)
     }
 
-    private func syncSource(preservedAlbumArtist: Bool) -> SyncSource? {
+    private func syncSource(preservedAlbumArtist: Bool, embeddedLyricsSidecar: Bool) -> SyncSource? {
         guard scanVersion == Self.currentScanVersion else { return nil }
         return SyncSource(fileSize: fileSize, modificationDate: modificationDate,
                           artworkFingerprint: artworkFingerprint,
                           preservedAlbumArtist: preservedAlbumArtist ? true : nil,
-                          hasLyrics: hasEmbeddedLyrics ? true : nil)
+                          hasLyrics: hasEmbeddedLyrics || embeddedLyricsSidecar ? true : nil,
+                          lyricsSidecarDate: embeddedLyricsSidecar ? lyricsFileDate : nil)
     }
 
     private var draft: ITunesTrackDraft {
@@ -28,7 +33,6 @@ extension LibraryTrack {
                          sortArtist: artist.iPodSortValue(tagged: sortArtistTag),
                          sortAlbumArtist: albumArtist.iPodSortValue(tagged: sortAlbumArtistTag),
                          sortAlbum: album.iPodSortValue(tagged: sortAlbumTag),
-                         sortComposer: composer.iPodSortValue(tagged: sortComposerTag),
-                         hasLyrics: hasEmbeddedLyrics)
+                         sortComposer: composer.iPodSortValue(tagged: sortComposerTag))
     }
 }
