@@ -57,6 +57,28 @@ struct TagEditorModelTests {
         #expect(!model.hasChanges)
     }
 
+    @Test func editsLyricsOnlyForOneSongOnceTheyAreRead() async {
+        let several = TagEditorModel(tracks: tracks)
+        await several.loadLyrics()
+        several.lyrics = "Lights go out"
+        #expect(!several.canEditLyrics && several.lyricsEdit == nil && !several.hasChanges)
+
+        let model = TagEditorModel(tracks: [tracks[0]])
+        model.lyrics = "Typed too early"
+        #expect(model.lyricsEdit == nil)
+
+        await model.loadLyrics()
+        #expect(model.canEditLyrics && model.originalLyrics == "" && model.lyrics == "")
+        model.lyrics = "Lights go out"
+        #expect(model.lyricsEdit == "Lights go out" && model.hasChanges)
+        let changes = TagChanges(edits: model.edits, artwork: model.artworkChange, lyrics: model.lyricsEdit,
+                                 applyingTo: tracks[0])
+        #expect(changes == TagChanges(lyrics: "Lights go out"))
+
+        model.revert()
+        #expect(model.lyrics == "" && !model.hasChanges)
+    }
+
     @Test func rejectsArtworkThatIsNotJPEGOrPNG() {
         let model = TagEditorModel(tracks: tracks)
         #expect(!model.replaceArtwork(with: Data("GIF89a".utf8)))

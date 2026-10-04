@@ -23,6 +23,8 @@ nonisolated extension AVMetadataIdentifier {
     static let vorbisSortAlbumArtist = vorbis("ALBUMARTISTSORT")
     static let vorbisSortAlbum = vorbis("ALBUMSORT")
     static let vorbisSortComposer = vorbis("COMPOSERSORT")
+    static let vorbisLyrics = vorbis("LYRICS")
+    static let vorbisUnsyncedLyrics = vorbis("UNSYNCEDLYRICS")
     /// AVFoundation hands back just the image bytes of FLAC's `PICTURE` block.
     static let vorbisPicture = vorbis("METADATA_BLOCK_PICTURE")
 

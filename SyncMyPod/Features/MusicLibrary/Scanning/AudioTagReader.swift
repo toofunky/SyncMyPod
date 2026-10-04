@@ -27,8 +27,13 @@ nonisolated struct AudioTagReader {
             sortAlbumArtist: await string([.iTunesSortAlbumArtist, .id3SortAlbumArtist, .vorbisSortAlbumArtist]),
             sortAlbum: await string([.iTunesSortAlbum, .id3MetadataAlbumSortOrder, .vorbisSortAlbum]),
             sortComposer: await string([.iTunesSortComposer, .id3SortComposer, .vorbisSortComposer]),
-            hasLyrics: await string([.iTunesMetadataLyrics, .id3MetadataUnsynchronizedLyric]) != nil
+            hasLyrics: await hasLyrics()
         )
+    }
+
+    private func hasLyrics() async -> Bool {
+        guard let value = try? await items.lyrics?.load(.stringValue) else { return false }
+        return !value.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
 
     private func string(_ identifiers: [AVMetadataIdentifier]) async -> String? {

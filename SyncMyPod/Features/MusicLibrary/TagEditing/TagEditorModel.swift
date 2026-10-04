@@ -9,8 +9,11 @@ import SwiftData
 final class TagEditorModel {
     let tracks: [LibraryTrack]
     var values: [TagField: String] = [:]
+    var lyrics = ""
     var errorMessage: String?
     private(set) var originals: [TagField: TagFieldValue] = [:]
+    /// `nil` until read from the file, and always with several songs selected.
+    private(set) var originalLyrics: String?
     private(set) var originalArtwork = TagArtworkPreview.none
     private(set) var artworkChange = ArtworkChange.keep
     private(set) var replacementArtwork: CGImage?
@@ -27,7 +30,15 @@ final class TagEditorModel {
         values.filter { field, text in originals[field]?.isEdited(by: text) ?? false }
     }
 
-    var hasChanges: Bool { !edits.isEmpty || artworkChange != .keep }
+    /// Lyrics are edited one song at a time, so a whole album can't get the same lyrics by mistake.
+    var canEditLyrics: Bool { tracks.count == 1 }
+
+    var lyricsEdit: String? {
+        guard let originalLyrics, lyrics != originalLyrics else { return nil }
+        return lyrics
+    }
+
+    var hasChanges: Bool { !edits.isEmpty || artworkChange != .keep || lyricsEdit != nil }
 
     var displayedArtwork: TagArtworkPreview {
         switch artworkChange {
@@ -46,6 +57,7 @@ final class TagEditorModel {
 
     func revert() {
         values = originals.mapValues(\.commonValue)
+        lyrics = originalLyrics ?? ""
         artworkChange = .keep
         replacementArtwork = nil
     }
@@ -75,14 +87,23 @@ final class TagEditorModel {
         originalArtwork = art.map { .image($0.image) } ?? .none
     }
 
+    /// Reads the file even when the library notes no lyrics, since older scans missed FLAC's.
+    func loadLyrics() async {
+        guard canEditLyrics, let track = tracks.first else { return }
+        let text = (try? await EmbeddedLyricsReader().read(URL(filePath: track.filePath))) ?? ""
+        originalLyrics = text
+        lyrics = text
+    }
+
     /// Writes one file at a time, since the library lives on a spinning drive.
     func save(in context: ModelContext) async {
         isSaving = true
         defer { isSaving = false }
-        let edits = edits, artwork = artworkChange
+        let edits = edits, artwork = artworkChange, lyricsEdit = lyricsEdit
         do {
-            for track in tracks { try await save(track, edits: edits, artwork: artwork) }
+            for track in tracks { try await save(track, edits: edits, artwork: artwork, lyrics: lyricsEdit) }
             try context.save()
+            if let lyricsEdit { originalLyrics = lyricsEdit }
             reloadValues()
             await loadArtwork()
         } catch {
@@ -91,9 +112,10 @@ final class TagEditorModel {
         }
     }
 
-    private func save(_ track: LibraryTrack, edits: [TagField: String], artwork: ArtworkChange) async throws {
+    private func save(_ track: LibraryTrack, edits: [TagField: String], artwork: ArtworkChange,
+                      lyrics: String?) async throws {
         let url = URL(filePath: track.filePath)
-        let changes = TagChanges(edits: edits, artwork: artwork, applyingTo: track)
+        let changes = TagChanges(edits: edits, artwork: artwork, lyrics: lyrics, applyingTo: track)
         try await writer.write(changes, to: url, codec: track.codec)
         try await track.refresh(from: url)
     }

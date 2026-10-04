@@ -12,6 +12,7 @@ struct SyncMyPodApp: App {
 
     init() {
         LibraryFolderAccess.shared.open(in: modelContainer.mainContext)
+        LibraryPlaylist.ensureFavorites(in: modelContainer.mainContext)
     }
 
     var body: some Scene {

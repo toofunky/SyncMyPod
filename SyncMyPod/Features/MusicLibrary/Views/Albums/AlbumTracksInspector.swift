@@ -11,7 +11,10 @@ struct AlbumTracksInspector: View {
 
     @Environment(MusicPlayerModel.self) private var player: MusicPlayerModel?
     @Query private var tracks: [LibraryTrack]
+    @Query(filter: LibraryPlaylist.favoritesFilter) private var favorites: [LibraryPlaylist]
     @State private var albumTracks: [LibraryTrack] = []
+    @State private var lyricsTrack: LibraryTrack?
+    @State private var lyricsTrackToRemove: LibraryTrack?
 
     var body: some View {
         content
@@ -21,6 +24,7 @@ struct AlbumTracksInspector: View {
                 Button("Album Tracks", systemImage: "sidebar.trailing") { isShowing.toggle() }
                     .disabled(albumID == nil)
             }
+            .modifier(LyricsEditingModifier(editing: $lyricsTrack, removing: $lyricsTrackToRemove))
             .onChange(of: albumID, initial: true) { updateAlbumTracks() }
             .onChange(of: tracks) { updateAlbumTracks() }
     }
@@ -47,6 +51,10 @@ struct AlbumTracksInspector: View {
             AlbumTrackRow(track: track, albumArtist: albumTracks[0].syncArtist)
                 .contentShape(.rect)
                 .onTapGesture(count: 2) { play(track) }
+                .contextMenu {
+                    SongMenuItems(tracks: [track], favorites: favorites.first,
+                                  editLyrics: { lyricsTrack = $0 }, removeLyrics: { lyricsTrackToRemove = $0 })
+                }
         }
         if discNumbers.count > 1 {
             Section(disc > 0 ? "Disc \(disc)" : "Other") { rows }

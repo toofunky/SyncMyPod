@@ -8,6 +8,9 @@ struct ArtistAlbumRow: View {
 
     let section: ArtistAlbumSection
     var onPlay: ((LibraryTrack) -> Void)?
+    var favorites: LibraryPlaylist?
+    var editLyrics: (LibraryTrack) -> Void = { _ in }
+    var removeLyrics: (LibraryTrack) -> Void = { _ in }
 
     var body: some View {
         HStack(alignment: .top, spacing: Self.columnSpacing) {
@@ -41,6 +44,10 @@ struct ArtistAlbumRow: View {
             AlbumTrackRow(track: track, albumArtist: section.album.artist)
                 .contentShape(.rect)
                 .onTapGesture(count: 2) { onPlay?(track) }
+                .contextMenu {
+                    SongMenuItems(tracks: [track], favorites: favorites,
+                                  editLyrics: editLyrics, removeLyrics: removeLyrics)
+                }
         }
     }
 
@@ -55,6 +62,7 @@ struct ArtistAlbumRow: View {
         ArtistAlbumRow(section: section)
             .frame(width: 600)
             .padding()
+            .modelContainer(.emptyPreview)
     }
 }
 #endif

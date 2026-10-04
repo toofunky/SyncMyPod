@@ -13,6 +13,7 @@ struct ContentView: View {
     @State private var selectedArtistID: LibraryArtist.ID?
     @State private var isShowingTagEditor = false
     @State private var isShowingAlbum = false
+    @Query(filter: LibraryPlaylist.favoritesFilter) private var favorites: [LibraryPlaylist]
 
     var body: some View {
         NavigationSplitView {
@@ -42,6 +43,7 @@ struct ContentView: View {
         }
         .onChange(of: selectedAlbumID) { isShowingAlbum = selectedAlbumID != nil }
         .frame(minWidth: 420, minHeight: 320)
+        .environment(\.favoriteTrackPaths, Set(favorites.first?.trackPaths ?? []))
     }
 
     private func libraryView(_ section: LibrarySection) -> some View {

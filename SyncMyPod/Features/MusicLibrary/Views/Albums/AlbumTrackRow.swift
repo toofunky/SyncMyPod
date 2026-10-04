@@ -16,7 +16,10 @@ struct AlbumTrackRow: View {
             }
             .frame(minWidth: Self.numberWidth, alignment: .trailing)
             VStack(alignment: .leading, spacing: 0) {
-                Text(track.title)
+                HStack {
+                    Text(track.title)
+                    TrackStatusIcons(track: track)
+                }
                 if showsArtist {
                     Text(track.artist)
                         .font(.caption)
@@ -41,6 +44,7 @@ struct AlbumTrackRow: View {
     List(LibraryTrack.previewTracks) { track in
         AlbumTrackRow(track: track, albumArtist: "OutKast")
     }
+    .environment(\.favoriteTrackPaths, [LibraryTrack.previewTracks[0].filePath])
     .frame(width: 300)
 }
 #endif

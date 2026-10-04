@@ -1,3 +1,9 @@
+SyncMyPod-1.10
+- Playlist import/export
+- Embedded lyrics editor (iPod video/classic feature)
+- Favorites "smart" playlist
+- Favorites/lyrics indicators are shown on albums and playlists
+
 SyncMyPod-1.9
 - Support non-Apple digital audio players (directory syncing).
 - Add support for cover files (cover.jpg/cover.png/folder.jpg/folder.png) (non-Apple digital audio players).

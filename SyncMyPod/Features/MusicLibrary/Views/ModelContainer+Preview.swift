@@ -7,6 +7,8 @@ extension ModelContainer {
         container.mainContext.insert(LibraryFolder.preview)
         LibraryTrack.previewTracks.forEach(container.mainContext.insert)
         container.mainContext.insert(LibraryPlaylist.preview)
+        LibraryPlaylist.ensureFavorites(in: container.mainContext)
+            .setFavorite([LibraryTrack.previewTracks[0]], true)
         return container
     }()
 

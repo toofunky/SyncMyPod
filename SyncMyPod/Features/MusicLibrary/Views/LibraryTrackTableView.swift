@@ -1,4 +1,3 @@
-import AppKit
 import SwiftData
 import SwiftUI
 
@@ -49,17 +48,10 @@ struct LibraryTrackTableView: View {
         .id(sortedBy)
         .id(filteredBy)
         .contextMenu(forSelectionType: LibraryTrack.ID.self) { ids in
-            AddToDeviceMenu(devices: addTargets) { addToDevice?($0, tracks.filter { ids.contains($0.id) }) }
-                .disabled(addToDevice == nil || ids.isEmpty)
-            AddToPlaylistMenu(playlists: playlists) { add(ids, to: $0) }
-                .disabled(ids.isEmpty)
-            Divider()
-            LyricsMenuItems(track: singleTrack(ids)) { lyricsTrack = $0 } remove: { lyricsTrackToRemove = $0 }
-            Divider()
-            ShowInPlaylistMenu(playlists: playlists(containing: ids)) { showPlaylist?($0) }
-                .disabled(showPlaylist == nil || ids.isEmpty)
-            Button("Show in Finder", systemImage: "folder") { showInFinder(ids) }
-                .disabled(ids.isEmpty)
+            LibraryTrackContextMenu(tracks: shownTracks(ids), devices: addTargets, addToDevice: addToDevice,
+                                    playlists: playlists, addToPlaylist: { add(ids, to: $0) },
+                                    editLyrics: { lyricsTrack = $0 }, removeLyrics: { lyricsTrackToRemove = $0 },
+                                    showPlaylist: showPlaylist)
         } primaryAction: { ids in
             play(ids)
         }
@@ -157,9 +149,13 @@ struct LibraryTrackTableView: View {
         }
     }
 
+    private func shownTracks(_ ids: Set<LibraryTrack.ID>) -> [LibraryTrack] {
+        sortedTracks.filter { ids.contains($0.id) }
+    }
+
     /// Adds in the order shown; `nil` makes a new playlist of them.
     private func add(_ ids: Set<LibraryTrack.ID>, to playlist: LibraryPlaylist?) {
-        let selected = sortedTracks.filter { ids.contains($0.id) }
+        let selected = shownTracks(ids)
         if let playlist {
             playlist.append(selected)
         } else {
@@ -171,20 +167,6 @@ struct LibraryTrackTableView: View {
     private func play(_ ids: Set<LibraryTrack.ID>) {
         guard let index = sortedTracks.firstIndex(where: { ids.contains($0.id) }) else { return }
         player?.play(sortedTracks, startingAt: index)
-    }
-
-    private func singleTrack(_ ids: Set<LibraryTrack.ID>) -> LibraryTrack? {
-        ids.count == 1 ? sortedTracks.first(where: { ids.contains($0.id) }) : nil
-    }
-
-    private func playlists(containing ids: Set<LibraryTrack.ID>) -> [LibraryPlaylist] {
-        let paths = Set(sortedTracks.filter { ids.contains($0.id) }.map(\.filePath))
-        return playlists.filter { !paths.isDisjoint(with: $0.trackPaths) }
-    }
-
-    private func showInFinder(_ ids: Set<LibraryTrack.ID>) {
-        let urls = sortedTracks.filter { ids.contains($0.id) }.map { URL(filePath: $0.filePath) }
-        NSWorkspace.shared.activateFileViewerSelecting(urls)
     }
 }
 
