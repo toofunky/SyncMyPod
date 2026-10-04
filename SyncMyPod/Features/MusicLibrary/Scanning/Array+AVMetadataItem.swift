@@ -7,6 +7,11 @@ nonisolated extension [AVMetadataItem] {
         firstItem(matching: [.iTunesMetadataCoverArt, .id3MetadataAttachedPicture, .vorbisPicture])
     }
 
+    var lyrics: AVMetadataItem? {
+        firstItem(matching: [.iTunesMetadataLyrics, .id3MetadataUnsynchronizedLyric, .vorbisLyrics,
+                             .vorbisUnsyncedLyrics])
+    }
+
     func firstItem(matching identifiers: [AVMetadataIdentifier]) -> AVMetadataItem? {
         identifiers.lazy
             .compactMap { AVMetadataItem.metadataItems(from: self, filteredByIdentifier: $0).first }

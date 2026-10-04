@@ -13,10 +13,14 @@ struct TagEditorForm: View {
         TabView {
             Tab("Details", systemImage: "info.circle") { details }
             Tab("Sorting", systemImage: "arrow.up.arrow.down") { TagSortingForm(model: model) }
+            Tab("Lyrics", systemImage: "quote.bubble") { TagLyricsForm(model: model) }
         }
         .disabled(model.isSaving)
         .safeAreaInset(edge: .bottom) { actions }
-        .task { await model.loadArtwork() }
+        .task {
+            await model.loadArtwork()
+            await model.loadLyrics()
+        }
         .alert("Couldn't Save Tags", isPresented: isShowingError) {
         } message: {
             Text(model.errorMessage ?? "")
