@@ -72,6 +72,22 @@ struct LibraryScannerTests {
         #expect(try tracks().isEmpty)
     }
 
+    @Test func rescanFindsLyricFilesBesideUnchangedSongs() async throws {
+        defer { try? FileManager.default.removeItem(at: folder) }
+        try AudioFixtureWriter.writeSilence(to: folder.appending(path: "song.m4a"))
+        _ = try await scan()
+        #expect(try tracks().map(\.hasLyrics) == [false])
+
+        let lyrics = folder.appending(path: "Song.LRC")
+        try Data("[00:01]La".utf8).write(to: lyrics)
+        #expect(try await scan() == LibraryScanSummary(unchanged: 1))
+        #expect(try tracks().map(\.hasLyrics) == [true])
+
+        try FileManager.default.removeItem(at: lyrics)
+        _ = try await scan()
+        #expect(try tracks().map(\.hasLyrics) == [false])
+    }
+
     private func scan() async throws -> LibraryScanSummary {
         try await LibraryScanner(modelContainer: container).scan(folderURL: folder) { _ in }
     }

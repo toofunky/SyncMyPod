@@ -37,6 +37,8 @@ nonisolated final class LibraryTrack {
     var sortAlbumArtistTag: String?
     var sortAlbumTag: String?
     var sortComposerTag: String?
+    /// Optional, like `composerTag`, because rows scanned before lyric files were found hold `NULL`.
+    var hasLyricsFile: Bool?
     var scanVersion = 0
 
     init(filePath: String) {
@@ -44,6 +46,12 @@ nonisolated final class LibraryTrack {
     }
 
     var composer: String { composerTag ?? "" }
+
+    /// Set by scanning and by the lyrics editor, so the song list never checks the disk.
+    var hasLyrics: Bool {
+        get { hasLyricsFile ?? false }
+        set { hasLyricsFile = newValue }
+    }
 
     var codec: AudioCodec {
         get { codecRawValue.flatMap(AudioCodec.init(rawValue:)) ?? .aac }

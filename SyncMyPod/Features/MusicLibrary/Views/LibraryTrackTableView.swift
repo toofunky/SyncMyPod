@@ -21,6 +21,8 @@ struct LibraryTrackTableView: View {
     @State private var sortedBy: KeyPathComparator<LibraryTrack>?
     @State private var filteredBy = ""
     @State private var scrollTarget: LibraryTrack.ID?
+    @State private var lyricsTrack: LibraryTrack?
+    @State private var lyricsTrackToRemove: LibraryTrack?
     @AppStorage("libraryTableColumns") private var columnCustomization = TableColumnCustomization<LibraryTrack>()
 
     var body: some View {
@@ -52,6 +54,8 @@ struct LibraryTrackTableView: View {
             AddToPlaylistMenu(playlists: playlists) { add(ids, to: $0) }
                 .disabled(ids.isEmpty)
             Divider()
+            LyricsMenuItems(track: singleTrack(ids)) { lyricsTrack = $0 } remove: { lyricsTrackToRemove = $0 }
+            Divider()
             ShowInPlaylistMenu(playlists: playlists(containing: ids)) { showPlaylist?($0) }
                 .disabled(showPlaylist == nil || ids.isEmpty)
             Button("Show in Finder", systemImage: "folder") { showInFinder(ids) }
@@ -59,6 +63,7 @@ struct LibraryTrackTableView: View {
         } primaryAction: { ids in
             play(ids)
         }
+        .modifier(LyricsEditingModifier(editing: $lyricsTrack, removing: $lyricsTrackToRemove))
         .onChange(of: tracks) {
             sortKeys = LibraryTrack.sortKeys(for: tracks)
             updateRows()
@@ -97,7 +102,7 @@ struct LibraryTrackTableView: View {
 
     @TableColumnBuilder<LibraryTrack, KeyPathComparator<LibraryTrack>>
     private var tagColumns: some TableColumnContent<LibraryTrack, KeyPathComparator<LibraryTrack>> {
-        TableColumn("Title", value: \.title)
+        TableColumn("Title", value: \.title) { LibraryTrackTitleCell(track: $0) }
             .customizationID("title")
             .disabledCustomizationBehavior(.visibility)
         TableColumn("Artist", value: \.artist)
@@ -166,6 +171,10 @@ struct LibraryTrackTableView: View {
     private func play(_ ids: Set<LibraryTrack.ID>) {
         guard let index = sortedTracks.firstIndex(where: { ids.contains($0.id) }) else { return }
         player?.play(sortedTracks, startingAt: index)
+    }
+
+    private func singleTrack(_ ids: Set<LibraryTrack.ID>) -> LibraryTrack? {
+        ids.count == 1 ? sortedTracks.first(where: { ids.contains($0.id) }) : nil
     }
 
     private func playlists(containing ids: Set<LibraryTrack.ID>) -> [LibraryPlaylist] {
