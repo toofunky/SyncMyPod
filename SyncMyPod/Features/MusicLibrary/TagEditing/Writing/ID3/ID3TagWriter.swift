@@ -20,7 +20,7 @@ nonisolated struct ID3TagWriter {
         return try ID3TagParser.parse(handle)
     }
 
-    private func apply(_ changes: TagChanges, to tag: inout ID3Tag) {
+    func apply(_ changes: TagChanges, to tag: inout ID3Tag) {
         let yearID: FourCC = tag.majorVersion >= 4 ? .id3RecordingTime : .id3Year
         let texts: [(FourCC, String?)] = [
             (.id3Title, changes.title), (.id3Artist, changes.artist), (.id3Album, changes.album),

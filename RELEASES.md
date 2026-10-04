@@ -1,7 +1,8 @@
 SyncMyPod-1.9
 - Support non-Apple digital audio players (directory syncing)
-- Add support for cover files (cover.jpg/cover.png/folder.jpg/folder.png)
-- Add support for lyric files (.lrc)
+- Add support for cover files (cover.jpg/cover.png/folder.jpg/folder.png) (non-Apple digital audio players)
+- Add support for lyric files (.lrc) (non-Apple digital audio players)
+- Add support for FLAC, WAV, and AIFF files (non-Apple digital audio players)
 
 SyncMyPod-1.8
 - Add Buy Me a Coffee button to About dialog and sidebar.

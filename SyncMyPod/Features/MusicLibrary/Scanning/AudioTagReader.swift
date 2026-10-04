@@ -5,17 +5,20 @@ nonisolated struct AudioTagReader {
 
     func tags() async -> AudioTags {
         AudioTags(
-            title: await string([.iTunesMetadataSongName, .id3MetadataTitleDescription, .vorbisTitle]),
-            artist: await string([.iTunesMetadataArtist, .id3MetadataLeadPerformer, .vorbisArtist]),
-            album: await string([.iTunesMetadataAlbum, .id3MetadataAlbumTitle, .vorbisAlbum]),
+            title: await string([.iTunesMetadataSongName, .id3MetadataTitleDescription, .vorbisTitle,
+                                 .audioFileTitle]),
+            artist: await string([.iTunesMetadataArtist, .id3MetadataLeadPerformer, .vorbisArtist, .audioFileArtist]),
+            album: await string([.iTunesMetadataAlbum, .id3MetadataAlbumTitle, .vorbisAlbum, .audioFileAlbum]),
             albumArtist: await string([.iTunesMetadataAlbumArtist, .id3MetadataBand, .vorbisAlbumArtist,
                                        .vorbisAlbumArtistSpaced]),
-            composer: await string([.iTunesMetadataComposer, .id3MetadataComposer, .vorbisComposer]),
-            genre: await string([.iTunesMetadataUserGenre, .id3MetadataContentType, .vorbisGenre]),
+            composer: await string([.iTunesMetadataComposer, .id3MetadataComposer, .vorbisComposer,
+                                    .audioFileComposer]),
+            genre: await string([.iTunesMetadataUserGenre, .id3MetadataContentType, .vorbisGenre, .audioFileGenre]),
             year: await string([.iTunesMetadataReleaseDate, .id3MetadataRecordingTime, .id3MetadataYear,
-                                .vorbisDate, .vorbisYear])
+                                .vorbisDate, .vorbisYear, .audioFileYear])
                 .flatMap { Int($0.prefix(4)) },
-            track: await numberPair([.iTunesMetadataTrackNumber, .id3MetadataTrackNumber, .vorbisTrackNumber],
+            track: await numberPair([.iTunesMetadataTrackNumber, .id3MetadataTrackNumber, .vorbisTrackNumber,
+                                     .audioFileTrackNumber],
                                     totals: [.vorbisTrackTotal, .vorbisTotalTracks]),
             disc: await numberPair([.iTunesMetadataDiscNumber, .id3MetadataPartOfASet, .vorbisDiscNumber],
                                    totals: [.vorbisDiscTotal, .vorbisTotalDiscs]),

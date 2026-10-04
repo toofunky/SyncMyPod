@@ -8,6 +8,7 @@ nonisolated struct TagWriter: Sendable {
         case .mp3: try ID3TagWriter().write(changes, to: url)
         case .aac, .alac: try MP4TagWriter().write(changes, to: url)
         case .flac: try FLACTagWriter().write(changes, to: url)
+        case .aiff, .wav: try ChunkedID3TagWriter().write(changes, to: url)
         }
     }
 }

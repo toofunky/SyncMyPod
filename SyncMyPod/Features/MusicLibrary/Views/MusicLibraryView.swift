@@ -67,7 +67,7 @@ struct MusicLibraryView: View {
             ContentUnavailableView {
                 Label("No Music Library", systemImage: "music.note.house")
             } description: {
-                Text("Choose the folder that contains your AAC, Apple Lossless, MP3 or FLAC music files.")
+                Text("Choose the folder that contains your AAC, Apple Lossless, MP3, FLAC, AIFF or WAV music files.")
             } actions: {
                 Button("Choose Folder…") { isChoosingFolder = true }
             }

@@ -1,14 +1,14 @@
 import Foundation
 
-/// Reads the ID3v2 tag at the start of a file. Frames of a v2.2 tag use a different layout and are
-/// dropped; files without a tag come back as an empty v2.3 tag.
+/// Reads the ID3v2 tag at `offset`: the start of an MP3, or an AIFF or WAV file's ID3 chunk. Frames of a
+/// v2.2 tag use a different layout and are dropped; files without a tag come back as an empty v2.3 tag.
 nonisolated enum ID3TagParser {
     private static let unsynchronisationFlag: UInt8 = 0x80
     private static let extendedHeaderFlag: UInt8 = 0x40
     private static let footerFlag: UInt8 = 0x10
 
-    static func parse(_ handle: FileHandle) throws -> ID3Tag {
-        try handle.seek(toOffset: 0)
+    static func parse(_ handle: FileHandle, at offset: UInt64 = 0) throws -> ID3Tag {
+        try handle.seek(toOffset: offset)
         let header = try handle.read(upToCount: ID3Tag.headerSize) ?? Data()
         guard header.count == ID3Tag.headerSize, header.prefix(3) == Data("ID3".utf8) else { return ID3Tag() }
         let major = header[3], flags = header[5]
