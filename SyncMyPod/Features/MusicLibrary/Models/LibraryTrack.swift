@@ -7,7 +7,8 @@ nonisolated final class LibraryTrack {
     /// 2: the `codec` → `codecRawValue` rename left older rows `NULL`, so they must be re-read.
     /// 3: reads the composer.
     /// 4: reads the sort tags.
-    static let currentScanVersion = 4
+    /// 5: notes embedded lyrics.
+    static let currentScanVersion = 5
 
     @Attribute(.unique) var filePath: String
     /// Optional because rows from before a rescan can hold `NULL`; those read as AAC.
@@ -39,6 +40,8 @@ nonisolated final class LibraryTrack {
     var sortComposerTag: String?
     /// Optional, like `composerTag`, because rows scanned before lyric files were found hold `NULL`.
     var hasLyricsFile: Bool?
+    /// Optional, like `composerTag`, because rows scanned before embedded lyrics were noted hold `NULL`.
+    var hasLyricsTag: Bool?
     var scanVersion = 0
 
     init(filePath: String) {
@@ -52,6 +55,8 @@ nonisolated final class LibraryTrack {
         get { hasLyricsFile ?? false }
         set { hasLyricsFile = newValue }
     }
+
+    var hasEmbeddedLyrics: Bool { hasLyricsTag ?? false }
 
     var codec: AudioCodec {
         get { codecRawValue.flatMap(AudioCodec.init(rawValue:)) ?? .aac }
@@ -87,6 +92,7 @@ nonisolated final class LibraryTrack {
         trackCount = tags.track.count
         discNumber = tags.disc.number
         discCount = tags.disc.count
+        hasLyricsTag = tags.hasLyrics
         applySortTags(tags)
     }
 

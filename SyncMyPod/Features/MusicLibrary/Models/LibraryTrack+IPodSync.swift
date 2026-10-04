@@ -13,7 +13,8 @@ extension LibraryTrack {
         guard scanVersion == Self.currentScanVersion else { return nil }
         return SyncSource(fileSize: fileSize, modificationDate: modificationDate,
                           artworkFingerprint: artworkFingerprint,
-                          preservedAlbumArtist: preservedAlbumArtist ? true : nil)
+                          preservedAlbumArtist: preservedAlbumArtist ? true : nil,
+                          hasLyrics: hasEmbeddedLyrics ? true : nil)
     }
 
     private var draft: ITunesTrackDraft {
@@ -27,6 +28,7 @@ extension LibraryTrack {
                          sortArtist: artist.iPodSortValue(tagged: sortArtistTag),
                          sortAlbumArtist: albumArtist.iPodSortValue(tagged: sortAlbumArtistTag),
                          sortAlbum: album.iPodSortValue(tagged: sortAlbumTag),
-                         sortComposer: composer.iPodSortValue(tagged: sortComposerTag))
+                         sortComposer: composer.iPodSortValue(tagged: sortComposerTag),
+                         hasLyrics: hasEmbeddedLyrics)
     }
 }

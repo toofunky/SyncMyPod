@@ -7,4 +7,6 @@ nonisolated struct SyncSource: Codable, Equatable, Sendable {
     let artworkFingerprint: String?
     /// `true` when the synced tags moved the artist into the title; `nil` otherwise, as in older manifests.
     var preservedAlbumArtist: Bool?
+    /// `true` when the synced file had lyrics; `nil` otherwise, so older tracks with lyrics get rewritten once.
+    var hasLyrics: Bool?
 }

@@ -80,6 +80,18 @@ struct ITunesDBTrackUpdaterTests {
         #expect(cleared.uint32(at: 0x160) == 0 && cleared.uint8(at: 0xA4) == 2 && cleared.uint32(at: 0x80) == 0)
     }
 
+    @Test func setsOrClearsTheLyricsFlag() throws {
+        var editor = try editor(fixture)
+        var withLyrics = retagged
+        withLyrics.hasLyrics = true
+        let databaseID = editor.addTrack(retagged)
+        #expect(try mhit(databaseID, in: editor).uint8(at: 0xB0) == 0)
+        _ = editor.updateTrack(databaseID: databaseID, with: withLyrics, keepingArtwork: true)
+        #expect(try mhit(databaseID, in: editor).uint8(at: 0xB0) == 1)
+        _ = editor.updateTrack(databaseID: databaseID, with: retagged, keepingArtwork: true)
+        #expect(try mhit(databaseID, in: editor).uint8(at: 0xB0) == 0)
+    }
+
     @Test func unknownTrackChangesNothing() throws {
         var editor = try editor(fixture)
         #expect(editor.updateTrack(databaseID: 42, with: retagged, keepingArtwork: false) == nil)

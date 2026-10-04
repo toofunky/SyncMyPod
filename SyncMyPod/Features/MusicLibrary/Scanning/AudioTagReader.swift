@@ -26,7 +26,8 @@ nonisolated struct AudioTagReader {
             sortArtist: await string([.iTunesSortArtist, .id3MetadataPerformerSortOrder, .vorbisSortArtist]),
             sortAlbumArtist: await string([.iTunesSortAlbumArtist, .id3SortAlbumArtist, .vorbisSortAlbumArtist]),
             sortAlbum: await string([.iTunesSortAlbum, .id3MetadataAlbumSortOrder, .vorbisSortAlbum]),
-            sortComposer: await string([.iTunesSortComposer, .id3SortComposer, .vorbisSortComposer])
+            sortComposer: await string([.iTunesSortComposer, .id3SortComposer, .vorbisSortComposer]),
+            hasLyrics: await string([.iTunesMetadataLyrics, .id3MetadataUnsynchronizedLyric]) != nil
         )
     }
 
