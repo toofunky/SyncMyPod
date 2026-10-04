@@ -31,4 +31,4 @@
 - [x] Lyric file editor
 - [x] Support cover files (cover.jpg/cover.png/folder.jpg/folder.png)
 - [x] Playlist import/export
-- [ ] Favorites
+- [x] Favorites

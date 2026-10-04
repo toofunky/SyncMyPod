@@ -8,6 +8,9 @@ struct PlaylistTrackListView: View {
     @Binding var selection: Set<PlaylistEntry.ID>
 
     @Environment(MusicPlayerModel.self) private var player: MusicPlayerModel?
+    @Query(filter: LibraryPlaylist.favoritesFilter) private var favorites: [LibraryPlaylist]
+    @State private var lyricsTrack: LibraryTrack?
+    @State private var lyricsTrackToRemove: LibraryTrack?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -49,10 +52,22 @@ struct PlaylistTrackListView: View {
         .contextMenu(forSelectionType: PlaylistEntry.ID.self) { ids in
             Button("Remove from Playlist", systemImage: "minus.circle") { remove(ids) }
                 .disabled(ids.isEmpty)
+            Divider()
+            SongMenuItems(tracks: tracks(ids), favorites: favorites.first,
+                          editLyrics: { lyricsTrack = $0 }, removeLyrics: { lyricsTrackToRemove = $0 })
         } primaryAction: { ids in
             play(ids)
         }
         .onDeleteCommand { remove(selection) }
+        .modifier(LyricsEditingModifier(editing: $lyricsTrack, removing: $lyricsTrackToRemove))
+        // Rows are identified by position, so unfavoriting from Favorites would leave the selection on other songs.
+        .onChange(of: entries.count) { selection = [] }
+    }
+
+    /// The selected songs in playlist order, each once; songs missing from the library are skipped.
+    private func tracks(_ ids: Set<PlaylistEntry.ID>) -> [LibraryTrack] {
+        var seen = Set<String>()
+        return entries.filter { ids.contains($0.id) }.compactMap(\.track).filter { seen.insert($0.filePath).inserted }
     }
 
     /// Songs missing from the library are skipped.

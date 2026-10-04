@@ -1,3 +1,4 @@
+import SwiftData
 import SwiftUI
 
 /// Every album by one artist, each followed by its songs.
@@ -7,12 +8,16 @@ struct ArtistAlbumsView: View {
     @Binding var sortOrder: AlbumSortOrder
 
     @Environment(MusicPlayerModel.self) private var player: MusicPlayerModel?
+    @Query(filter: LibraryPlaylist.favoritesFilter) private var favorites: [LibraryPlaylist]
+    @State private var lyricsTrack: LibraryTrack?
+    @State private var lyricsTrackToRemove: LibraryTrack?
 
     var body: some View {
         VStack(spacing: 0) {
             header
             albumList
         }
+        .modifier(LyricsEditingModifier(editing: $lyricsTrack, removing: $lyricsTrackToRemove))
     }
 
     private var header: some View {
@@ -35,7 +40,8 @@ struct ArtistAlbumsView: View {
         ScrollView {
             LazyVStack(alignment: .leading) {
                 ForEach(sections) { section in
-                    ArtistAlbumRow(section: section, onPlay: play)
+                    ArtistAlbumRow(section: section, onPlay: play, favorites: favorites.first,
+                                   editLyrics: { lyricsTrack = $0 }, removeLyrics: { lyricsTrackToRemove = $0 })
                         .padding(.vertical)
                     if section.id != sections.last?.id {
                         Divider()
@@ -59,5 +65,6 @@ struct ArtistAlbumsView: View {
     ArtistAlbumsView(artistName: "OutKast", sections: ArtistAlbumSection.sections(from: LibraryTrack.previewTracks),
                      sortOrder: .constant(.year))
         .frame(width: 500, height: 600)
+        .modelContainer(.preview)
 }
 #endif

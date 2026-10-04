@@ -19,9 +19,8 @@ struct LibraryTrackContextMenu: View {
             .disabled(addToDevice == nil || tracks.isEmpty)
         AddToPlaylistMenu(playlists: playlists.filter { !$0.isFavorites }, onAdd: addToPlaylist)
             .disabled(tracks.isEmpty)
-        FavoriteMenuItem(tracks: tracks, favorites: playlists.first(where: \.isFavorites))
-        Divider()
-        LyricsMenuItems(track: tracks.count == 1 ? tracks.first : nil, edit: editLyrics, remove: removeLyrics)
+        SongMenuItems(tracks: tracks, favorites: playlists.first(where: \.isFavorites),
+                      editLyrics: editLyrics, removeLyrics: removeLyrics)
         Divider()
         ShowInPlaylistMenu(playlists: playlistsContainingTracks) { showPlaylist?($0) }
             .disabled(showPlaylist == nil || tracks.isEmpty)
