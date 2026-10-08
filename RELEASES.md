@@ -1,3 +1,6 @@
+SyncMyPod-1.11
+- Improve song matching during playlist import
+
 SyncMyPod-1.10
 - Playlist import/export
 - Embedded lyrics editor (iPod video/classic feature)
