@@ -1,3 +1,6 @@
+SyncMyPod-1.12
+- Improve song matching during playlist import.
+
 SyncMyPod-1.11
 - Improve song matching during playlist import.
 - Add a warning before scanning a different library.

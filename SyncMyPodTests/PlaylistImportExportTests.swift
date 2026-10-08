@@ -42,6 +42,14 @@ struct PlaylistImportExportTests {
         #expect(PlaylistImporter.match([path], in: library).trackPaths == [library[0].filePath])
     }
 
+    @Test func matchesFolderNamesWithReplacedOrDroppedEdgeDots() {
+        let library = [track("/Music/x/y/01 Ooh Aah Just a Little Bit.m4a", artist: "Gina G.",
+                             album: "Ooh Ahh... Just a Little Bit - Single")]
+        let paths = ["Gina G_/Ooh Ahh... Just a Little Bit - Single/01 Ooh Aah Just a Little Bit.m4a",
+                     "Gina G/Ooh Ahh... Just a Little Bit - Single/01 Ooh Aah Just a Little Bit.m4a"]
+        #expect(PlaylistImporter.match(paths, in: library).trackPaths == Array(repeating: library[0].filePath, count: 2))
+    }
+
     @Test func keepsOrderAndDuplicates() {
         let first = track("/M/A/B/1.mp3", artist: "A", album: "B")
         let second = track("/M/A/B/2.mp3", artist: "A", album: "B")
