@@ -1,11 +1,12 @@
 SyncMyPod-1.11
-- Improve song matching during playlist import
+- Improve song matching during playlist import.
+- Add a warning before scanning a different library.
 
 SyncMyPod-1.10
-- Playlist import/export
-- Embedded lyrics editor (iPod video/classic feature)
-- Favorites "smart" playlist
-- Favorites/lyrics indicators are shown on albums and playlists
+- Playlist import/export.
+- Embedded lyrics editor (iPod video/classic feature).
+- Favorites "smart" playlist.
+- Favorites/lyrics indicators are shown on albums and playlists.
 
 SyncMyPod-1.9
 - Support non-Apple digital audio players (directory syncing).
