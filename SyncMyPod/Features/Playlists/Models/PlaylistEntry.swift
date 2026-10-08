@@ -1,7 +1,7 @@
 import Foundation
 
 /// One row of a playlist: its position, the file it names, and that file's library track if it's still there.
-struct PlaylistEntry: Identifiable {
+nonisolated struct PlaylistEntry: Identifiable {
     let id: Int
     let path: String
     let track: LibraryTrack?
