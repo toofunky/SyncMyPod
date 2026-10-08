@@ -40,10 +40,13 @@ nonisolated struct PlaylistEntryKey: Hashable {
     /// Tools swap characters FAT can't store for `_`, `;`, or similar, so those all compare equal.
     private static let substitutable = CharacterSet(charactersIn: ":;_/\\*?\"<>|")
 
+    /// Leading and trailing dots get dropped or swapped for `_` depending on the tool, so they're ignored.
+    private static let edges = CharacterSet(charactersIn: "._ ")
+
     private static func folded(_ text: String) -> String {
         let scalars = text.precomposedStringWithCanonicalMapping
             .folding(options: [.caseInsensitive, .diacriticInsensitive], locale: nil)
             .unicodeScalars.map { substitutable.contains($0) ? "_" : $0 }
-        return String(String.UnicodeScalarView(scalars))
+        return String(String.UnicodeScalarView(scalars)).trimmingCharacters(in: edges)
     }
 }
