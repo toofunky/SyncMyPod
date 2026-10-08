@@ -23,9 +23,9 @@ struct MusicLibraryView: View {
     var body: some View {
         content
             .toolbar { toolbarContent }
-            .fileImporter(isPresented: $isChoosingFolder, allowedContentTypes: [.folder]) { result in
-                if case .success(let url) = result { model.chooseFolder(url, in: context) }
-            }
+            .modifier(LibraryFolderChoiceModifier(isChoosingFolder: $isChoosingFolder, currentFolder: folders.first) {
+                model.chooseFolder($0, in: context)
+            })
             .syncProgressSheet()
     }
 
