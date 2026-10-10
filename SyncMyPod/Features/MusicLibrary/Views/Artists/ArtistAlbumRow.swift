@@ -8,7 +8,7 @@ struct ArtistAlbumRow: View {
 
     let section: ArtistAlbumSection
     var onPlay: ((LibraryTrack) -> Void)?
-    var favorites: LibraryPlaylist?
+    var playlists: [LibraryPlaylist] = []
     var editLyrics: (LibraryTrack) -> Void = { _ in }
     var removeLyrics: (LibraryTrack) -> Void = { _ in }
 
@@ -45,7 +45,8 @@ struct ArtistAlbumRow: View {
                 .contentShape(.rect)
                 .onTapGesture(count: 2) { onPlay?(track) }
                 .contextMenu {
-                    SongMenuItems(tracks: [track], favorites: favorites,
+                    AddTracksToPlaylistMenu(tracks: [track], playlists: playlists)
+                    SongMenuItems(tracks: [track], favorites: playlists.first(where: \.isFavorites),
                                   editLyrics: editLyrics, removeLyrics: removeLyrics)
                 }
         }

@@ -8,7 +8,7 @@ struct ArtistAlbumsView: View {
     @Binding var sortOrder: AlbumSortOrder
 
     @Environment(MusicPlayerModel.self) private var player: MusicPlayerModel?
-    @Query(filter: LibraryPlaylist.favoritesFilter) private var favorites: [LibraryPlaylist]
+    @Query(sort: LibraryPlaylist.sidebarOrder) private var playlists: [LibraryPlaylist]
     @State private var lyricsTrack: LibraryTrack?
     @State private var lyricsTrackToRemove: LibraryTrack?
 
@@ -40,7 +40,7 @@ struct ArtistAlbumsView: View {
         ScrollView {
             LazyVStack(alignment: .leading) {
                 ForEach(sections) { section in
-                    ArtistAlbumRow(section: section, onPlay: play, favorites: favorites.first,
+                    ArtistAlbumRow(section: section, onPlay: play, playlists: playlists,
                                    editLyrics: { lyricsTrack = $0 }, removeLyrics: { lyricsTrackToRemove = $0 })
                         .padding(.vertical)
                     if section.id != sections.last?.id {

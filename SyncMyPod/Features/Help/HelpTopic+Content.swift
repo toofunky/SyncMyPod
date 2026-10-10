@@ -87,7 +87,8 @@ extension HelpTopic {
                         + "of the playlist."),
         HelpSection(heading: "Adding Songs",
                     body: "In Songs, select songs, Control-click, then choose **Add to Playlist**. Pick "
-                        + "a playlist, or choose **New Playlist** to create one from the selection."),
+                        + "a playlist, or choose **New Playlist** to create one from the selection. In Artists, "
+                        + "or in an album's song list in Albums, Control-click a song to add it the same way."),
         HelpSection(heading: "Arranging and Removing Songs",
                     body: "Drag songs to change their order. To take songs out, select them, Control-click, then "
                         + "choose **Remove from Playlist**. The songs stay in your library."),
