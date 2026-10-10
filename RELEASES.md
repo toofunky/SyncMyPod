@@ -1,4 +1,4 @@
-SyncMyPod-1.12
+SyncMyPod-1.11.1
 - Improve song matching during playlist import.
 
 SyncMyPod-1.11
