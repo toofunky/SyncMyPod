@@ -9,10 +9,11 @@ struct LibraryInspector: View {
     let isLocked: Bool
     @Binding var isShowingTagEditor: Bool
     @Binding var isShowingAlbum: Bool
+    var showPlaylist: ((LibraryPlaylist) -> Void)?
 
     var body: some View {
         if section == .albums {
-            AlbumTracksInspector(albumID: albumID, isShowing: $isShowingAlbum)
+            AlbumTracksInspector(albumID: albumID, isShowing: $isShowingAlbum, showPlaylist: showPlaylist)
         } else {
             LibraryTagEditorInspector(selection: trackSelection, isLocked: isLocked, isShowing: $isShowingTagEditor)
         }
@@ -24,6 +25,8 @@ struct LibraryInspector: View {
     @Previewable @State var isShowing = true
     LibraryInspector(section: .albums, trackSelection: [], albumID: LibraryAlbum.preview.id, isLocked: false,
                      isShowingTagEditor: $isShowing, isShowingAlbum: $isShowing)
+        .environment(DeviceMountWatcher.preview())
+        .environment(DeviceSyncModel())
         .modelContainer(.preview)
 }
 #endif

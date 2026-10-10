@@ -32,7 +32,8 @@ struct ContentView: View {
         .inspector(isPresented: inspectorPresented) {
             LibraryInspector(section: librarySection, trackSelection: librarySelection,
                              albumID: selectedAlbumID, isLocked: libraryModel.isScanning || syncModel.isSyncing,
-                             isShowingTagEditor: $isShowingTagEditor, isShowingAlbum: $isShowingAlbum)
+                             isShowingTagEditor: $isShowingTagEditor, isShowingAlbum: $isShowingAlbum,
+                             showPlaylist: show)
         }
         .contentMargins(.bottom, showsPlayer ? MusicPlayerOverlay.clearance : 0, for: .scrollContent)
         .overlay(alignment: .bottom) {

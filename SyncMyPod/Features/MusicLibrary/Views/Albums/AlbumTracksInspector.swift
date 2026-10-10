@@ -8,10 +8,11 @@ struct AlbumTracksInspector: View {
 
     let albumID: LibraryAlbum.ID?
     @Binding var isShowing: Bool
+    var showPlaylist: ((LibraryPlaylist) -> Void)?
 
     @Environment(MusicPlayerModel.self) private var player: MusicPlayerModel?
     @Query private var tracks: [LibraryTrack]
-    @Query(filter: LibraryPlaylist.favoritesFilter) private var favorites: [LibraryPlaylist]
+    @Query(sort: LibraryPlaylist.sidebarOrder) private var playlists: [LibraryPlaylist]
     @State private var albumTracks: [LibraryTrack] = []
     @State private var lyricsTrack: LibraryTrack?
     @State private var lyricsTrackToRemove: LibraryTrack?
@@ -52,8 +53,9 @@ struct AlbumTracksInspector: View {
                 .contentShape(.rect)
                 .onTapGesture(count: 2) { play(track) }
                 .contextMenu {
-                    SongMenuItems(tracks: [track], favorites: favorites.first,
-                                  editLyrics: { lyricsTrack = $0 }, removeLyrics: { lyricsTrackToRemove = $0 })
+                    LibrarySongContextMenu(tracks: [track], playlists: playlists,
+                                           editLyrics: { lyricsTrack = $0 }, removeLyrics: { lyricsTrackToRemove = $0 },
+                                           showPlaylist: showPlaylist)
                 }
         }
         if discNumbers.count > 1 {
@@ -83,6 +85,8 @@ struct AlbumTracksInspector: View {
 #Preview {
     @Previewable @State var isShowing = true
     AlbumTracksInspector(albumID: LibraryAlbum.preview.id, isShowing: $isShowing)
+        .environment(DeviceMountWatcher.preview())
+        .environment(DeviceSyncModel())
         .modelContainer(.preview)
 }
 #endif
