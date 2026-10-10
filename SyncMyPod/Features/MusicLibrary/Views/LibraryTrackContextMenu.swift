@@ -2,7 +2,7 @@ import AppKit
 import SwiftData
 import SwiftUI
 
-/// The Songs table's right-click menu for the selected songs, given in the order shown.
+/// The right-click menu for library songs, given in the order shown.
 struct LibraryTrackContextMenu: View {
     let tracks: [LibraryTrack]
     let devices: [ConnectedDevice]

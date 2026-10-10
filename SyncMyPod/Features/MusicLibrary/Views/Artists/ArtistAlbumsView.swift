@@ -6,6 +6,7 @@ struct ArtistAlbumsView: View {
     let artistName: String
     let sections: [ArtistAlbumSection]
     @Binding var sortOrder: AlbumSortOrder
+    var showPlaylist: ((LibraryPlaylist) -> Void)?
 
     @Environment(MusicPlayerModel.self) private var player: MusicPlayerModel?
     @Query(sort: LibraryPlaylist.sidebarOrder) private var playlists: [LibraryPlaylist]
@@ -41,7 +42,8 @@ struct ArtistAlbumsView: View {
             LazyVStack(alignment: .leading) {
                 ForEach(sections) { section in
                     ArtistAlbumRow(section: section, onPlay: play, playlists: playlists,
-                                   editLyrics: { lyricsTrack = $0 }, removeLyrics: { lyricsTrackToRemove = $0 })
+                                   editLyrics: { lyricsTrack = $0 }, removeLyrics: { lyricsTrackToRemove = $0 },
+                                   showPlaylist: showPlaylist)
                         .padding(.vertical)
                     if section.id != sections.last?.id {
                         Divider()
@@ -65,6 +67,8 @@ struct ArtistAlbumsView: View {
     ArtistAlbumsView(artistName: "OutKast", sections: ArtistAlbumSection.sections(from: LibraryTrack.previewTracks),
                      sortOrder: .constant(.year))
         .frame(width: 500, height: 600)
+        .environment(DeviceMountWatcher.preview())
+        .environment(DeviceSyncModel())
         .modelContainer(.preview)
 }
 #endif

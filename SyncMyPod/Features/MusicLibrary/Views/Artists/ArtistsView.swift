@@ -9,6 +9,7 @@ struct ArtistsView: View {
     let tracks: [LibraryTrack]
     var searchText = ""
     @Binding var selection: LibraryArtist.ID?
+    var showPlaylist: ((LibraryPlaylist) -> Void)?
 
     @AppStorage("artistAlbumSortOrder") private var sortOrder = AlbumSortOrder.year
     @State private var artists: [LibraryArtist] = []
@@ -38,7 +39,8 @@ struct ArtistsView: View {
     @ViewBuilder
     private var detail: some View {
         if let selection, !sections.isEmpty {
-            ArtistAlbumsView(artistName: selection, sections: sections, sortOrder: $sortOrder)
+            ArtistAlbumsView(artistName: selection, sections: sections, sortOrder: $sortOrder,
+                             showPlaylist: showPlaylist)
                 .id(selection)
         } else {
             ContentUnavailableView("No Artist Selected", systemImage: "music.mic",
@@ -58,5 +60,7 @@ struct ArtistsView: View {
     @Previewable @State var selection: LibraryArtist.ID?
     ArtistsView(tracks: LibraryTrack.previewTracks, selection: $selection)
         .frame(width: 800, height: 500)
+        .environment(DeviceMountWatcher.preview())
+        .environment(DeviceSyncModel())
 }
 #endif
