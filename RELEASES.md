@@ -1,3 +1,6 @@
+SyncMyPod-1.11.2
+- Add context menu options to all song lists.
+
 SyncMyPod-1.11.1
 - Improve song matching during playlist import.
 
