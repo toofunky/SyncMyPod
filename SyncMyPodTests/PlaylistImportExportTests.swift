@@ -58,13 +58,14 @@ struct PlaylistImportExportTests {
         #expect(result.summary == nil)
     }
 
-    @Test func exportsRelativePathsThatImportBack() {
-        let library = [track("/Music/A/B/s.m4a", artist: "A", album: "B")]
+    @Test func exportsArtistAlbumFilePathsThatImportBack() {
+        let library = [track("/Users/me/Downloads/s.m4a", artist: "A", album: "B: C"),
+                       track("/Users/me/t.m4a", artist: "A feat. D", album: "E", albumArtist: "A")]
         let playlist = LibraryPlaylist(name: "Mix", trackPaths: library.map(\.filePath) + ["/Music/Gone/X/y.mp3"])
         let entries = PlaylistEntry.entries(of: playlist, in: library)
-        let text = PlaylistExporter.contents(of: entries, relativeTo: URL(filePath: "/Music/Playlists"))
-        #expect(text == "#EXTM3U\n#EXTINF:200,A - s\n../A/B/s.m4a\n../Gone/X/y.mp3\n")
+        let text = PlaylistExporter.contents(of: entries)
+        #expect(text == "#EXTM3U\n#EXTINF:200,A - s\nA/B_ C/s.m4a\n#EXTINF:200,A feat. D - t\nA/E/t.m4a\nGone/X/y.mp3\n")
         let result = PlaylistImporter.match(M3UPlaylistParser.paths(in: text), in: library)
-        #expect(result.trackPaths == [library[0].filePath])
+        #expect(result.trackPaths == library.map(\.filePath))
     }
 }

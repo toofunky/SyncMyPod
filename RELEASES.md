@@ -1,3 +1,8 @@
+SyncMyPod-1.11.3
+- Adding a new playlist will prompt for playlist name.
+- Tag editor on song list views.
+- Export playlist path is now <ARTIST>/<ALBUM>/<TRACK>.
+
 SyncMyPod-1.11.2
 - Add context menu options to all song lists.
 

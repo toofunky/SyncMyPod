@@ -9,9 +9,7 @@ struct ArtistAlbumRow: View {
     let section: ArtistAlbumSection
     var onPlay: ((LibraryTrack) -> Void)?
     var playlists: [LibraryPlaylist] = []
-    var editLyrics: (LibraryTrack) -> Void = { _ in }
-    var removeLyrics: (LibraryTrack) -> Void = { _ in }
-    var showPlaylist: ((LibraryPlaylist) -> Void)?
+    var actions = SongMenuActions()
 
     var body: some View {
         HStack(alignment: .top, spacing: Self.columnSpacing) {
@@ -46,8 +44,7 @@ struct ArtistAlbumRow: View {
                 .contentShape(.rect)
                 .onTapGesture(count: 2) { onPlay?(track) }
                 .contextMenu {
-                    LibrarySongContextMenu(tracks: [track], playlists: playlists, editLyrics: editLyrics,
-                                           removeLyrics: removeLyrics, showPlaylist: showPlaylist)
+                    LibrarySongContextMenu(tracks: [track], playlists: playlists, actions: actions)
                 }
         }
     }

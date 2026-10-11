@@ -45,6 +45,7 @@ struct ContentView: View {
         .onChange(of: selectedAlbumID) { isShowingAlbum = selectedAlbumID != nil }
         .frame(minWidth: 420, minHeight: 320)
         .environment(\.favoriteTrackPaths, Set(favorites.first?.trackPaths ?? []))
+        .environment(\.isTagEditingLocked, libraryModel.isScanning || syncModel.isSyncing)
     }
 
     private func libraryView(_ section: LibrarySection) -> some View {

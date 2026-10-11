@@ -11,7 +11,6 @@ struct LibraryTrackTableView: View {
     var addToDevice: ((ConnectedDevice, [LibraryTrack]) -> Void)?
     var showPlaylist: ((LibraryPlaylist) -> Void)?
 
-    @Environment(\.modelContext) private var context
     @Environment(MusicPlayerModel.self) private var player: MusicPlayerModel?
     @Query(sort: LibraryPlaylist.sidebarOrder) private var playlists: [LibraryPlaylist]
     @State private var sortOrder = [KeyPathComparator(\LibraryTrack.albumArtist)]
@@ -22,6 +21,7 @@ struct LibraryTrackTableView: View {
     @State private var scrollTarget: LibraryTrack.ID?
     @State private var lyricsTrack: LibraryTrack?
     @State private var lyricsTrackToRemove: LibraryTrack?
+    @State private var newPlaylistTracks: [LibraryTrack]?
     @AppStorage("libraryTableColumns") private var columnCustomization = TableColumnCustomization<LibraryTrack>()
 
     var body: some View {
@@ -49,13 +49,12 @@ struct LibraryTrackTableView: View {
         .id(filteredBy)
         .contextMenu(forSelectionType: LibraryTrack.ID.self) { ids in
             LibraryTrackContextMenu(tracks: shownTracks(ids), devices: addTargets, addToDevice: addToDevice,
-                                    playlists: playlists, addToPlaylist: { add(ids, to: $0) },
-                                    editLyrics: { lyricsTrack = $0 }, removeLyrics: { lyricsTrackToRemove = $0 },
-                                    showPlaylist: showPlaylist)
+                                    playlists: playlists, actions: songActions)
         } primaryAction: { ids in
             play(ids)
         }
         .modifier(LyricsEditingModifier(editing: $lyricsTrack, removing: $lyricsTrackToRemove))
+        .modifier(NewPlaylistModifier(tracks: $newPlaylistTracks))
         .onChange(of: tracks) {
             sortKeys = LibraryTrack.sortKeys(for: tracks)
             updateRows()
@@ -153,14 +152,10 @@ struct LibraryTrackTableView: View {
         sortedTracks.filter { ids.contains($0.id) }
     }
 
-    /// Adds in the order shown; `nil` makes a new playlist of them.
-    private func add(_ ids: Set<LibraryTrack.ID>, to playlist: LibraryPlaylist?) {
-        let selected = shownTracks(ids)
-        if let playlist {
-            playlist.append(selected)
-        } else {
-            context.insert(LibraryPlaylist(trackPaths: selected.map(\.filePath)))
-        }
+    /// Tags are edited in the inspector beside the table, so the menu leaves that item out.
+    private var songActions: SongMenuActions {
+        SongMenuActions(editLyrics: { lyricsTrack = $0 }, removeLyrics: { lyricsTrackToRemove = $0 },
+                        newPlaylist: { newPlaylistTracks = $0 }, showPlaylist: showPlaylist)
     }
 
     /// Plays the first double-clicked song, then the ones after it in the order shown.

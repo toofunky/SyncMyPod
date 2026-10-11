@@ -12,7 +12,6 @@ struct PlaylistTransferModifier: ViewModifier {
     @Query private var tracks: [LibraryTrack]
     @Query(sort: LibraryPlaylist.sidebarOrder) private var playlists: [LibraryPlaylist]
     @State private var exportFile: M3UPlaylistFile?
-    @State private var exportEntries: [PlaylistEntry] = []
     @State private var message: String?
 
     func body(content: Content) -> some View {
@@ -55,19 +54,15 @@ struct PlaylistTransferModifier: ViewModifier {
         }
     }
 
-    /// Absolute paths go in first, since the destination isn't known until the file is saved.
     private func prepareExport() {
         guard let exportTarget else { return }
-        exportEntries = PlaylistEntry.entries(of: exportTarget, in: tracks)
-        exportFile = M3UPlaylistFile(contents: PlaylistExporter.contents(of: exportEntries, relativeTo: nil))
+        let entries = PlaylistEntry.entries(of: exportTarget, in: tracks)
+        exportFile = M3UPlaylistFile(contents: PlaylistExporter.contents(of: entries))
     }
 
-    /// Rewrites the saved file with paths relative to its folder.
     private func finishExport(_ result: Result<URL, any Error>) {
         do {
-            let url = try result.get()
-            let contents = PlaylistExporter.contents(of: exportEntries, relativeTo: url.deletingLastPathComponent())
-            try contents.write(to: url, atomically: true, encoding: .utf8)
+            _ = try result.get()
         } catch let error as CocoaError where error.code == .userCancelled {
             return
         } catch {

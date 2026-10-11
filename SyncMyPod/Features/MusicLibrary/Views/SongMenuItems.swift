@@ -1,17 +1,26 @@
 import SwiftData
 import SwiftUI
 
-/// Context menu items shared by every song list: favorite, then the lyrics items for a single song.
+/// Context menu items shared by every song list: favorite, then the tag and lyrics items for a single song.
 struct SongMenuItems: View {
     let tracks: [LibraryTrack]
     let favorites: LibraryPlaylist?
-    let editLyrics: (LibraryTrack) -> Void
-    let removeLyrics: (LibraryTrack) -> Void
+    let actions: SongMenuActions
 
     var body: some View {
         FavoriteMenuItem(tracks: tracks, favorites: favorites)
         Divider()
-        LyricsMenuItems(track: tracks.count == 1 ? tracks.first : nil, edit: editLyrics, remove: removeLyrics)
+        if let editTags = actions.editTags {
+            Button("Edit Tags…", systemImage: "tag") {
+                if let track { editTags(track) }
+            }
+            .disabled(track == nil)
+        }
+        LyricsMenuItems(track: track, edit: actions.editLyrics, remove: actions.removeLyrics)
+    }
+
+    private var track: LibraryTrack? {
+        tracks.count == 1 ? tracks.first : nil
     }
 }
 
@@ -19,7 +28,7 @@ struct SongMenuItems: View {
 #Preview {
     Menu("Song") {
         SongMenuItems(tracks: [LibraryTrack.previewTracks[0]], favorites: nil,
-                      editLyrics: { _ in }, removeLyrics: { _ in })
+                      actions: SongMenuActions(editTags: { _ in }))
     }
     .padding()
     .modelContainer(.emptyPreview)

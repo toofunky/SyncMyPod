@@ -6,10 +6,10 @@ struct PlaylistsView: View {
     /// Each playlist's selected rows, kept here so they survive switching playlists or sections.
     @Binding var trackSelections: [UUID: Set<PlaylistEntry.ID>]
 
-    @Environment(\.modelContext) private var context
     @Query(sort: LibraryPlaylist.sidebarOrder) private var playlists: [LibraryPlaylist]
     @State private var isImporting = false
     @State private var exportTarget: LibraryPlaylist?
+    @State private var newPlaylistTracks: [LibraryTrack]?
 
     var body: some View {
         VStack(spacing: 0) {
@@ -18,6 +18,7 @@ struct PlaylistsView: View {
             splitView
         }
         .playlistTransfer(isImporting: $isImporting, exportTarget: $exportTarget, selection: $selection)
+        .modifier(NewPlaylistModifier(tracks: $newPlaylistTracks, onCreate: select))
     }
 
     private var header: some View {
@@ -29,7 +30,7 @@ struct PlaylistsView: View {
                 Button("Import Playlist…", systemImage: "square.and.arrow.down") { isImporting = true }
                 Button("Export Playlist…", systemImage: "square.and.arrow.up", action: exportSelected)
                     .disabled(selection == nil)
-                Button("New Playlist", systemImage: "plus", action: create)
+                Button("New Playlist", systemImage: "plus") { newPlaylistTracks = [] }
             }
             .buttonStyle(.borderless)
             .labelStyle(.iconOnly)
@@ -57,10 +58,8 @@ struct PlaylistsView: View {
         }
     }
 
-    private func create() {
-        let playlist = LibraryPlaylist()
+    private func select(_ playlist: LibraryPlaylist) {
         playlist.sortIndex = LibraryPlaylist.nextSortIndex(after: playlists)
-        context.insert(playlist)
         selection = playlist.playlistID
     }
 
