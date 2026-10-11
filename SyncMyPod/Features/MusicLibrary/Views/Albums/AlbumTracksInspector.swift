@@ -32,6 +32,7 @@ struct AlbumTracksInspector: View {
             .modifier(NewPlaylistModifier(tracks: $newPlaylistTracks))
             .onChange(of: albumID, initial: true) { updateAlbumTracks() }
             .onChange(of: tracks) { updateAlbumTracks() }
+            .onModelContextSave { updateAlbumTracks() }
     }
 
     @ViewBuilder

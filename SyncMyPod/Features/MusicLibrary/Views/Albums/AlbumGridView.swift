@@ -1,3 +1,4 @@
+import SwiftData
 import SwiftUI
 
 struct AlbumGridView: View {
@@ -12,6 +13,7 @@ struct AlbumGridView: View {
     @State private var albums: [LibraryAlbum] = []
     @State private var visibleAlbums: [LibraryAlbum] = []
     @State private var scrollTarget: LibraryAlbum.ID?
+    @State private var selectedTrackID: LibraryTrack.ID?
 
     var body: some View {
         VStack(spacing: 0) {
@@ -23,14 +25,13 @@ struct AlbumGridView: View {
                 ContentUnavailableView.search(text: searchText)
             }
         }
-        .onChange(of: tracks) {
-            albums = LibraryAlbum.albums(from: tracks)
-            updateVisibleAlbums()
-        }
+        .onChange(of: tracks) { reloadAlbums() }
+        .onModelContextSave { reloadAlbums() }
         .onAppear {
             albums = LibraryAlbum.albums(from: tracks)
             updateVisibleAlbums(revealingSelection: true)
         }
+        .onChange(of: selection, initial: true) { rememberSelectedTrack() }
         .onChange(of: sortOrder) { updateVisibleAlbums(revealingSelection: true) }
         .onChange(of: searchText) { updateVisibleAlbums(revealingSelection: true) }
     }
@@ -68,6 +69,20 @@ struct AlbumGridView: View {
 
     private func toggle(_ album: LibraryAlbum) {
         selection = selection == album.id ? nil : album.id
+    }
+
+    /// Changing an album's artist or title gives it a new ID, so the selection follows one of its songs.
+    private func reloadAlbums() {
+        albums = LibraryAlbum.albums(from: tracks)
+        let isSelectionGone = selection.map { id in !albums.contains { $0.id == id } } ?? false
+        if isSelectionGone {
+            selection = tracks.first { $0.id == selectedTrackID }?.syncAlbumKey
+        }
+        updateVisibleAlbums(revealingSelection: isSelectionGone)
+    }
+
+    private func rememberSelectedTrack() {
+        selectedTrackID = tracks.first { $0.syncAlbumKey == selection }?.id
     }
 
     private func updateVisibleAlbums(revealingSelection: Bool = false) {
