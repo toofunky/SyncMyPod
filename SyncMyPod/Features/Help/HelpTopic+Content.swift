@@ -63,8 +63,9 @@ extension HelpTopic {
 
     private static let tagEditorSections = [
         HelpSection(heading: "Opening the Tag Editor",
-                    body: "Select one or more songs in Songs, then click **Tag Editor** in the toolbar. "
-                        + "The editor opens on the right side of the window."),
+                    body: "Select one or more songs in Songs, then click **Edit Tags…** in the toolbar or press "
+                        + "Command-I. You can also Control-click the songs and choose **Edit Tags…**. In Artists, "
+                        + "or in an album's song list in Albums, Control-click a song to edit its tags."),
         HelpSection(heading: "Editing Several Songs",
                     body: "When the selected songs have different values for a field, the field shows **Mixed**. "
                         + "Anything you type replaces the value for every selected song."),
@@ -76,7 +77,7 @@ extension HelpTopic {
                         + "\"Bowie, David\". When a field is empty, the song sorts by its name without a leading "
                         + "\"A\", \"An\" or \"The\", as iTunes does."),
         HelpSection(heading: "Saving Changes",
-                    body: "Click **Save** to write your changes to the music files, or **Revert** to discard them. "
+                    body: "Click **Save** to write your changes to the music files, or **Cancel** to discard them. "
                         + "If a scan or sync is running, saving resumes once it finishes. On the next sync, "
                         + "the changed songs are updated on your iPod."),
     ]

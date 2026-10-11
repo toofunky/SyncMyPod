@@ -11,7 +11,6 @@ struct ContentView: View {
     @State private var librarySelection = Set<LibraryTrack.ID>()
     @State private var selectedAlbumID: LibraryAlbum.ID?
     @State private var selectedArtistID: LibraryArtist.ID?
-    @State private var isShowingTagEditor = false
     @State private var isShowingAlbum = false
     @Query(filter: LibraryPlaylist.favoritesFilter) private var favorites: [LibraryPlaylist]
 
@@ -30,10 +29,7 @@ struct ContentView: View {
             }
         }
         .inspector(isPresented: inspectorPresented) {
-            LibraryInspector(section: librarySection, trackSelection: librarySelection,
-                             albumID: selectedAlbumID, isLocked: libraryModel.isScanning || syncModel.isSyncing,
-                             isShowingTagEditor: $isShowingTagEditor, isShowingAlbum: $isShowingAlbum,
-                             showPlaylist: show)
+            AlbumTracksInspector(albumID: selectedAlbumID, isShowing: $isShowingAlbum, showPlaylist: show)
         }
         .contentMargins(.bottom, showsPlayer ? MusicPlayerOverlay.clearance : 0, for: .scrollContent)
         .overlay(alignment: .bottom) {
@@ -59,20 +55,12 @@ struct ContentView: View {
         if case .library(let section) = selection { section } else { nil }
     }
 
-    /// Songs show the tag editor and Albums show the selected album, so each keeps its own toggle.
+    /// Only Albums has an inspector, showing the selected album's songs.
     private var inspectorPresented: Binding<Bool> {
         Binding(get: {
-            switch librarySection {
-            case .songs: isShowingTagEditor
-            case .albums: isShowingAlbum && selectedAlbumID != nil
-            default: false
-            }
+            librarySection == .albums && isShowingAlbum && selectedAlbumID != nil
         }, set: { isPresented in
-            switch librarySection {
-            case .songs: isShowingTagEditor = isPresented
-            case .albums: isShowingAlbum = isPresented
-            default: break
-            }
+            if librarySection == .albums { isShowingAlbum = isPresented }
         })
     }
 

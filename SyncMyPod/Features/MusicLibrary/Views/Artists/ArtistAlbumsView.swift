@@ -10,7 +10,7 @@ struct ArtistAlbumsView: View {
 
     @Environment(MusicPlayerModel.self) private var player: MusicPlayerModel?
     @Query(sort: LibraryPlaylist.sidebarOrder) private var playlists: [LibraryPlaylist]
-    @State private var tagsTrack: LibraryTrack?
+    @State private var tagsTracks: [LibraryTrack]?
     @State private var lyricsTrack: LibraryTrack?
     @State private var lyricsTrackToRemove: LibraryTrack?
     @State private var newPlaylistTracks: [LibraryTrack]?
@@ -20,13 +20,13 @@ struct ArtistAlbumsView: View {
             header
             albumList
         }
-        .sheet(item: $tagsTrack) { TagEditorSheet(track: $0) }
+        .modifier(TagEditingModifier(tracks: $tagsTracks))
         .modifier(LyricsEditingModifier(editing: $lyricsTrack, removing: $lyricsTrackToRemove))
         .modifier(NewPlaylistModifier(tracks: $newPlaylistTracks))
     }
 
     private var songActions: SongMenuActions {
-        SongMenuActions(editTags: { tagsTrack = $0 }, editLyrics: { lyricsTrack = $0 },
+        SongMenuActions(editTags: { tagsTracks = $0 }, editLyrics: { lyricsTrack = $0 },
                         removeLyrics: { lyricsTrackToRemove = $0 }, newPlaylist: { newPlaylistTracks = $0 },
                         showPlaylist: showPlaylist)
     }

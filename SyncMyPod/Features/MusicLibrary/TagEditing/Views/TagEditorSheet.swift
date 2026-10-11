@@ -1,7 +1,7 @@
 import SwiftData
 import SwiftUI
 
-/// The tag editor as a dialog, for song lists without the tag editor inspector.
+/// The tag editor as a dialog, so the selection can't change while tags are being edited.
 struct TagEditorSheet: View {
     private static let minWidth = 420.0
     private static let minHeight = 560.0
@@ -10,8 +10,8 @@ struct TagEditorSheet: View {
     @Environment(\.isTagEditingLocked) private var isLocked
     @State private var model: TagEditorModel
 
-    init(track: LibraryTrack) {
-        _model = State(initialValue: TagEditorModel(tracks: [track]))
+    init(tracks: [LibraryTrack]) {
+        _model = State(initialValue: TagEditorModel(tracks: tracks))
     }
 
     var body: some View {
@@ -21,8 +21,13 @@ struct TagEditorSheet: View {
 }
 
 #if DEBUG
-#Preview {
-    TagEditorSheet(track: LibraryTrack.previewTracks[0])
+#Preview("One Song") {
+    TagEditorSheet(tracks: [LibraryTrack.previewTracks[0]])
+        .modelContainer(.preview)
+}
+
+#Preview("Several Songs") {
+    TagEditorSheet(tracks: LibraryTrack.previewTracks)
         .modelContainer(.preview)
 }
 #endif

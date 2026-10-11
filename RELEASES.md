@@ -1,8 +1,8 @@
 SyncMyPod-1.11.4
 - Fix sorting by Album Artist to subsort on album name.
-- Keep tag editor tab visible when switching between songs.
-- The Artists and Albums views refresh after editing a tag now.
-- Add Reset button to sort tab?
+-  The Artists and Albums views refresh after editing a tag now.
+- Add clear button to sorting tag fields.
+- The tag editor has been moved out of the inspector and is now only a dialog.
 
 SyncMyPod-1.11.3
 - Adding a new playlist will prompt for playlist name.
