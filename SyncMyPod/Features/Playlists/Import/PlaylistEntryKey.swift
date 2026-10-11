@@ -38,7 +38,7 @@ nonisolated struct PlaylistEntryKey: Hashable {
     }
 
     /// Tools swap characters FAT can't store for `_`, `;`, or similar, so those all compare equal.
-    private static let substitutable = CharacterSet(charactersIn: ":;_/\\*?\"<>|")
+    private static let substitutable = CharacterSet(charactersIn: ":;_/\\*?\"<>|+=[],…")
 
     /// Leading and trailing dots get dropped or swapped for `_` depending on the tool, so they're ignored.
     private static let edges = CharacterSet(charactersIn: "._ ")

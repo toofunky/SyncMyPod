@@ -6,6 +6,7 @@ struct PlayerFileNamerTests {
     @Test(arguments: [
         ("AC/DC", "AC_DC"),
         ("What? Why: \"Now\"", "What_ Why_ _Now_"),
+        ("A+B=C [Live], Pt. 1; Wait…", "A_B_C _Live__ Pt. 1_ Wait_"),
         ("...And Justice for All", "_..And Justice for All"),
         ("Trailing dots...", "Trailing dots"),
         ("   ", "Fallback"),
