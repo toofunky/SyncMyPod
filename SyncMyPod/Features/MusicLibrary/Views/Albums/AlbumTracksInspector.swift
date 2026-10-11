@@ -16,6 +16,7 @@ struct AlbumTracksInspector: View {
     @State private var albumTracks: [LibraryTrack] = []
     @State private var lyricsTrack: LibraryTrack?
     @State private var lyricsTrackToRemove: LibraryTrack?
+    @State private var newPlaylistTracks: [LibraryTrack]?
 
     var body: some View {
         content
@@ -26,6 +27,7 @@ struct AlbumTracksInspector: View {
                     .disabled(albumID == nil)
             }
             .modifier(LyricsEditingModifier(editing: $lyricsTrack, removing: $lyricsTrackToRemove))
+            .modifier(NewPlaylistModifier(tracks: $newPlaylistTracks))
             .onChange(of: albumID, initial: true) { updateAlbumTracks() }
             .onChange(of: tracks) { updateAlbumTracks() }
     }
@@ -55,7 +57,7 @@ struct AlbumTracksInspector: View {
                 .contextMenu {
                     LibrarySongContextMenu(tracks: [track], playlists: playlists,
                                            editLyrics: { lyricsTrack = $0 }, removeLyrics: { lyricsTrackToRemove = $0 },
-                                           showPlaylist: showPlaylist)
+                                           newPlaylist: { newPlaylistTracks = $0 }, showPlaylist: showPlaylist)
                 }
         }
         if discNumbers.count > 1 {

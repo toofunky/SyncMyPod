@@ -11,7 +11,6 @@ struct LibraryTrackTableView: View {
     var addToDevice: ((ConnectedDevice, [LibraryTrack]) -> Void)?
     var showPlaylist: ((LibraryPlaylist) -> Void)?
 
-    @Environment(\.modelContext) private var context
     @Environment(MusicPlayerModel.self) private var player: MusicPlayerModel?
     @Query(sort: LibraryPlaylist.sidebarOrder) private var playlists: [LibraryPlaylist]
     @State private var sortOrder = [KeyPathComparator(\LibraryTrack.albumArtist)]
@@ -22,6 +21,7 @@ struct LibraryTrackTableView: View {
     @State private var scrollTarget: LibraryTrack.ID?
     @State private var lyricsTrack: LibraryTrack?
     @State private var lyricsTrackToRemove: LibraryTrack?
+    @State private var newPlaylistTracks: [LibraryTrack]?
     @AppStorage("libraryTableColumns") private var columnCustomization = TableColumnCustomization<LibraryTrack>()
 
     var body: some View {
@@ -56,6 +56,7 @@ struct LibraryTrackTableView: View {
             play(ids)
         }
         .modifier(LyricsEditingModifier(editing: $lyricsTrack, removing: $lyricsTrackToRemove))
+        .modifier(NewPlaylistModifier(tracks: $newPlaylistTracks))
         .onChange(of: tracks) {
             sortKeys = LibraryTrack.sortKeys(for: tracks)
             updateRows()
@@ -153,13 +154,13 @@ struct LibraryTrackTableView: View {
         sortedTracks.filter { ids.contains($0.id) }
     }
 
-    /// Adds in the order shown; `nil` makes a new playlist of them.
+    /// Adds in the order shown; `nil` asks for a name for a new playlist of them.
     private func add(_ ids: Set<LibraryTrack.ID>, to playlist: LibraryPlaylist?) {
         let selected = shownTracks(ids)
         if let playlist {
             playlist.append(selected)
         } else {
-            context.insert(LibraryPlaylist(trackPaths: selected.map(\.filePath)))
+            newPlaylistTracks = selected
         }
     }
 

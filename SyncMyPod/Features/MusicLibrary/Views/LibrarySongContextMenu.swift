@@ -7,6 +7,7 @@ struct LibrarySongContextMenu: View {
     let playlists: [LibraryPlaylist]
     let editLyrics: (LibraryTrack) -> Void
     let removeLyrics: (LibraryTrack) -> Void
+    let newPlaylist: ([LibraryTrack]) -> Void
     var showPlaylist: ((LibraryPlaylist) -> Void)?
 
     @Environment(\.modelContext) private var context
@@ -28,12 +29,12 @@ struct LibrarySongContextMenu: View {
         return { device, tracks in syncModel.add(tracks, to: device, in: context) }
     }
 
-    /// `nil` makes a new playlist of the songs.
+    /// `nil` asks for a name for a new playlist of the songs.
     private func add(to playlist: LibraryPlaylist?) {
         if let playlist {
             playlist.append(tracks)
         } else {
-            context.insert(LibraryPlaylist(trackPaths: tracks.map(\.filePath)))
+            newPlaylist(tracks)
         }
     }
 }
@@ -42,7 +43,8 @@ struct LibrarySongContextMenu: View {
 #Preview {
     Menu("Song") {
         LibrarySongContextMenu(tracks: [LibraryTrack.previewTracks[0]], playlists: [.preview],
-                               editLyrics: { _ in }, removeLyrics: { _ in }, showPlaylist: { _ in })
+                               editLyrics: { _ in }, removeLyrics: { _ in }, newPlaylist: { _ in },
+                               showPlaylist: { _ in })
     }
     .padding()
     .environment(DeviceMountWatcher.preview(connectedDevices: [.iPod(.preview)]))

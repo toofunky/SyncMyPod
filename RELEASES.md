@@ -1,3 +1,8 @@
+SyncMyPod-1.11.3
+- Add new playlist will prompt for playlist name.
+- Tag editor on song lists.
+- Export playlist with music at root
+
 SyncMyPod-1.11.2
 - Add context menu options to all song lists.
 

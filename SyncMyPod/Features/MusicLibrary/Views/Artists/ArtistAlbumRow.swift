@@ -11,6 +11,7 @@ struct ArtistAlbumRow: View {
     var playlists: [LibraryPlaylist] = []
     var editLyrics: (LibraryTrack) -> Void = { _ in }
     var removeLyrics: (LibraryTrack) -> Void = { _ in }
+    var newPlaylist: ([LibraryTrack]) -> Void = { _ in }
     var showPlaylist: ((LibraryPlaylist) -> Void)?
 
     var body: some View {
@@ -47,7 +48,8 @@ struct ArtistAlbumRow: View {
                 .onTapGesture(count: 2) { onPlay?(track) }
                 .contextMenu {
                     LibrarySongContextMenu(tracks: [track], playlists: playlists, editLyrics: editLyrics,
-                                           removeLyrics: removeLyrics, showPlaylist: showPlaylist)
+                                           removeLyrics: removeLyrics, newPlaylist: newPlaylist,
+                                           showPlaylist: showPlaylist)
                 }
         }
     }

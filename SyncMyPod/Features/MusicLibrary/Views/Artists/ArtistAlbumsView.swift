@@ -12,6 +12,7 @@ struct ArtistAlbumsView: View {
     @Query(sort: LibraryPlaylist.sidebarOrder) private var playlists: [LibraryPlaylist]
     @State private var lyricsTrack: LibraryTrack?
     @State private var lyricsTrackToRemove: LibraryTrack?
+    @State private var newPlaylistTracks: [LibraryTrack]?
 
     var body: some View {
         VStack(spacing: 0) {
@@ -19,6 +20,7 @@ struct ArtistAlbumsView: View {
             albumList
         }
         .modifier(LyricsEditingModifier(editing: $lyricsTrack, removing: $lyricsTrackToRemove))
+        .modifier(NewPlaylistModifier(tracks: $newPlaylistTracks))
     }
 
     private var header: some View {
@@ -43,7 +45,7 @@ struct ArtistAlbumsView: View {
                 ForEach(sections) { section in
                     ArtistAlbumRow(section: section, onPlay: play, playlists: playlists,
                                    editLyrics: { lyricsTrack = $0 }, removeLyrics: { lyricsTrackToRemove = $0 },
-                                   showPlaylist: showPlaylist)
+                                   newPlaylist: { newPlaylistTracks = $0 }, showPlaylist: showPlaylist)
                         .padding(.vertical)
                     if section.id != sections.last?.id {
                         Divider()
