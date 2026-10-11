@@ -10,6 +10,7 @@ struct ArtistAlbumsView: View {
 
     @Environment(MusicPlayerModel.self) private var player: MusicPlayerModel?
     @Query(sort: LibraryPlaylist.sidebarOrder) private var playlists: [LibraryPlaylist]
+    @State private var tagsTrack: LibraryTrack?
     @State private var lyricsTrack: LibraryTrack?
     @State private var lyricsTrackToRemove: LibraryTrack?
     @State private var newPlaylistTracks: [LibraryTrack]?
@@ -19,8 +20,15 @@ struct ArtistAlbumsView: View {
             header
             albumList
         }
+        .sheet(item: $tagsTrack) { TagEditorSheet(track: $0) }
         .modifier(LyricsEditingModifier(editing: $lyricsTrack, removing: $lyricsTrackToRemove))
         .modifier(NewPlaylistModifier(tracks: $newPlaylistTracks))
+    }
+
+    private var songActions: SongMenuActions {
+        SongMenuActions(editTags: { tagsTrack = $0 }, editLyrics: { lyricsTrack = $0 },
+                        removeLyrics: { lyricsTrackToRemove = $0 }, newPlaylist: { newPlaylistTracks = $0 },
+                        showPlaylist: showPlaylist)
     }
 
     private var header: some View {
@@ -43,9 +51,7 @@ struct ArtistAlbumsView: View {
         ScrollView {
             LazyVStack(alignment: .leading) {
                 ForEach(sections) { section in
-                    ArtistAlbumRow(section: section, onPlay: play, playlists: playlists,
-                                   editLyrics: { lyricsTrack = $0 }, removeLyrics: { lyricsTrackToRemove = $0 },
-                                   newPlaylist: { newPlaylistTracks = $0 }, showPlaylist: showPlaylist)
+                    ArtistAlbumRow(section: section, onPlay: play, playlists: playlists, actions: songActions)
                         .padding(.vertical)
                     if section.id != sections.last?.id {
                         Divider()

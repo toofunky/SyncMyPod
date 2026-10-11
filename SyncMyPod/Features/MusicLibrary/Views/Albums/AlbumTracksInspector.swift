@@ -14,6 +14,7 @@ struct AlbumTracksInspector: View {
     @Query private var tracks: [LibraryTrack]
     @Query(sort: LibraryPlaylist.sidebarOrder) private var playlists: [LibraryPlaylist]
     @State private var albumTracks: [LibraryTrack] = []
+    @State private var tagsTrack: LibraryTrack?
     @State private var lyricsTrack: LibraryTrack?
     @State private var lyricsTrackToRemove: LibraryTrack?
     @State private var newPlaylistTracks: [LibraryTrack]?
@@ -26,6 +27,7 @@ struct AlbumTracksInspector: View {
                 Button("Album Tracks", systemImage: "sidebar.trailing") { isShowing.toggle() }
                     .disabled(albumID == nil)
             }
+            .sheet(item: $tagsTrack) { TagEditorSheet(track: $0) }
             .modifier(LyricsEditingModifier(editing: $lyricsTrack, removing: $lyricsTrackToRemove))
             .modifier(NewPlaylistModifier(tracks: $newPlaylistTracks))
             .onChange(of: albumID, initial: true) { updateAlbumTracks() }
@@ -55,9 +57,7 @@ struct AlbumTracksInspector: View {
                 .contentShape(.rect)
                 .onTapGesture(count: 2) { play(track) }
                 .contextMenu {
-                    LibrarySongContextMenu(tracks: [track], playlists: playlists,
-                                           editLyrics: { lyricsTrack = $0 }, removeLyrics: { lyricsTrackToRemove = $0 },
-                                           newPlaylist: { newPlaylistTracks = $0 }, showPlaylist: showPlaylist)
+                    LibrarySongContextMenu(tracks: [track], playlists: playlists, actions: songActions)
                 }
         }
         if discNumbers.count > 1 {
@@ -65,6 +65,12 @@ struct AlbumTracksInspector: View {
         } else {
             Section { rows }
         }
+    }
+
+    private var songActions: SongMenuActions {
+        SongMenuActions(editTags: { tagsTrack = $0 }, editLyrics: { lyricsTrack = $0 },
+                        removeLyrics: { lyricsTrackToRemove = $0 }, newPlaylist: { newPlaylistTracks = $0 },
+                        showPlaylist: showPlaylist)
     }
 
     private var discNumbers: [Int] {

@@ -54,7 +54,8 @@ struct PlaylistTrackListView: View {
                 .disabled(ids.isEmpty)
             Divider()
             SongMenuItems(tracks: tracks(ids), favorites: favorites.first,
-                          editLyrics: { lyricsTrack = $0 }, removeLyrics: { lyricsTrackToRemove = $0 })
+                          actions: SongMenuActions(editLyrics: { lyricsTrack = $0 },
+                                                   removeLyrics: { lyricsTrackToRemove = $0 }))
         } primaryAction: { ids in
             play(ids)
         }

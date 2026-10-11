@@ -49,9 +49,7 @@ struct LibraryTrackTableView: View {
         .id(filteredBy)
         .contextMenu(forSelectionType: LibraryTrack.ID.self) { ids in
             LibraryTrackContextMenu(tracks: shownTracks(ids), devices: addTargets, addToDevice: addToDevice,
-                                    playlists: playlists, addToPlaylist: { add(ids, to: $0) },
-                                    editLyrics: { lyricsTrack = $0 }, removeLyrics: { lyricsTrackToRemove = $0 },
-                                    showPlaylist: showPlaylist)
+                                    playlists: playlists, actions: songActions)
         } primaryAction: { ids in
             play(ids)
         }
@@ -154,14 +152,10 @@ struct LibraryTrackTableView: View {
         sortedTracks.filter { ids.contains($0.id) }
     }
 
-    /// Adds in the order shown; `nil` asks for a name for a new playlist of them.
-    private func add(_ ids: Set<LibraryTrack.ID>, to playlist: LibraryPlaylist?) {
-        let selected = shownTracks(ids)
-        if let playlist {
-            playlist.append(selected)
-        } else {
-            newPlaylistTracks = selected
-        }
+    /// Tags are edited in the inspector beside the table, so the menu leaves that item out.
+    private var songActions: SongMenuActions {
+        SongMenuActions(editLyrics: { lyricsTrack = $0 }, removeLyrics: { lyricsTrackToRemove = $0 },
+                        newPlaylist: { newPlaylistTracks = $0 }, showPlaylist: showPlaylist)
     }
 
     /// Plays the first double-clicked song, then the ones after it in the order shown.
