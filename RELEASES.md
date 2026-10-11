@@ -1,5 +1,5 @@
 SyncMyPod-1.11.3
-- Add new playlist will prompt for playlist name.
+- Adding new playlist will prompt for playlist name.
 - Tag editor on song lists.
 - Export playlist with music at root
 
