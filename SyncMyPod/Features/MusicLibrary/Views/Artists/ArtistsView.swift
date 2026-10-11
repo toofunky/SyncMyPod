@@ -1,3 +1,4 @@
+import SwiftData
 import SwiftUI
 
 struct ArtistsView: View {
@@ -22,11 +23,8 @@ struct ArtistsView: View {
             detail
                 .frame(minWidth: Self.detailMinWidth, maxWidth: .infinity, maxHeight: .infinity)
         }
-        .onChange(of: tracks, initial: true) {
-            artists = LibraryArtist.artists(from: tracks)
-            if selection == nil { selection = artists.first?.id }
-            updateSections()
-        }
+        .onChange(of: tracks, initial: true) { reloadArtists() }
+        .onModelContextSave { reloadArtists() }
         .onChange(of: selection) { updateSections() }
         .onChange(of: sortOrder) { updateSections() }
     }
@@ -46,6 +44,17 @@ struct ArtistsView: View {
             ContentUnavailableView("No Artist Selected", systemImage: "music.mic",
                                    description: Text("Select an artist to see their albums."))
         }
+    }
+
+    /// Moving an artist's songs to another artist follows them there.
+    private func reloadArtists() {
+        let shownTrackIDs = Set(sections.flatMap(\.tracks).map(\.id))
+        artists = LibraryArtist.artists(from: tracks)
+        if let selection, !artists.contains(where: { $0.id == selection }) {
+            self.selection = tracks.first { shownTrackIDs.contains($0.id) }?.syncArtist
+        }
+        if selection == nil { selection = artists.first?.id }
+        updateSections()
     }
 
     private func updateSections() {

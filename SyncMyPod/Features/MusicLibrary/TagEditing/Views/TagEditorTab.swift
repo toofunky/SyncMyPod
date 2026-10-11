@@ -1,6 +1,6 @@
 import SwiftUI
 
-enum TagEditorTab: CaseIterable, Hashable {
+enum TagEditorTab: String, CaseIterable, Hashable {
     case details
     case sorting
     case lyrics

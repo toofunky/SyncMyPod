@@ -19,6 +19,7 @@ struct LibraryTrackTableView: View {
     @State private var sortedBy: KeyPathComparator<LibraryTrack>?
     @State private var filteredBy = ""
     @State private var scrollTarget: LibraryTrack.ID?
+    @State private var tagsTracks: [LibraryTrack]?
     @State private var lyricsTrack: LibraryTrack?
     @State private var lyricsTrackToRemove: LibraryTrack?
     @State private var newPlaylistTracks: [LibraryTrack]?
@@ -32,6 +33,13 @@ struct LibraryTrackTableView: View {
                     proxy.scrollTo(scrollTarget, anchor: .center)
                     self.scrollTarget = nil
                 }
+        }
+        .toolbar {
+            ToolbarItem {
+                Button("Edit Tags…", systemImage: "tag") { tagsTracks = shownTracks(selection) }
+                    .keyboardShortcut("i")
+                    .disabled(selection.isEmpty)
+            }
         }
     }
 
@@ -53,6 +61,7 @@ struct LibraryTrackTableView: View {
         } primaryAction: { ids in
             play(ids)
         }
+        .modifier(TagEditingModifier(tracks: $tagsTracks))
         .modifier(LyricsEditingModifier(editing: $lyricsTrack, removing: $lyricsTrackToRemove))
         .modifier(NewPlaylistModifier(tracks: $newPlaylistTracks))
         .onChange(of: tracks) {
@@ -130,7 +139,7 @@ struct LibraryTrackTableView: View {
             .customizationID("codec")
     }
 
-    /// Also drops hidden tracks from the selection so the tag editor never edits rows the search hides.
+    /// Also drops hidden tracks from the selection so Edit Tags never edits rows the search hides.
     /// Revealing scrolls to the first selected row, since a rebuilt table starts at the top.
     private func updateRows(revealingSelection: Bool = false) {
         sortedBy = sortOrder.first
@@ -152,10 +161,10 @@ struct LibraryTrackTableView: View {
         sortedTracks.filter { ids.contains($0.id) }
     }
 
-    /// Tags are edited in the inspector beside the table, so the menu leaves that item out.
     private var songActions: SongMenuActions {
-        SongMenuActions(editLyrics: { lyricsTrack = $0 }, removeLyrics: { lyricsTrackToRemove = $0 },
-                        newPlaylist: { newPlaylistTracks = $0 }, showPlaylist: showPlaylist)
+        SongMenuActions(editTags: { tagsTracks = $0 }, editLyrics: { lyricsTrack = $0 },
+                        removeLyrics: { lyricsTrackToRemove = $0 }, newPlaylist: { newPlaylistTracks = $0 },
+                        showPlaylist: showPlaylist)
     }
 
     /// Plays the first double-clicked song, then the ones after it in the order shown.
