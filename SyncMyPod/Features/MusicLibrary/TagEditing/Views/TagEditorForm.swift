@@ -11,6 +11,7 @@ struct TagEditorForm: View {
 
     @Environment(\.modelContext) private var context
     @State private var dialogTab = TagEditorTab.details
+    @AppStorage("tagEditorInspectorTab") private var inspectorTab = TagEditorTab.details
 
     var body: some View {
         tabs
@@ -30,10 +31,10 @@ struct TagEditorForm: View {
     @ViewBuilder
     private var tabs: some View {
         if onClose == nil {
-            TabView {
-                Tab("Details", systemImage: "info.circle") { content(for: .details) }
-                Tab("Sorting", systemImage: "arrow.up.arrow.down") { content(for: .sorting) }
-                Tab("Lyrics", systemImage: "quote.bubble") { content(for: .lyrics) }
+            TabView(selection: $inspectorTab) {
+                Tab("Details", systemImage: "info.circle", value: .details) { content(for: .details) }
+                Tab("Sorting", systemImage: "arrow.up.arrow.down", value: .sorting) { content(for: .sorting) }
+                Tab("Lyrics", systemImage: "quote.bubble", value: .lyrics) { content(for: .lyrics) }
             }
         } else {
             VStack(spacing: 0) {
