@@ -18,9 +18,10 @@ struct AlbumSortOrderTests {
         Self.album("The Wall", artist: "Pink Floyd", year: 1979),
     ]
 
-    @Test func albumArtistIgnoresArticlesThenSortsByYear() {
+    @Test func albumArtistIgnoresArticlesThenSortsByTitle() {
+        let albums = albums + [Self.album("Day & Age", artist: "The Killers", year: 2008)]
         let titles = AlbumSortOrder.albumArtist.sorted(albums).map(\.title)
-        #expect(titles == ["Abbey Road", "Hot Fuss", "Sam's Town", "The Wall", "Untitled"])
+        #expect(titles == ["Abbey Road", "Day & Age", "Hot Fuss", "Sam's Town", "The Wall", "Untitled"])
     }
 
     @Test func albumSortsByTitleIgnoringArticles() {

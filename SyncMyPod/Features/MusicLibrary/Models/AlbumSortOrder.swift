@@ -32,7 +32,7 @@ nonisolated enum AlbumSortOrder: String, CaseIterable, Identifiable, Sendable {
 
     private var comparators: [(LibraryAlbum, LibraryAlbum) -> ComparisonResult] {
         switch self {
-        case .albumArtist: [Self.byArtist, Self.byYear, Self.byTitle]
+        case .albumArtist: [Self.byArtist, Self.byTitle]
         case .album: [Self.byTitle, Self.byArtist]
         case .year: [Self.byYear, Self.byArtist, Self.byTitle]
         case .yearDescending: [Self.byYearDescending, Self.byArtist, Self.byTitle]
