@@ -18,6 +18,11 @@ struct AudioPlayerConfigFields: View {
     private static let lyricsInfo = "A song's .lrc lyric file, in the same folder and with the same name, is "
         + "copied beside it and renamed to match the song on the player — for example, \"01 Clocks.lrc\" beside "
         + "\"01 Clocks.m4a\" — so the player shows synced lyrics."
+    private static let playlistFormatInfo = "Most players read .m3u8 playlists, which can hold any song name. "
+        + "Choose .m3u for players, such as Sonos, that only read playlists written in Windows Latin-1."
+    private static let latin1Note = "Songs whose album artist, album or file name uses characters outside "
+        + "Windows Latin-1, such as Japanese, Chinese or Cyrillic letters, are still copied but are left out of "
+        + ".m3u playlists."
     private static let blankFolderPrompt = "Leave blank to use the root folder"
 
     @Binding var config: AudioPlayerConfig
@@ -35,6 +40,7 @@ struct AudioPlayerConfigFields: View {
             Text("Folders inside the root folder. Songs are filed by album artist and album.")
                 .foregroundStyle(.secondary)
         }
+        playlistFormatSection
         Section {
             option("Preserve Track Sorting?", isOn: $config.preserveTrackSorting,
                    infoTitle: "Preserve Track Sorting", info: Self.trackSortingInfo)
@@ -56,6 +62,22 @@ struct AudioPlayerConfigFields: View {
             }
             option("Copy Lyric Files?", isOn: $config.copyLyricFiles,
                    infoTitle: "Copy Lyric Files", info: Self.lyricsInfo)
+        }
+    }
+
+    private var playlistFormatSection: some View {
+        Section {
+            HStack {
+                Picker("Playlist Format", selection: $config.playlistFormat) {
+                    ForEach(PlayerPlaylistFormat.allCases) { Text($0.title).tag($0) }
+                }
+                InfoPopoverButton(title: "Playlist Format", message: Self.playlistFormatInfo)
+            }
+        } footer: {
+            if config.playlistFormat == .m3u {
+                Text(Self.latin1Note)
+                    .foregroundStyle(.secondary)
+            }
         }
     }
 

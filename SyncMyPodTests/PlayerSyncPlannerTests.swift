@@ -112,4 +112,42 @@ struct PlayerSyncPlannerTests {
         #expect(plan.stalePlaylistPaths == ["Playlists/Old.m3u8"])
         #expect(plan.playlistChangeCount == 2)
     }
+
+    @Test func m3uPlaylistsLeaveOutSongsLatin1CantName() throws {
+        var latin1 = config
+        latin1.playlistFormat = .m3u
+        let volume = try TemporaryPlayerVolume(config: latin1)
+        let accented = try volume.request("Hoppípolla", artist: "Sigur Rós")
+        let japanese = try volume.request("Song", artist: "ビートルズ")
+        let playlist = IPodPlaylistRequest(id: 1, name: "Mix", createdAt: .now, tracks: [accented, japanese])
+        let plan = planner(latin1).plan(selected: [accented, japanese], playlists: [playlist])
+        let file = try #require(plan.playlists?.first)
+        #expect(file.path == "Playlists/Mix.m3u")
+        #expect(file.contents == "#EXTM3U\n#EXTINF:0,Sigur Rós - Hoppípolla\n../Music/Sigur Rós/Album/Hoppípolla.m4a\n")
+        #expect(file.data != Data(file.contents.utf8))
+        #expect(String(data: file.data, encoding: .windowsCP1252) == file.contents)
+        #expect(plan.copies.count == 2)
+    }
+
+    @Test func m3uTitlesLatin1CantHoldReadAsQuestionMarks() throws {
+        var latin1 = config
+        latin1.playlistFormat = .m3u
+        let volume = try TemporaryPlayerVolume(config: latin1)
+        let song = try volume.request("ビ", file: "Song.m4a")
+        let playlist = IPodPlaylistRequest(id: 1, name: "Mix", createdAt: .now, tracks: [song])
+        let contents = planner(latin1).plan(selected: [song], playlists: [playlist]).playlists?.first?.contents
+        #expect(contents == "#EXTM3U\n#EXTINF:0,Artist - ?\n../Music/Artist/Album/Song.m4a\n")
+    }
+
+    @Test func switchingFormatReplacesThePlaylistsSyncMyPodWrote() throws {
+        var latin1 = config
+        latin1.playlistFormat = .m3u
+        let volume = try TemporaryPlayerVolume(config: latin1)
+        let song = try volume.request("Song")
+        let mix = IPodPlaylistRequest(id: 1, name: "Mix", createdAt: .now, tracks: [song])
+        let plan = planner(latin1, playlists: ["Playlists/Mix.m3u8": "#EXTM3U\n"], playlistPaths: ["Playlists/Mix.m3u8"])
+            .plan(selected: [song], playlists: [mix])
+        #expect(plan.playlists?.map(\.path) == ["Playlists/Mix.m3u"])
+        #expect(plan.stalePlaylistPaths == ["Playlists/Mix.m3u8"])
+    }
 }

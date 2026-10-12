@@ -139,7 +139,10 @@ extension HelpTopic {
         HelpSection(heading: "Music and Playlist Folders",
                     body: "Choose where songs and playlists go inside the player's folder, or leave them blank to "
                         + "use the folder itself. Songs are filed in folders by album artist and album, and "
-                        + "playlists are saved as .m3u8 files that most players understand."),
+                        + "playlists are saved as .m3u8 files that most players understand. For players such as "
+                        + "Sonos that only read .m3u playlists, change **Playlist Format** to .m3u (Windows "
+                        + "Latin-1). Songs with names Latin-1 can't hold, such as Japanese or Cyrillic ones, are "
+                        + "left out of .m3u playlists but still copied."),
         HelpSection(heading: "Sync All Songs or Custom Sync",
                     body: "In the **Sync** tab, **Sync All Songs** copies every song and playlist in your music "
                         + "library. **Custom Sync** lets you check artists and albums, genres, and playlists. "

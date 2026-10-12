@@ -77,7 +77,7 @@ nonisolated struct PlayerTrackSyncer {
     private func write(_ playlists: [PlayerPlaylistFile], removing stale: [String],
                        state: inout PlayerSyncState) throws {
         for playlist in playlists {
-            try files.write(playlist.contents, to: playlist.path)
+            try files.write(playlist.data, to: playlist.path)
         }
         stale.forEach(files.remove)
         state.manifest.playlistPaths = Set(playlists.map(\.path))

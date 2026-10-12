@@ -1,5 +1,6 @@
 SyncMyPod-1.11.5
 - Replace more "illegal" characters in filenames with \_ when writing files to device.
+- Add Device option to use .m3u8 or .m3u playlists.
 
 SyncMyPod-1.11.4
 - Fix sorting by Album Artist to subsort on album name.

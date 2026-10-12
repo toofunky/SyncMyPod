@@ -10,6 +10,7 @@ nonisolated struct AudioPlayerConfig: Codable, Hashable, Sendable {
     var musicFolder = ""
     /// Relative to the root; empty means the root.
     var playlistFolder = ""
+    var playlistFormat = PlayerPlaylistFormat.m3u8
     /// Names files "01 Title" or "2-05 Title" for players that sort by file name.
     var preserveTrackSorting = false
     /// Tags copies with the album artist as their artist and moves a guest artist into the title.
@@ -76,6 +77,7 @@ nonisolated extension AudioPlayerConfig {
         rootPath = try container.decode(String.self, forKey: .rootPath)
         musicFolder = try container.decodeIfPresent(String.self, forKey: .musicFolder) ?? ""
         playlistFolder = try container.decodeIfPresent(String.self, forKey: .playlistFolder) ?? ""
+        playlistFormat = try container.decodeIfPresent(PlayerPlaylistFormat.self, forKey: .playlistFormat) ?? .m3u8
         preserveTrackSorting = try container.decodeIfPresent(Bool.self, forKey: .preserveTrackSorting) ?? false
         preserveAlbumArtist = try container.decodeIfPresent(Bool.self, forKey: .preserveAlbumArtist) ?? false
         copyCovers = try container.decodeIfPresent(Bool.self, forKey: .copyCovers) ?? false

@@ -8,7 +8,7 @@ nonisolated struct PlayerSyncPlanner {
     var presentSizes: [String: Int64] = [:]
     /// Library files known to be deleted, whose copies are removed whatever is selected.
     var missingSources: Set<String> = []
-    /// The playlist folder's `.m3u8` files, keyed by path, so unchanged ones aren't counted or rewritten.
+    /// The playlist folder's `.m3u` and `.m3u8` files, keyed by path, so unchanged ones aren't counted or rewritten.
     var existingPlaylists: [String: String] = [:]
     /// Covers and lyric files beside the library's songs, copied when the config asks for them.
     var sidecars = LibrarySidecars()
@@ -71,16 +71,27 @@ nonisolated struct PlayerSyncPlanner {
                      to plan: inout PlayerSyncPlan) {
         let others = Set(existingPlaylists.keys).subtracting(manifest.playlistPaths)
         var taken = Set(others.map { $0.lowercased() })
+        let format = config.playlistFormat
         let files = playlists.map { playlist in
-            let name = PlayerFileNamer.safeComponent(playlist.name, fallback: "Playlist") + ".m3u8"
+            let name = PlayerFileNamer.safeComponent(playlist.name, fallback: "Playlist") + "." + format.fileExtension
             let path = Self.claim(AudioPlayerConfig.join(config.playlistPath, name), in: &taken)
-            let entries = playlist.tracks.compactMap { track in destinations[track.sourcePath].map { (track.draft, $0) } }
-            return PlayerPlaylistFile(path: path, contents: M3U8Playlist.contents(entries, inFolder: config.playlistPath))
+            return playlistFile(playlist, at: path, destinations: destinations)
         }
         plan.playlists = files
         plan.stalePlaylistPaths = manifest.playlistPaths.subtracting(files.map(\.path)).sorted()
         plan.playlistChangeCount = files.filter { existingPlaylists[$0.path] != $0.contents }.count
             + plan.stalePlaylistPaths.count
+    }
+
+    /// Leaves out songs whose path the format can't encode, since a garbled line would never match the file.
+    private func playlistFile(_ playlist: IPodPlaylistRequest, at path: String,
+                              destinations: [String: String]) -> PlayerPlaylistFile {
+        let format = config.playlistFormat
+        let entries = playlist.tracks.compactMap { track in
+            destinations[track.sourcePath].flatMap { format.canEncode($0) ? (track.draft, $0) : nil }
+        }
+        let contents = M3U8Playlist.contents(entries, inFolder: config.playlistPath)
+        return PlayerPlaylistFile(path: path, contents: format.representable(contents), format: format)
     }
 
     private static func claim(_ wanted: String, in taken: inout Set<String>) -> String {

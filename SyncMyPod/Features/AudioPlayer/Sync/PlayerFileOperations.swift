@@ -53,10 +53,10 @@ nonisolated struct PlayerFileOperations {
         try? manager.removeItem(at: device.url(forPath: path))
     }
 
-    func write(_ contents: String, to path: String) throws {
+    func write(_ data: Data, to path: String) throws {
         let url = device.url(forPath: path)
         try manager.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
-        try Data(contents.utf8).write(to: url, options: .atomic)
+        try data.write(to: url, options: .atomic)
     }
 
     /// Deletes folders left empty below the music folder, apart from Finder's hidden files.

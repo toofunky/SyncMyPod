@@ -5,7 +5,7 @@ nonisolated struct PlayerDeviceContents: Equatable, Sendable {
     var manifest = PlayerSyncManifest()
     /// Sizes of the manifest's files that are still on the player, keyed by path.
     var presentSizes: [String: Int64] = [:]
-    /// The playlist folder's `.m3u8` files, keyed by path.
+    /// The playlist folder's `.m3u` and `.m3u8` files, keyed by path. Unreadable ones still hold their name.
     var playlists: [String: String] = [:]
 
     @concurrent
@@ -35,9 +35,10 @@ nonisolated struct PlayerDeviceContents: Equatable, Sendable {
         let folder = device.playlistURL
         let names = (try? FileManager.default.contentsOfDirectory(atPath: folder.path(percentEncoded: false))) ?? []
         var playlists: [String: String] = [:]
-        for name in names where name.lowercased().hasSuffix(".m3u8") && !name.hasPrefix(".") {
-            let path = AudioPlayerConfig.join(device.config.playlistPath, name)
-            playlists[path] = try? String(contentsOf: folder.appending(path: name), encoding: .utf8)
+        for name in names where !name.hasPrefix(".") {
+            guard let format = PlayerPlaylistFormat(fileName: name) else { continue }
+            let data = try? Data(contentsOf: folder.appending(path: name))
+            playlists[AudioPlayerConfig.join(device.config.playlistPath, name)] = data.flatMap(format.decoded) ?? ""
         }
         return playlists
     }
