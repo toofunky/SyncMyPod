@@ -8,4 +8,13 @@ nonisolated extension IPodSyncRequest {
         return TagChanges(title: draft.title, artist: draft.artist,
                           sortTitle: draft.sortTitle.isEmpty ? nil : draft.sortTitle, sortArtist: draft.sortArtist)
     }
+
+    /// Records the size the copy's embedded artwork is scaled to fit, so changing it updates the copies.
+    /// Songs without artwork aren't affected, so they're never copied again for it.
+    func resizingArtwork(to pixelLimit: Int?) -> IPodSyncRequest {
+        guard var source, source.artworkFingerprint != nil else { return self }
+        source.artworkPixelLimit = pixelLimit
+        return IPodSyncRequest(sourceURL: sourceURL, draft: draft, source: source,
+                               embedsLyricsSidecar: embedsLyricsSidecar)
+    }
 }

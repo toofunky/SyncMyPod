@@ -17,7 +17,7 @@ nonisolated struct AudioPlayerConfig: Codable, Hashable, Sendable {
     var preserveAlbumArtist = false
     /// Copies an album folder's cover.jpg, folder.jpg, cover.png or folder.png beside its songs.
     var copyCovers = false
-    /// Scales copied covers down so neither side is larger than `maxCoverSize` pixels.
+    /// Scales songs' embedded artwork, and copied covers, down so neither side is larger than `maxCoverSize`.
     var resizeCovers = false
     var maxCoverSize = Self.defaultMaxCoverSize
     /// Copies each song's .lrc lyric file, renamed to match the song's name on the player.
@@ -26,8 +26,8 @@ nonisolated struct AudioPlayerConfig: Codable, Hashable, Sendable {
     static let defaultMaxCoverSize = 300
     static let coverSizeRange = 16...10_000
 
-    /// The size covers are scaled to fit, or `nil` to copy them as they are.
-    var coverPixelLimit: Int? { copyCovers && resizeCovers ? maxCoverSize : nil }
+    /// The size embedded artwork and copied covers are scaled to fit, or `nil` to copy them as they are.
+    var coverPixelLimit: Int? { resizeCovers ? maxCoverSize : nil }
 
     init(id: String = UUID().uuidString, name: String, rootPath: String, musicFolder: String = "",
          playlistFolder: String = "") {

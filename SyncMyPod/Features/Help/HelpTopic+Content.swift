@@ -158,7 +158,8 @@ extension HelpTopic {
         HelpSection(heading: "Player Settings",
                     body: "The **Settings** tab tailors the copies to your player. Add track numbers to file "
                         + "names for players that sort by name, keep albums together under the album artist, "
-                        + "copy and resize album covers, and copy .lrc files for synced lyrics. Click the info "
+                        + "copy album covers, shrink oversized artwork, and copy .lrc files for synced lyrics. "
+                        + "Click the info "
                         + "button beside an option to learn more."),
         HelpSection(heading: "Changing or Forgetting a Player",
                     body: "If you change the music folder, songs already on the player are moved at the next "

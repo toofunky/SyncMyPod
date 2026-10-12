@@ -7,13 +7,17 @@ nonisolated struct PlayerFileOperations {
     let device: AudioPlayerDevice
     private var manager: FileManager { .default }
 
-    /// Retags the copy, when its album artist is preserved, before it replaces anything.
+    /// A copy that's retagged, when its album artist is preserved, or gets smaller artwork, when covers are
+    /// resized, is finished locally first, so the player is written only once.
     func copy(_ request: IPodSyncRequest, to path: String) async throws {
-        try await copy(request.sourceURL, to: path) { staged in
-            if let tags = request.playerTagChanges {
-                try await TagWriter().write(tags, to: staged, codec: request.draft.codec)
-            }
+        let changes = await PlayerSongPreparer.changes(for: request)
+        guard !changes.isEmpty else { return try await copy(request.sourceURL, to: path) }
+        guard manager.fileExists(atPath: request.sourcePath) else {
+            throw PlayerSyncError.missingSource(request.sourceURL.lastPathComponent)
         }
+        let prepared = try await PlayerSongPreparer().prepare(request, with: changes)
+        defer { try? manager.removeItem(at: prepared.deletingLastPathComponent()) }
+        try await copy(prepared, to: path)
     }
 
     /// Copies, and `prepare`s, beside the destination first, so a cancelled or failed copy never leaves a

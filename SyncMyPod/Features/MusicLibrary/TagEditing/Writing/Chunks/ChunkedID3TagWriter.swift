@@ -1,18 +1,18 @@
 import Foundation
 
 /// Updates the ID3v2 tag that WAV and AIFF files keep in an `id3 ` or `ID3 ` chunk, adding the chunk at the
-/// end of the file when there's none. The chunk is overwritten in place when the tag fits in its padding.
+/// end of the file when there's none. The chunk is overwritten in place when the tag fits in its padding,
+/// unless that would leave more than `maximumPadding` bytes of padding.
 nonisolated struct ChunkedID3TagWriter {
-    private static let padding = 2_048
+    var maximumPadding: Int?
 
     func write(_ changes: TagChanges, to url: URL) throws {
         let (layout, existingTag) = try read(url)
         var tag = existingTag
-        ID3TagWriter().apply(changes, to: &tag)
+        let writer = ID3TagWriter(maximumPadding: maximumPadding)
+        writer.apply(changes, to: &tag)
         let existing = layout.id3Chunk
-        let room = existing?.size ?? 0
-        let fitted = tag.serialized(minimumLength: room)
-        let body = fitted.count == room ? fitted : tag.serialized(minimumLength: fitted.count + Self.padding)
+        let body = writer.serialized(tag, room: existing?.size ?? 0)
         var chunk = layout.format.chunk(id: existing?.id ?? layout.format.id3ChunkID, body: body)
         let range: Range<Int>
         if let existing {

@@ -19,7 +19,7 @@ nonisolated struct PlayerSyncPlanner {
     /// that aren't in `selected`, as when adding a few songs.
     func plan(selected: [IPodSyncRequest], unselected: [IPodSyncRequest] = [],
               playlists: [IPodPlaylistRequest]?) -> PlayerSyncPlan {
-        let selected = Self.unique(selected)
+        let selected = Self.unique(selected).map { $0.resizingArtwork(to: config.coverPixelLimit) }
         var plan = PlayerSyncPlan(selectedCount: selected.count)
         plan.removals = removals(unselected, keeping: Set(selected.map(\.sourcePath)))
         let destinations = destinations(for: selected, removing: Set(plan.removals.map(\.sourcePath)))
