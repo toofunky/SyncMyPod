@@ -17,7 +17,7 @@ nonisolated struct PlayerFileOperations {
     }
 
     /// Copies, and `prepare`s, beside the destination first, so a cancelled or failed copy never leaves a
-    /// truncated or half-changed file.
+    /// truncated or half-changed file. An .m4a whose `moov` box comes last is copied with it first.
     func copy(_ source: URL, to path: String,
               preparing prepare: (URL) async throws -> Void = { _ in }) async throws {
         guard manager.fileExists(atPath: source.path(percentEncoded: false)) else {
@@ -28,7 +28,9 @@ nonisolated struct PlayerFileOperations {
         try manager.createDirectory(at: folder, withIntermediateDirectories: true)
         let staged = folder.appending(path: ".syncmypod-\(UUID().uuidString).tmp")
         do {
-            try manager.copyItem(at: source, to: staged)
+            if try !MP4FastStartCopier().copy(source, to: staged) {
+                try manager.copyItem(at: source, to: staged)
+            }
             try await prepare(staged)
             try replace(destination, with: staged)
         } catch {
