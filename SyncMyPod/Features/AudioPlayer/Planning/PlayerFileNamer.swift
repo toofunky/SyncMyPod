@@ -3,7 +3,7 @@ import Foundation
 /// Names that are safe on the FAT32 and exFAT cards most players use.
 nonisolated enum PlayerFileNamer {
     private static let maxComponentLength = 120
-    private static let forbidden = CharacterSet(charactersIn: "/\\:*?\"<>|").union(.controlCharacters)
+    private static let forbidden = CharacterSet(charactersIn: "/\\:*?\"<>|+=[],…;").union(.controlCharacters)
 
     /// Replaces characters FAT can't store, keeps names from hiding behind a leading dot, and trims the
     /// trailing dots and spaces Windows drops.

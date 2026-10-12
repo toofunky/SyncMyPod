@@ -1,3 +1,6 @@
+SyncMyPod-1.11.5
+- Replace more "illegal" characters in filenames with \_ when writing files to device.
+
 SyncMyPod-1.11.4
 - Fix sorting by Album Artist to subsort on album name.
 -  The Artists and Albums views refresh after editing a tag now.
