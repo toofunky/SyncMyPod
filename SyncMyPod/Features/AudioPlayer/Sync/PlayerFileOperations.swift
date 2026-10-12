@@ -7,17 +7,21 @@ nonisolated struct PlayerFileOperations {
     let device: AudioPlayerDevice
     private var manager: FileManager { .default }
 
-    /// Retags the copy, when its album artist is preserved, before it replaces anything.
+    /// A copy that's retagged, when its album artist is preserved, or gets smaller artwork, when covers are
+    /// resized, is finished locally first, so the player is written only once.
     func copy(_ request: IPodSyncRequest, to path: String) async throws {
-        try await copy(request.sourceURL, to: path) { staged in
-            if let tags = request.playerTagChanges {
-                try await TagWriter().write(tags, to: staged, codec: request.draft.codec)
-            }
+        let changes = await PlayerSongPreparer.changes(for: request)
+        guard !changes.isEmpty else { return try await copy(request.sourceURL, to: path) }
+        guard manager.fileExists(atPath: request.sourcePath) else {
+            throw PlayerSyncError.missingSource(request.sourceURL.lastPathComponent)
         }
+        let prepared = try await PlayerSongPreparer().prepare(request, with: changes)
+        defer { try? manager.removeItem(at: prepared.deletingLastPathComponent()) }
+        try await copy(prepared, to: path)
     }
 
     /// Copies, and `prepare`s, beside the destination first, so a cancelled or failed copy never leaves a
-    /// truncated or half-changed file.
+    /// truncated or half-changed file. An .m4a whose `moov` box comes last is copied with it first.
     func copy(_ source: URL, to path: String,
               preparing prepare: (URL) async throws -> Void = { _ in }) async throws {
         guard manager.fileExists(atPath: source.path(percentEncoded: false)) else {
@@ -28,7 +32,9 @@ nonisolated struct PlayerFileOperations {
         try manager.createDirectory(at: folder, withIntermediateDirectories: true)
         let staged = folder.appending(path: ".syncmypod-\(UUID().uuidString).tmp")
         do {
-            try manager.copyItem(at: source, to: staged)
+            if try !MP4FastStartCopier().copy(source, to: staged) {
+                try manager.copyItem(at: source, to: staged)
+            }
             try await prepare(staged)
             try replace(destination, with: staged)
         } catch {
@@ -53,10 +59,10 @@ nonisolated struct PlayerFileOperations {
         try? manager.removeItem(at: device.url(forPath: path))
     }
 
-    func write(_ contents: String, to path: String) throws {
+    func write(_ data: Data, to path: String) throws {
         let url = device.url(forPath: path)
         try manager.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
-        try Data(contents.utf8).write(to: url, options: .atomic)
+        try data.write(to: url, options: .atomic)
     }
 
     /// Deletes folders left empty below the music folder, apart from Finder's hidden files.

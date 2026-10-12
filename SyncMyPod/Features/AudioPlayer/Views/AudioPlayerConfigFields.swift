@@ -12,12 +12,18 @@ struct AudioPlayerConfigFields: View {
     private static let coversInfo = "An album folder's cover.jpg, folder.jpg, cover.png or folder.png is copied "
         + "into the album's folder on the player, for players that show folder artwork instead of artwork "
         + "embedded in songs."
-    private static let resizeInfo = "Covers larger than the maximum size are scaled down so their longer side "
-        + "fits, keeping their shape, for players that are slow with or can't show large images. Smaller covers "
-        + "are copied as they are. Your library's covers aren't changed."
+    private static let resizeInfo = "Artwork embedded in songs, and covers copied beside them, that's larger "
+        + "than the maximum size is scaled down so its longer side fits, keeping its shape, for players that are "
+        + "slow with or can't show large images. Smaller artwork is copied as it is. For Sonos, try 1000 px. "
+        + "Changing this copies songs with artwork again at the next sync. Your library's files aren't changed."
     private static let lyricsInfo = "A song's .lrc lyric file, in the same folder and with the same name, is "
         + "copied beside it and renamed to match the song on the player — for example, \"01 Clocks.lrc\" beside "
         + "\"01 Clocks.m4a\" — so the player shows synced lyrics."
+    private static let playlistFormatInfo = "Most players read .m3u8 playlists, which can hold any song name. "
+        + "Choose .m3u for players, such as Sonos, that only read playlists written in Windows Latin-1."
+    private static let latin1Note = "Songs whose album artist, album or file name uses characters outside "
+        + "Windows Latin-1, such as Japanese, Chinese or Cyrillic letters, are still copied but are left out of "
+        + ".m3u playlists."
     private static let blankFolderPrompt = "Leave blank to use the root folder"
 
     @Binding var config: AudioPlayerConfig
@@ -35,27 +41,42 @@ struct AudioPlayerConfigFields: View {
             Text("Folders inside the root folder. Songs are filed by album artist and album.")
                 .foregroundStyle(.secondary)
         }
+        playlistFormatSection
         Section {
             option("Preserve Track Sorting?", isOn: $config.preserveTrackSorting,
                    infoTitle: "Preserve Track Sorting", info: Self.trackSortingInfo)
             option("Preserve Album Artist?", isOn: $config.preserveAlbumArtist,
                    infoTitle: "Preserve Album Artist", info: Self.albumArtistInfo)
             option("Copy Covers?", isOn: $config.copyCovers, infoTitle: "Copy Covers", info: Self.coversInfo)
-            if config.copyCovers {
-                option("Resize Covers?", isOn: $config.resizeCovers, infoTitle: "Resize Covers", info: Self.resizeInfo)
-                if config.resizeCovers {
-                    LabeledContent("Maximum Size") {
-                        HStack {
-                            TextField("Maximum Size", value: $config.maxCoverSize, format: .number)
-                                .labelsHidden()
-                                .multilineTextAlignment(.trailing)
-                            Text("px")
-                        }
+            option("Resize Covers?", isOn: $config.resizeCovers, infoTitle: "Resize Covers", info: Self.resizeInfo)
+            if config.resizeCovers {
+                LabeledContent("Maximum Size") {
+                    HStack {
+                        TextField("Maximum Size", value: $config.maxCoverSize, format: .number)
+                            .labelsHidden()
+                            .multilineTextAlignment(.trailing)
+                        Text("px")
                     }
                 }
             }
             option("Copy Lyric Files?", isOn: $config.copyLyricFiles,
                    infoTitle: "Copy Lyric Files", info: Self.lyricsInfo)
+        }
+    }
+
+    private var playlistFormatSection: some View {
+        Section {
+            HStack {
+                Picker("Playlist Format", selection: $config.playlistFormat) {
+                    ForEach(PlayerPlaylistFormat.allCases) { Text($0.title).tag($0) }
+                }
+                InfoPopoverButton(title: "Playlist Format", message: Self.playlistFormatInfo)
+            }
+        } footer: {
+            if config.playlistFormat == .m3u {
+                Text(Self.latin1Note)
+                    .foregroundStyle(.secondary)
+            }
         }
     }
 

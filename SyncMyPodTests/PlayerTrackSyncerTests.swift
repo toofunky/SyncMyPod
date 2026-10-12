@@ -28,6 +28,21 @@ struct PlayerTrackSyncerTests {
         #expect(manifest.playlistPaths == ["Playlists/Mix.m3u8"])
     }
 
+    @Test func m3uPlaylistsAreWrittenInLatin1AndReadBackUnchanged() async throws {
+        var latin1 = config
+        latin1.playlistFormat = .m3u
+        let volume = try TemporaryPlayerVolume(config: latin1)
+        let song = try volume.request("Hoppípolla", artist: "Sigur Rós")
+        let mix = IPodPlaylistRequest(id: 1, name: "Mix", createdAt: .now, tracks: [song])
+        _ = try await PlayerTrackSyncer(device: volume.device)
+            .sync(try await plan(on: volume, selected: [song], playlists: [mix], config: latin1))
+        let data = try Data(contentsOf: volume.volumeURL.appending(path: "Playlists/Mix.m3u"))
+        #expect(String(data: data, encoding: .windowsCP1252)?.contains("../Music/Sigur Rós/Album/Hoppípolla.m4a") == true)
+        #expect(String(data: data, encoding: .utf8) == nil)
+        let again = try await plan(on: volume, selected: [song], playlists: [mix], config: latin1)
+        #expect(again.playlistChangeCount == 0)
+    }
+
     @Test func secondSyncChangesNothing() async throws {
         let volume = try TemporaryPlayerVolume(config: config)
         let song = try volume.request("Clocks")

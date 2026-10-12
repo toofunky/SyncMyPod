@@ -1,17 +1,26 @@
 import Foundation
 
 /// Updates the ID3v2 tag at the start of an MP3, keeping the tag's version (v2.3 for new tags) and
-/// every frame it doesn't change. The tag is overwritten in place when it fits in the old one's padding.
+/// every frame it doesn't change. The tag is overwritten in place when it fits in the old one's padding,
+/// unless that would leave more than `maximumPadding` bytes of padding.
 nonisolated struct ID3TagWriter {
-    private static let padding = 2_048
+    static let padding = 2_048
+
+    var maximumPadding: Int?
 
     func write(_ changes: TagChanges, to url: URL) throws {
         var tag = try readTag(at: url)
         apply(changes, to: &tag)
-        let fitted = tag.serialized(minimumLength: tag.existingLength)
-        let data = fitted.count == tag.existingLength
-            ? fitted : tag.serialized(minimumLength: fitted.count + Self.padding)
-        try FileRegionReplacer(url: url).replace(0..<tag.existingLength, with: data)
+        try FileRegionReplacer(url: url).replace(0..<tag.existingLength, with: serialized(tag, room: tag.existingLength))
+    }
+
+    /// `tag` filling exactly `room` bytes when it fits there without too much padding, or else compacted with
+    /// the usual padding.
+    func serialized(_ tag: ID3Tag, room: Int) -> Data {
+        let compact = tag.serialized(minimumLength: 0)
+        let fitted = tag.serialized(minimumLength: room)
+        let fitsInPlace = fitted.count == room && room - compact.count <= maximumPadding ?? .max
+        return fitsInPlace ? fitted : tag.serialized(minimumLength: compact.count + Self.padding)
     }
 
     private func readTag(at url: URL) throws -> ID3Tag {

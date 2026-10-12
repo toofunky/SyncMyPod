@@ -1,9 +1,12 @@
 import Foundation
 
 /// Updates the Vorbis comment and pictures of a FLAC file, keeping every comment and block it doesn't change.
-/// The metadata is overwritten in place when it fits in the old metadata and its padding.
+/// The metadata is overwritten in place when it fits in the old metadata and its padding, unless that would
+/// leave more than `maximumPadding` bytes of padding.
 nonisolated struct FLACTagWriter {
     private static let padding = 4_096
+
+    var maximumPadding: Int?
 
     func write(_ changes: TagChanges, to url: URL) throws {
         var metadata = try readMetadata(at: url)
@@ -11,9 +14,11 @@ nonisolated struct FLACTagWriter {
         apply(changes, to: &comment)
         metadata.setVorbisComment(comment)
         applyArtwork(changes.artwork, to: &metadata)
+        let compact = metadata.serialized(minimumLength: 0)
         let fitted = metadata.serialized(minimumLength: metadata.existingLength)
-        let data = fitted.count == metadata.existingLength
-            ? fitted : metadata.serialized(minimumLength: fitted.count + Self.padding)
+        let fitsInPlace = fitted.count == metadata.existingLength
+            && metadata.existingLength - compact.count <= maximumPadding ?? .max
+        let data = fitsInPlace ? fitted : metadata.serialized(minimumLength: compact.count + Self.padding)
         try FileRegionReplacer(url: url).replace(0..<metadata.existingLength, with: data)
     }
 

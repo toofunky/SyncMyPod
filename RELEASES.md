@@ -1,5 +1,8 @@
 SyncMyPod-1.11.5
 - Replace more "illegal" characters in filenames with \_ when writing files to device.
+- Add device option to use .m3u8 or .m3u playlists.
+- Move tag index to front of file when syncing (improves compatability with SONOS scanning).
+- Decouple Copy Covers and Resize Covers device options (resize can apply to embedded or sidecar covery files now).
 
 SyncMyPod-1.11.4
 - Fix sorting by Album Artist to subsort on album name.

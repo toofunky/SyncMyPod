@@ -11,4 +11,6 @@ nonisolated struct SyncSource: Codable, Equatable, Sendable {
     var hasLyrics: Bool?
     /// The modification date of the lyric file embedded in the copy; `nil` when none was.
     var lyricsSidecarDate: Date?
+    /// The size a player's copy had its embedded artwork scaled to fit; `nil` when it was copied as it is.
+    var artworkPixelLimit: Int?
 }

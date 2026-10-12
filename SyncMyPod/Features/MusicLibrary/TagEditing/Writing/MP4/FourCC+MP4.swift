@@ -2,6 +2,7 @@ import Foundation
 
 nonisolated extension FourCC {
     static let moov = FourCC("moov")
+    static let mdat = FourCC("mdat")
     static let trak = FourCC("trak")
     static let mdia = FourCC("mdia")
     static let minf = FourCC("minf")

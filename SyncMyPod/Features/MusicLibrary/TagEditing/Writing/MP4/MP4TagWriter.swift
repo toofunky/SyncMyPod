@@ -2,9 +2,12 @@ import Foundation
 
 /// Rewrites the `moov` box of an .m4a with new tags. It absorbs size changes into following `free`
 /// boxes when it can, rewrites in place when `moov` is last, and otherwise shifts the chunk offsets and
-/// rewrites the file with padding so later edits fit in place.
+/// rewrites the file with padding so later edits fit in place. Size changes aren't absorbed when that would
+/// leave more than `maximumPadding` bytes of `free` space.
 nonisolated struct MP4TagWriter {
     private static let padding = 2_048
+
+    var maximumPadding: Int?
 
     func write(_ changes: TagChanges, to url: URL) throws {
         let (region, fileSize, moovData) = try readMovieRegion(of: url)
@@ -32,7 +35,7 @@ nonisolated struct MP4TagWriter {
 
     private func layOut(_ moov: inout MP4Box, replacing region: Range<Int>, fileSize: Int) throws -> Data {
         let spare = region.count - moov.size
-        if spare == 0 || spare >= MP4Box.headerSize {
+        if (spare == 0 || spare >= MP4Box.headerSize) && spare <= maximumPadding ?? .max {
             return moov.serialized() + (spare > 0 ? MP4Box.free(size: spare).serialized() : Data())
         }
         if region.upperBound == fileSize { return moov.serialized() }

@@ -1,6 +1,6 @@
 import Foundation
 
-/// An extended M3U playlist in UTF-8, with paths relative to the playlist's own folder.
+/// An extended M3U playlist, with paths relative to the playlist's own folder.
 nonisolated enum M3U8Playlist {
     /// `folder` and each entry's `path` are relative to the volume.
     static func contents(_ entries: [(draft: ITunesTrackDraft, path: String)], inFolder folder: String) -> String {
