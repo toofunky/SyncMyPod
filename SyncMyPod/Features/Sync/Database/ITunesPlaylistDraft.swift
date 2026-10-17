@@ -6,4 +6,8 @@ nonisolated struct ITunesPlaylistDraft: Equatable, Sendable {
     let name: String
     let createdAt: Date
     let databaseIDs: [UInt64]
+    /// For the Podcasts list, each episode's show, parallel to `databaseIDs`; `nil` for other playlists.
+    var podcastShows: [String]?
+
+    var isPodcasts: Bool { podcastShows != nil }
 }

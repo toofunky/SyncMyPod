@@ -9,7 +9,7 @@ nonisolated extension NanoLibraryRows {
             return [("pid", .id(playlist.pid)), ("distinguished_kind", .int(playlist.distinguishedKind)),
                     ("date_created", .int(created)), ("date_modified", .int(created)), ("name", .text(playlist.name)),
                     ("name_order", .int(catalog.playlists.order(of: playlist.name))), ("parent_pid", .int(0)),
-                    ("media_kinds", .bool(playlist.holdsMusic)), ("workout_template_id", .int(0)),
+                    ("media_kinds", .int(playlist.mediaKinds)), ("workout_template_id", .int(0)),
                     ("is_hidden", .bool(playlist.isHidden)), ("smart_is_folder", .int(0))]
         })
     }

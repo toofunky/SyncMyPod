@@ -8,7 +8,7 @@ nonisolated enum SyncCategory: String, CaseIterable, Identifiable, Sendable {
 
     var id: Self { self }
 
-    /// iPods don't sync podcasts yet.
+    /// For a selection without podcasts.
     static let musicCategories: [SyncCategory] = [.albums, .genres, .playlists]
 
     var title: String {

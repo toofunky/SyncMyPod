@@ -20,8 +20,7 @@ nonisolated struct PodcastDownloadJob: Sendable {
         // An untaggable file is still worth keeping; it's only missing its show details.
         let metadata = try? await PodcastEpisodeTagger.tag(destination, with: tags)
         let size = try destination.resourceValues(forKeys: [.fileSizeKey]).fileSize ?? 0
-        return PodcastDownloadResult(fileURL: destination, byteCount: Int64(size),
-                                     duration: metadata.map(\.duration).flatMap { $0 > 0 ? $0 : nil })
+        return PodcastDownloadResult(fileURL: destination, byteCount: Int64(size), metadata: metadata)
     }
 
     private func move(_ temporaryURL: URL, into folder: URL) throws -> URL {

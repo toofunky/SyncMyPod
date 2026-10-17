@@ -22,7 +22,7 @@ struct SyncSettingsForm: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            SyncSelectionEditor(settings: settings, library: library)
+            SyncSelectionEditor(settings: settings, library: library, includesPodcasts: true)
             Divider()
             let input = planInput
             SyncSummaryBar(totals: plan?.totals, isCalculating: plannedInput != input, freeBytes: freeBytes,

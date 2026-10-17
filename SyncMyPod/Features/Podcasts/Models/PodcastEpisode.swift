@@ -18,6 +18,12 @@ nonisolated final class PodcastEpisode {
     /// The downloaded file's full path, or `nil` when it hasn't been downloaded. Absolute, so choosing another
     /// download folder only affects new downloads.
     var downloadedFilePath: String?
+    /// When the download finished; with the size, how an iPod sync tells the file hasn't changed.
+    var downloadedAt: Date?
+    /// Read from the downloaded file, for the iPod's track record.
+    var codecRawValue: String?
+    var bitrate: Int?
+    var sampleRate: Int?
     var podcast: Podcast?
 
     init(guid: String, title: String, enclosureURL: String) {
@@ -29,6 +35,16 @@ nonisolated final class PodcastEpisode {
     var isDownloaded: Bool { downloadedFilePath != nil }
 
     var downloadedFileURL: URL? { downloadedFilePath.map { URL(filePath: $0) } }
+
+    var codec: AudioCodec? { codecRawValue.flatMap(AudioCodec.init(rawValue:)) }
+
+    /// Records what was read from the downloaded file.
+    func apply(_ metadata: AudioFileMetadata) {
+        codecRawValue = metadata.codec.rawValue
+        bitrate = metadata.bitrate
+        sampleRate = metadata.sampleRate
+        if metadata.duration > 0 { duration = metadata.duration }
+    }
 
     /// A downloaded episode keeps the duration and size read from its file, which feeds often get wrong.
     func update(from episode: PodcastFeedEpisode) {

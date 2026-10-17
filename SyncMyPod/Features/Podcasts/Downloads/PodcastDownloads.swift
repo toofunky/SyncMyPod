@@ -61,6 +61,18 @@ final class PodcastDownloads {
         try? context.save()
     }
 
+    /// Reads the codec and audio details of downloads made before they were recorded, which an iPod needs.
+    func readMissingAudioDetails(of podcasts: [Podcast], context: ModelContext) async {
+        let episodes = podcasts.flatMap(\.episodes).filter { $0.isDownloaded && $0.codecRawValue == nil }
+        guard !episodes.isEmpty else { return }
+        for episode in episodes {
+            guard let url = episode.downloadedFileURL,
+                  let metadata = try? await AudioMetadataReader().read(url) else { continue }
+            episode.apply(metadata)
+        }
+        try? context.save()
+    }
+
     private func startQueued() {
         while tasks.count < Self.maximumConcurrent, !queue.isEmpty {
             let pending = queue.removeFirst()
@@ -90,8 +102,9 @@ final class PodcastDownloads {
                 Task { @MainActor in self?.setProgress(fraction, for: id) }
             }
             episode.downloadedFilePath = result.fileURL.path(percentEncoded: false)
+            episode.downloadedAt = .now
             episode.byteCount = result.byteCount
-            if let duration = result.duration { episode.duration = duration }
+            if let metadata = result.metadata { episode.apply(metadata) }
             try? context.save()
         } catch {
             if !Task.isCancelled { errors[id] = error.localizedDescription }

@@ -2,6 +2,8 @@ import Foundation
 
 /// Builds a user `mhyp` playlist with its title `mhod`, an optional settings `mhod` and its `mhip` entries.
 nonisolated enum PlaylistRecordBuilder {
+    /// Marks the iPod's Podcasts list.
+    static let podcastFlagOffset = 0x2A
     private static let headerLength = 0x6C
     private static let manualSortOrder: UInt32 = 1
 
@@ -15,6 +17,7 @@ nonisolated enum PlaylistRecordBuilder {
         mhyp.set(ITunesTimestamp.seconds(from: draft.createdAt), at: 0x18)
         mhyp.set(draft.id, at: 0x1C)
         mhyp.set(UInt16(1), at: 0x28)
+        if draft.isPodcasts { mhyp.set(UInt16(1), at: podcastFlagOffset) }
         mhyp.set(manualSortOrder, at: 0x2C)
         return mhyp
     }

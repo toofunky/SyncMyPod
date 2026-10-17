@@ -34,6 +34,10 @@ nonisolated struct NanoLibraryItem: Equatable, Sendable {
     let artworkID: UInt32
     let albumID: UInt32
     let artistID: UInt32
+    var skipsWhenShuffling = false
+    var remembersPosition = false
+
+    var isPodcast: Bool { NanoMediaKind(mediaType: mediaType) == .podcast }
 
     func string(_ field: ITunesStringField) -> String? {
         strings[field].flatMap { $0.isEmpty ? nil : $0 }

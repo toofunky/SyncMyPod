@@ -42,14 +42,16 @@ nonisolated struct SyncPlan: Equatable, Sendable {
              strayDatabaseIDs: strayDatabaseIDs)
     }
 
+    /// `episodes` are podcast episodes chosen and not chosen, which aren't in any playlist but the Podcasts list.
     static func make(snapshots tracks: [SyncTrackSnapshot], mode: SyncMode, selectedAlbums: Set<String>,
                      selectedGenres: Set<String>, playlists: [IPodPlaylistRequest], onDevice: [ITunesTrack],
-                     devicePlaylists: [ITunesPlaylist], manifest: SyncManifest,
-                     strayDatabaseIDs: Set<UInt64>) -> SyncPlan {
+                     devicePlaylists: [ITunesPlaylist], manifest: SyncManifest, strayDatabaseIDs: Set<UInt64>,
+                     episodes: (selected: [IPodSyncRequest], unselected: [IPodSyncRequest]) = ([], [])) -> SyncPlan {
         let selection = SyncSelection(mode: mode, albums: selectedAlbums, genres: selectedGenres)
             .partition(tracks, syncedPlaylists: playlists)
         let plan = SyncPlanner(manifest: manifest, onDevice: onDevice, strayDatabaseIDs: strayDatabaseIDs)
-            .plan(selected: selection.selected.map(\.request), unselected: selection.unselected.map(\.request))
+            .plan(selected: selection.selected.map(\.request) + episodes.selected,
+                  unselected: selection.unselected.map(\.request) + episodes.unselected)
         let resolver = PlaylistTrackResolver(manifest: manifest.valid(for: Set(onDevice.map(\.databaseID))),
                                              onDevice: onDevice)
         let changes = PlaylistChangeCounter.count(playlists, resolver: resolver, onDevice: onDevice,

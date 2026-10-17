@@ -1,6 +1,8 @@
 import Foundation
 
 /// Replaces user playlists in both playlist sections of an iTunesDB tree, leaving the master playlist alone.
+/// The Podcasts list is flat in the playlist section and grouped by show in the podcast section, as libgpod
+/// writes it, and replaces any Podcasts list already there.
 nonisolated enum ITunesDBPlaylistWriter {
     private static let playlistIDOffset = 0x1C
     private static let databaseIDOffset = 0x70
@@ -12,29 +14,28 @@ nonisolated enum ITunesDBPlaylistWriter {
     static func replace(_ drafts: [ITunesPlaylistDraft], removing ids: Set<UInt64>, in root: inout ITunesDBRecord,
                         allocator: inout ITunesDBIDAllocator) {
         let replaced = ids.union(drafts.map(\.id))
-        let trackIDs = trackIDsByDatabaseID(in: root)
-        let settings = masterSettings(in: root)
-        let records = drafts.map { draft in
-            PlaylistRecordBuilder.build(draft, items: items(for: draft, trackIDs: trackIDs, allocator: &allocator),
-                                        settings: settings)
-        }
+        let replacesPodcasts = drafts.contains(where: \.isPodcasts)
+        let assembler = PlaylistRecordAssembler(trackIDs: trackIDsByDatabaseID(in: root), settings: masterSettings(in: root))
+        let shared = drafts.filter { !$0.isPodcasts }
+            .map { assembler.record(for: $0, grouped: false, allocator: &allocator) }
         for index in root.children.indices where sections.contains(where: root.children[index].isSection) {
             guard !root.children[index].children.isEmpty else { continue }
+            let grouped = root.children[index].isSection(.podcasts)
+            let podcasts = drafts.filter(\.isPodcasts)
+                .map { assembler.record(for: $0, grouped: grouped, allocator: &allocator) }
             var list = root.children[index].children[0]
-            list.children.removeAll { !$0.isMasterPlaylist && replaced.contains($0.uint64(at: playlistIDOffset)) }
-            list.children += records
+            list.children.removeAll { playlist in
+                !playlist.isMasterPlaylist && (replaced.contains(playlist.uint64(at: playlistIDOffset))
+                                               || (replacesPodcasts && isPodcastList(playlist)))
+            }
+            list.children += shared + podcasts
             root.children[index].children[0] = list
         }
     }
 
-    private static func items(for draft: ITunesPlaylistDraft, trackIDs: [UInt64: UInt32],
-                              allocator: inout ITunesDBIDAllocator) -> [ITunesDBRecord] {
-        draft.databaseIDs.compactMap { databaseID in
-            trackIDs[databaseID].map {
-                PlaylistItemRecordBuilder.build(itemID: allocator.allocate(), trackID: $0, databaseID: databaseID,
-                                                dateAdded: draft.createdAt)
-            }
-        }
+    static func isPodcastList(_ playlist: ITunesDBRecord) -> Bool {
+        playlist.tag == "mhyp" && playlist.header.count >= PlaylistRecordBuilder.podcastFlagOffset + 2
+            && playlist.header.read(UInt16.self, at: PlaylistRecordBuilder.podcastFlagOffset) == 1
     }
 
     private static func trackIDsByDatabaseID(in root: ITunesDBRecord) -> [UInt64: UInt32] {

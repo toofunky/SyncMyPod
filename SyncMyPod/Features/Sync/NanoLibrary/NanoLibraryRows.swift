@@ -12,7 +12,15 @@ nonisolated struct NanoLibraryRows: Sendable {
 
     func libraryTables(geniusCUID: String?) -> [SQLiteTableRows] {
         [versionInfo(), dbInfo(geniusCUID: geniusCUID), items(), audioFormats(), albums(), artists(), composers(),
-         genres(), locationKinds(), containers(), containerItems()]
+         genres(), locationKinds(), containers(), containerItems(), podcastInfo()]
+    }
+
+    /// The release date the device's post-process commands copy into each episode's row.
+    private func podcastInfo() -> SQLiteTableRows {
+        SQLiteTableRows(table: "podcast_info", records: snapshot.items.filter(\.isPodcast).map { item in
+            [("item_pid", .id(item.pid)), ("date_released", .int(NanoTimestamp.seconds(fromUTC: item.dateReleased))),
+             ("external_guid", .null), ("feed_url", .null), ("feed_keywords", .null)]
+        })
     }
 
     private func versionInfo() -> SQLiteTableRows {
@@ -44,7 +52,8 @@ nonisolated struct NanoLibraryRows: Sendable {
          ("artwork_cache_id", .int(item.artworkID)), ("total_time_ms", .real(Double(item.durationMS))),
          ("track_number", .int(item.trackNumber)), ("track_count", .int(item.trackCount)),
          ("disc_number", .int(item.discNumber)), ("disc_count", .int(item.discCount)), ("bpm", .int(item.bpm)),
-         ("relative_volume", .int(0))]
+         ("relative_volume", .int(0)), ("remember_bookmark", .bool(item.remembersPosition)),
+         ("exclude_from_shuffle", .bool(item.skipsWhenShuffling))]
     }
 
     private func itemLinks(_ item: NanoLibraryItem) -> Record {

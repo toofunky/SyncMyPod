@@ -19,11 +19,19 @@ nonisolated enum PlayCountsMerger {
         if entry.playCount > 0 {
             mhit.set(mhit.uint32(at: 0x50) &+ entry.playCount, at: 0x50)
             mhit.set(entry.playCount, at: 0x54)
+            clearUnplayedDot(of: &mhit)
         }
         if entry.lastPlayed > mhit.uint32(at: 0x58) { mhit.set(entry.lastPlayed, at: 0x58) }
         if entry.bookmark > 0 { mhit.set(entry.bookmark, at: 0x6C) }
         if let rating = entry.rating, rating <= maximumRating { mhit.set(UInt8(rating), at: 0x1F) }
         if entry.skipCount > 0 { mhit.set(mhit.uint32(at: 0x9C) &+ entry.skipCount, at: 0x9C) }
         if entry.lastSkipped > mhit.uint32(at: 0xA0) { mhit.set(entry.lastSkipped, at: 0xA0) }
+    }
+
+    /// The iPod reports plays but doesn't clear a played podcast's unplayed dot itself.
+    private static func clearUnplayedDot(of mhit: inout ITunesDBRecord) {
+        guard mhit.header.count > TrackRecordBuilder.unplayedOffset,
+              mhit.uint8(at: TrackRecordBuilder.unplayedOffset) == TrackRecordBuilder.unplayedPodcast else { return }
+        mhit.set(TrackRecordBuilder.playedPodcast, at: TrackRecordBuilder.unplayedOffset)
     }
 }
