@@ -23,7 +23,8 @@ The iPod nano (7th generation) reads its library from SQLite databases instead o
 - **Music Library**: scan any folder of AAC and ALAC (`.m4a`) and MP3 files. The library shows track, disc, album artist and codec, and sorts by album, disc and track.
 - **Tag editor**: edit tags and cover art from an inspector. Changes are written back to the MP4 or ID3 tags in the source files.
 - **Playlists**: create playlists in the app and sync them to the iPod.
-- **Flexible syncing**: sync the entire library, or pick the artists, albums, genres and playlists you want. The app remembers your choices for each iPod.
+- **Podcasts**: subscribe by RSS feed address and download episodes into a folder you choose. On an iPod, episodes appear in the Podcasts menu, grouped by show, and resume where you left off. On other audio players, they're copied into a podcast folder, with a playlist for each show in the order the episodes came out. Episodes already on a device are never copied again, so the device keeps your place in them.
+- **Flexible syncing**: sync the entire library, or pick the artists, albums, genres, playlists and podcasts you want. The app remembers your choices for each iPod.
 - **Album artwork**: embedded cover art is resized for the iPod and deduplicated in the `ArtworkDB`.
 - **Change detection**: when a file's tags or artwork change, the track is updated on the iPod in place instead of being added again.
 - **Housekeeping**: songs you deselect are removed from the iPod, play counts recorded on the iPod are merged back, and unused artwork is compacted.
@@ -47,7 +48,7 @@ Download the latest `SyncMyPod-<version>.zip` from [Releases](https://github.com
 
 1. Open **Music Library** and choose the folder that contains your music. The app scans the folder and indexes it.
 2. Connect your iPod. It appears under **iPod** in the sidebar with its model and capacity.
-3. Choose **Sync All Songs**, or choose **Custom Sync** and select artists, albums, genres or playlists.
+3. Choose **Sync All Songs**, or choose **Custom Sync** and select artists, albums, genres, playlists or podcasts. To sync podcasts, subscribe and download episodes in **Podcasts** first.
 4. Click **Sync** and wait for it to finish before ejecting the iPod.
 
 > [!TIP]
@@ -81,6 +82,8 @@ SyncMyPod/
     Library/         iTunesDB parsing and the lossless record tree
     MusicLibrary/    Folder scanning, SwiftData library and tag editing
     Playlists/       Playlist models and views
+    Podcasts/        RSS feeds, episode downloads, the download folder and podcast sync snapshots
+    Settings/        The Settings window
     Sync/            Sync planning, database editing, artwork, hash58 and hashAB signing,
                      and the iPod nano's SQLite library
     Updates/         Sparkle integration

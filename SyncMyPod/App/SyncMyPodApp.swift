@@ -28,7 +28,6 @@ struct SyncMyPodApp: App {
                 .environment(podcastDownloads)
                 .environment(podcastFolder)
                 .preferredColorScheme(appearance.colorScheme)
-                .task { await podcasts.refreshAll(in: modelContainer.mainContext) }
         }
         .modelContainer(modelContainer)
         .commands {

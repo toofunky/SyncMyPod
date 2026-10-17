@@ -32,3 +32,6 @@
 - [x] Support cover files (cover.jpg/cover.png/folder.jpg/folder.png)
 - [x] Playlist import/export
 - [x] Favorites
+- [x] Podcasts (subscribe by RSS feed, download episodes, sync to iPods and audio players)
+- [ ] Mark podcast episodes played from the device's play counts
+- [ ] Automatically download new podcast episodes

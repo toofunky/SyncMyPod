@@ -52,16 +52,17 @@ struct SyncSettingsForm: View {
     }
 
     private var removalTitle: String {
-        let count = pendingRemoval?.removals.count ?? 0
-        return "Remove \(count) \(count == 1 ? "song" : "songs") from the iPod?"
+        let removals = pendingRemoval?.removals ?? []
+        let episodes = removals.count { ($0.mediaType ?? 0) & TrackRecordBuilder.podcastMediaType != 0 }
+        return SyncRemovalWording.title(songs: removals.count - episodes, episodes: episodes, deviceKind: "iPod")
     }
 
     private func removalMessage(_ plan: SyncPlan) -> String {
         let listed = plan.removals.prefix(Self.listedRemovalLimit).map { "\($0.title) — \($0.artist)" }
         let remainder = plan.removals.count - listed.count
         let more = remainder > 0 ? ["and \(remainder) more"] : []
-        let reason = "They're no longer selected, their file was deleted, or they duplicate another song on the iPod. "
-            + "Your music library isn't affected."
+        let reason = "They're no longer selected, their file or download was removed, or they duplicate another song "
+            + "on the iPod. Your music library and downloads aren't affected."
         return (listed + more + [reason]).joined(separator: "\n")
     }
 }

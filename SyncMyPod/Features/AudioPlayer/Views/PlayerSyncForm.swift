@@ -54,17 +54,20 @@ struct PlayerSyncForm: View {
         Binding(get: { pendingRemoval != nil }, set: { if !$0 { pendingRemoval = nil } })
     }
 
+    /// Episodes are told apart by their folder, unless podcasts share the music folder or sit at the root.
     private var removalTitle: String {
-        let count = pendingRemoval?.removals.count ?? 0
-        return "Remove \(count) \(count == 1 ? "song" : "songs") from the player?"
+        let removals = pendingRemoval?.removals ?? []
+        let separate = !config.podcastPath.isEmpty && config.podcastPath != config.musicPath
+        let episodes = separate ? removals.count { $0.path.hasPrefix(config.podcastPath + "/") } : 0
+        return SyncRemovalWording.title(songs: removals.count - episodes, episodes: episodes, deviceKind: "player")
     }
 
     private func removalMessage(_ plan: PlayerSyncPlan) -> String {
         let listed = plan.removals.prefix(Self.listedRemovalLimit).map(\.fileName)
         let remainder = plan.removals.count - listed.count
         let more = remainder > 0 ? ["and \(remainder) more"] : []
-        let reason = "They're no longer selected or their file was deleted. Only songs SyncMyPod copied are "
-            + "removed, and your music library isn't affected."
+        let reason = "They're no longer selected or their file or download was removed. Only what SyncMyPod copied "
+            + "is removed, and your music library and downloads aren't affected."
         return (listed + more + [reason]).joined(separator: "\n")
     }
 }
