@@ -99,7 +99,7 @@ final class PodcastDownloads {
         }
         do {
             let result = try await job.run(into: folder) { [weak self] fraction in
-                Task { @MainActor in self?.setProgress(fraction, for: id) }
+                Task { @MainActor [weak self] in self?.setProgress(fraction, for: id) }
             }
             episode.downloadedFilePath = result.fileURL.path(percentEncoded: false)
             episode.downloadedAt = .now
