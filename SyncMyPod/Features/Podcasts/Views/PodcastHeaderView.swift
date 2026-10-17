@@ -41,6 +41,10 @@ struct PodcastHeaderView: View {
     private var details: some View {
         HStack(spacing: 4) {
             Text("^[\(podcast.episodes.count) episode](inflect: true)")
+            if downloadedCount > 0 {
+                Text("·")
+                Text("\(downloadedCount) downloaded")
+            }
             if let lastRefreshed = podcast.lastRefreshed {
                 Text("·")
                 Text("Updated \(lastRefreshed, format: .relative(presentation: .named))")
@@ -49,6 +53,8 @@ struct PodcastHeaderView: View {
         .font(.caption)
         .foregroundStyle(.tertiary)
     }
+
+    private var downloadedCount: Int { podcast.episodes.count(where: \.isDownloaded) }
 }
 
 #if DEBUG

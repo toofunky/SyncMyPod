@@ -83,12 +83,16 @@ struct PodcastsView: View {
     @Previewable @State var selection: UUID? = Podcast.preview.podcastID
     PodcastsView(selection: $selection)
         .environment(PodcastsModel())
+        .environment(PodcastDownloads())
+        .environment(PodcastFolder.preview)
         .modelContainer(.preview)
 }
 
 #Preview("No Podcasts") {
     PodcastsView(selection: .constant(nil))
         .environment(PodcastsModel())
+        .environment(PodcastDownloads())
+        .environment(PodcastFolder.preview)
         .modelContainer(.emptyPreview)
 }
 #endif

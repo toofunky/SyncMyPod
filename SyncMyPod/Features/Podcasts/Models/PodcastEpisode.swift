@@ -15,8 +15,9 @@ nonisolated final class PodcastEpisode {
     var byteCount: Int64?
     var episodeNumber: Int?
     var seasonNumber: Int?
-    /// The downloaded file's name inside the podcast's folder, or `nil` when it hasn't been downloaded.
-    var downloadedFileName: String?
+    /// The downloaded file's full path, or `nil` when it hasn't been downloaded. Absolute, so choosing another
+    /// download folder only affects new downloads.
+    var downloadedFilePath: String?
     var podcast: Podcast?
 
     init(guid: String, title: String, enclosureURL: String) {
@@ -25,18 +26,23 @@ nonisolated final class PodcastEpisode {
         self.enclosureURL = enclosureURL
     }
 
-    var isDownloaded: Bool { downloadedFileName != nil }
+    var isDownloaded: Bool { downloadedFilePath != nil }
 
+    var downloadedFileURL: URL? { downloadedFilePath.map { URL(filePath: $0) } }
+
+    /// A downloaded episode keeps the duration and size read from its file, which feeds often get wrong.
     func update(from episode: PodcastFeedEpisode) {
         title = episode.title
         summary = episode.summary
         publishedAt = episode.publishedAt
-        duration = episode.duration
         enclosureURL = episode.enclosureURL.absoluteString
         enclosureType = episode.enclosureType
-        byteCount = episode.byteCount
         episodeNumber = episode.episodeNumber
         seasonNumber = episode.seasonNumber
+        if !isDownloaded {
+            duration = episode.duration
+            byteCount = episode.byteCount
+        }
     }
 }
 
@@ -49,7 +55,7 @@ extension PodcastEpisode {
             episode.publishedAt = .now.addingTimeInterval(-Double(index) * 604_800)
             episode.duration = 3_358 - Double(index) * 420
             episode.byteCount = 53_000_000 - Int64(index) * 6_000_000
-            episode.downloadedFileName = index == 1 ? "The Week That Was.mp3" : nil
+            episode.downloadedFilePath = index == 1 ? "/Users/me/Podcasts/I've Had It/The Week That Was.mp3" : nil
             return episode
         }
     }

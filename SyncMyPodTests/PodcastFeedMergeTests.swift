@@ -40,7 +40,7 @@ struct PodcastFeedMergeTests {
 
     @Test func keepsDownloadedEpisodesThatLeftTheFeed() throws {
         let podcast = subscribedPodcast(with: ["old", "downloaded"])
-        podcast.episodes.first { $0.guid == "downloaded" }?.downloadedFileName = "downloaded.mp3"
+        podcast.episodes.first { $0.guid == "downloaded" }?.downloadedFilePath = "/Podcasts/Show/downloaded.mp3"
         podcast.update(from: PodcastFeed(title: "Show", episodes: [episode("new")]), in: context)
         try context.save()
         #expect(Set(podcast.episodes.map(\.guid)) == ["new", "downloaded"])

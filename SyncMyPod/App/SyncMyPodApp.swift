@@ -8,6 +8,7 @@ struct SyncMyPodApp: App {
     @State private var player = MusicPlayerModel()
     @State private var updater = AppUpdater()
     @State private var podcasts = PodcastsModel()
+    @State private var podcastDownloads = PodcastDownloads()
     @State private var podcastFolder = PodcastFolder()
     private let modelContainer = LibraryStore.makeContainer()
     @AppStorage(AppAppearance.storageKey) private var appearance = AppAppearance.system
@@ -24,6 +25,7 @@ struct SyncMyPodApp: App {
                 .environment(syncModel)
                 .environment(player)
                 .environment(podcasts)
+                .environment(podcastDownloads)
                 .environment(podcastFolder)
                 .preferredColorScheme(appearance.colorScheme)
                 .task { await podcasts.refreshAll(in: modelContainer.mainContext) }

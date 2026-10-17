@@ -79,6 +79,8 @@ struct ContentView: View {
         .environment(DeviceSyncModel())
         .environment(MusicPlayerModel())
         .environment(PodcastsModel())
+        .environment(PodcastDownloads())
+        .environment(PodcastFolder.preview)
         .environment(\.iTunesDBLoader, .preview)
         .modelContainer(.preview)
 }

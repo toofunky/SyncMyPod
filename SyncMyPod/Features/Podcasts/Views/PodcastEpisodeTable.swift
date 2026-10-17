@@ -4,6 +4,7 @@ import SwiftUI
 /// A podcast's episodes, newest first.
 struct PodcastEpisodeTable: View {
     let episodes: [PodcastEpisode]
+    let download: ([PodcastEpisode]) -> Void
 
     @State private var selection = Set<PodcastEpisode.ID>()
 
@@ -26,14 +27,13 @@ struct PodcastEpisodeTable: View {
                 Text(episode.byteCount?.formatted(.byteCount(style: .file)) ?? "")
             }
             .width(min: 60, ideal: 70)
-            TableColumn("Downloaded") { episode in
-                if episode.isDownloaded {
-                    Image(systemName: "checkmark.circle.fill")
-                        .foregroundStyle(.secondary)
-                        .help("Downloaded")
-                }
+            TableColumn("Status") { episode in
+                PodcastEpisodeStatusView(episode: episode, download: download)
             }
-            .width(min: 70, ideal: 80)
+            .width(min: 90, ideal: 100)
+        }
+        .contextMenu(forSelectionType: PodcastEpisode.ID.self) { ids in
+            PodcastEpisodeMenu(episodes: episodes.filter { ids.contains($0.id) }, download: download)
         }
     }
 
@@ -45,8 +45,9 @@ struct PodcastEpisodeTable: View {
 
 #if DEBUG
 #Preview {
-    PodcastEpisodeTable(episodes: Podcast.preview.sortedEpisodes)
+    PodcastEpisodeTable(episodes: Podcast.preview.sortedEpisodes) { _ in }
+        .environment(PodcastDownloads())
         .modelContainer(.preview)
-        .frame(width: 640, height: 240)
+        .frame(width: 720, height: 240)
 }
 #endif
