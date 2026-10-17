@@ -3,18 +3,19 @@ import Foundation
 enum SidebarItem: Hashable, Identifiable {
     case library(LibrarySection)
     case playlists
+    case podcasts
     case device(id: String)
     /// Shown in place of the device rows while nothing is connected.
     case noDevice
 
-    static let libraryItems = LibrarySection.allCases.map(SidebarItem.library) + [.playlists]
+    static let libraryItems = LibrarySection.allCases.map(SidebarItem.library) + [.playlists, .podcasts]
 
     var id: Self { self }
 
     var isDevice: Bool {
         switch self {
         case .device, .noDevice: true
-        case .library, .playlists: false
+        case .library, .playlists, .podcasts: false
         }
     }
 
@@ -22,6 +23,7 @@ enum SidebarItem: Hashable, Identifiable {
         switch self {
         case .library(let section): section.title
         case .playlists: "Playlists"
+        case .podcasts: "Podcasts"
         case .device: "Device"
         case .noDevice: "No Device"
         }
@@ -31,6 +33,7 @@ enum SidebarItem: Hashable, Identifiable {
         switch self {
         case .library(let section): section.systemImage
         case .playlists: "music.note.list"
+        case .podcasts: "antenna.radiowaves.left.and.right"
         case .device, .noDevice: "ipod"
         }
     }

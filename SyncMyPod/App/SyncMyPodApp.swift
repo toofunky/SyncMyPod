@@ -7,6 +7,8 @@ struct SyncMyPodApp: App {
     @State private var syncModel = DeviceSyncModel()
     @State private var player = MusicPlayerModel()
     @State private var updater = AppUpdater()
+    @State private var podcasts = PodcastsModel()
+    @State private var podcastFolder = PodcastFolder()
     private let modelContainer = LibraryStore.makeContainer()
     @AppStorage(AppAppearance.storageKey) private var appearance = AppAppearance.system
 
@@ -21,7 +23,10 @@ struct SyncMyPodApp: App {
                 .environment(mountWatcher)
                 .environment(syncModel)
                 .environment(player)
+                .environment(podcasts)
+                .environment(podcastFolder)
                 .preferredColorScheme(appearance.colorScheme)
+                .task { await podcasts.refreshAll(in: modelContainer.mainContext) }
         }
         .modelContainer(modelContainer)
         .commands {
@@ -29,6 +34,13 @@ struct SyncMyPodApp: App {
             CheckForUpdatesCommand(updater: updater)
             HelpCommand()
         }
+
+        Settings {
+            SettingsView()
+                .environment(podcastFolder)
+                .preferredColorScheme(appearance.colorScheme)
+        }
+        .modelContainer(modelContainer)
 
         Window("About SyncMyPod", id: AboutView.windowID) {
             AboutView()
