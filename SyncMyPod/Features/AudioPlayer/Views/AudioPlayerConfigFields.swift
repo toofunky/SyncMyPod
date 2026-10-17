@@ -24,6 +24,9 @@ struct AudioPlayerConfigFields: View {
     private static let latin1Note = "Songs whose album artist, album or file name uses characters outside "
         + "Windows Latin-1, such as Japanese, Chinese or Cyrillic letters, are still copied but are left out of "
         + ".m3u playlists."
+    private static let podcastPlaylistsInfo = "Each podcast gets a playlist of its episodes, oldest first, so they "
+        + "play in the order they came out. Useful for players without a podcast menu, or when the podcast folder "
+        + "is the same as the music folder."
     private static let blankFolderPrompt = "Leave blank to use the root folder"
 
     @Binding var config: AudioPlayerConfig
@@ -37,8 +40,10 @@ struct AudioPlayerConfigFields: View {
         Section {
             TextField("Music Folder", text: $config.musicFolder, prompt: Text(Self.blankFolderPrompt))
             TextField("Playlist Folder", text: $config.playlistFolder, prompt: Text(Self.blankFolderPrompt))
+            TextField("Podcast Folder", text: $config.podcastFolder, prompt: Text(Self.blankFolderPrompt))
         } footer: {
-            Text("Folders inside the root folder. Songs are filed by album artist and album.")
+            Text("Folders inside the root folder. Songs are filed by album artist and album, and podcast episodes "
+                 + "by show. For players that don't separate podcasts, use the music folder.")
                 .foregroundStyle(.secondary)
         }
         playlistFormatSection
@@ -61,6 +66,8 @@ struct AudioPlayerConfigFields: View {
             }
             option("Copy Lyric Files?", isOn: $config.copyLyricFiles,
                    infoTitle: "Copy Lyric Files", info: Self.lyricsInfo)
+            option("Make Podcast Playlists?", isOn: $config.makesPodcastPlaylists,
+                   infoTitle: "Make Podcast Playlists", info: Self.podcastPlaylistsInfo)
         }
     }
 

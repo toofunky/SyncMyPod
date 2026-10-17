@@ -7,10 +7,14 @@ nonisolated struct SyncLibrarySnapshot: Equatable, Sendable {
     let artists: [SyncArtistNode]
     let genres: [SyncGenreNode]
     let playlistNodes: [SyncPlaylistNode]
+    /// Podcasts with downloaded episodes; empty for iPods, which don't sync podcasts yet.
+    let podcasts: [SyncPodcastSnapshot]
 
     @MainActor
-    init(tracks: [LibraryTrack], playlists: [LibraryPlaylist], preservingAlbumArtist: Bool,
+    init(tracks: [LibraryTrack], playlists: [LibraryPlaylist], podcasts: [Podcast] = [], preservingAlbumArtist: Bool,
          embeddingLyricsSidecars: Bool = false) {
+        self.podcasts = podcasts.compactMap { $0.syncSnapshot() }
+            .sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
         let snapshots = tracks.map {
             $0.syncSnapshot(preservingAlbumArtist: preservingAlbumArtist, embeddingLyricsSidecar: embeddingLyricsSidecars)
         }

@@ -10,6 +10,10 @@ nonisolated struct AudioPlayerConfig: Codable, Hashable, Sendable {
     var musicFolder = ""
     /// Relative to the root; empty means the root.
     var playlistFolder = ""
+    /// Relative to the root; empty means the root, and the music folder files episodes among the music.
+    var podcastFolder = Self.defaultPodcastFolder
+    /// Writes a playlist of each podcast's episodes, oldest first, for players without a podcast menu.
+    var makesPodcastPlaylists = true
     var playlistFormat = PlayerPlaylistFormat.m3u8
     /// Names files "01 Title" or "2-05 Title" for players that sort by file name.
     var preserveTrackSorting = false
@@ -25,17 +29,19 @@ nonisolated struct AudioPlayerConfig: Codable, Hashable, Sendable {
 
     static let defaultMaxCoverSize = 300
     static let coverSizeRange = 16...10_000
+    static let defaultPodcastFolder = "Podcasts"
 
     /// The size embedded artwork and copied covers are scaled to fit, or `nil` to copy them as they are.
     var coverPixelLimit: Int? { resizeCovers ? maxCoverSize : nil }
 
     init(id: String = UUID().uuidString, name: String, rootPath: String, musicFolder: String = "",
-         playlistFolder: String = "") {
+         playlistFolder: String = "", podcastFolder: String = Self.defaultPodcastFolder) {
         self.id = id
         self.name = name
         self.rootPath = Self.cleanedPath(rootPath)
         self.musicFolder = Self.cleanedPath(musicFolder)
         self.playlistFolder = Self.cleanedPath(playlistFolder)
+        self.podcastFolder = Self.cleanedPath(podcastFolder)
     }
 
     /// With folders cleaned up as typed by hand, and the volume's name when the name was left blank.
@@ -46,6 +52,7 @@ nonisolated struct AudioPlayerConfig: Codable, Hashable, Sendable {
         config.rootPath = Self.cleanedPath(rootPath)
         config.musicFolder = Self.cleanedPath(musicFolder)
         config.playlistFolder = Self.cleanedPath(playlistFolder)
+        config.podcastFolder = Self.cleanedPath(podcastFolder)
         config.maxCoverSize = min(max(maxCoverSize, Self.coverSizeRange.lowerBound), Self.coverSizeRange.upperBound)
         return config
     }
@@ -54,6 +61,8 @@ nonisolated struct AudioPlayerConfig: Codable, Hashable, Sendable {
     var musicPath: String { Self.join(rootPath, musicFolder) }
     /// The playlist folder relative to the volume.
     var playlistPath: String { Self.join(rootPath, playlistFolder) }
+    /// The podcast folder relative to the volume.
+    var podcastPath: String { Self.join(rootPath, podcastFolder) }
 
     /// Trims spaces and slashes and drops empty, "." and ".." components, so a path can't leave the volume.
     static func cleanedPath(_ path: String) -> String {
@@ -70,6 +79,7 @@ nonisolated struct AudioPlayerConfig: Codable, Hashable, Sendable {
 
 nonisolated extension AudioPlayerConfig {
     /// Options missing from a config saved by an older version read as off, so the player is still recognized.
+    /// Podcasts, which came later, get their own folder and playlists as new players do.
     init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         id = try container.decode(String.self, forKey: .id)
@@ -77,6 +87,8 @@ nonisolated extension AudioPlayerConfig {
         rootPath = try container.decode(String.self, forKey: .rootPath)
         musicFolder = try container.decodeIfPresent(String.self, forKey: .musicFolder) ?? ""
         playlistFolder = try container.decodeIfPresent(String.self, forKey: .playlistFolder) ?? ""
+        podcastFolder = try container.decodeIfPresent(String.self, forKey: .podcastFolder) ?? Self.defaultPodcastFolder
+        makesPodcastPlaylists = try container.decodeIfPresent(Bool.self, forKey: .makesPodcastPlaylists) ?? true
         playlistFormat = try container.decodeIfPresent(PlayerPlaylistFormat.self, forKey: .playlistFormat) ?? .m3u8
         preserveTrackSorting = try container.decodeIfPresent(Bool.self, forKey: .preserveTrackSorting) ?? false
         preserveAlbumArtist = try container.decodeIfPresent(Bool.self, forKey: .preserveAlbumArtist) ?? false
