@@ -1,12 +1,18 @@
 import Foundation
 
-/// Where a library file goes on a player: `<music folder>/<Album Artist>/<Album>/<file>`.
+/// Where a library file goes on a player: `<music folder>/<Album Artist>/<Album>/<file>`, or for a podcast
+/// episode `<podcast folder>/<Show>/<file>`, keeping the downloaded name that sorts episodes by date.
 nonisolated struct PlayerPathBuilder {
     let config: AudioPlayerConfig
 
     /// Relative to the volume.
     func path(for request: IPodSyncRequest) -> String {
         let draft = request.draft
+        if request.isPodcast {
+            let show = PlayerFileNamer.safeComponent(draft.album, fallback: "Podcast")
+            let file = PlayerFileNamer.safeComponent(request.sourceURL.lastPathComponent, fallback: "Episode")
+            return AudioPlayerConfig.join(config.podcastPath, show, file)
+        }
         let artist = PlayerFileNamer.safeComponent(draft.albumListArtist, fallback: LibraryTrack.unknownArtist)
         let album = PlayerFileNamer.safeComponent(draft.album, fallback: LibraryTrack.unknownAlbum)
         return AudioPlayerConfig.join(config.musicPath, artist, album, fileName(for: request))

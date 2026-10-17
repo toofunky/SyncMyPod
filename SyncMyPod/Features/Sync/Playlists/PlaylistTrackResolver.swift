@@ -13,8 +13,12 @@ nonisolated struct PlaylistTrackResolver: Sendable {
 
     /// `synced` holds the database IDs of tracks copied since the manifest was read, keyed by source path.
     func draft(for playlist: IPodPlaylistRequest, synced: [String: UInt64] = [:]) -> ITunesPlaylistDraft {
-        ITunesPlaylistDraft(id: playlist.id, name: playlist.name, createdAt: playlist.createdAt,
-                            databaseIDs: playlist.tracks.compactMap { databaseID(for: $0, synced: synced) })
+        let resolved = playlist.tracks.compactMap { track in
+            databaseID(for: track, synced: synced).map { ($0, track.draft.album) }
+        }
+        return ITunesPlaylistDraft(id: playlist.id, name: playlist.name, createdAt: playlist.createdAt,
+                                   databaseIDs: resolved.map(\.0),
+                                   podcastShows: playlist.isPodcasts ? resolved.map(\.1) : nil)
     }
 
     private func databaseID(for request: IPodSyncRequest, synced: [String: UInt64]) -> UInt64? {

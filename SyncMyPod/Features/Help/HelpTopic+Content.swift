@@ -7,6 +7,7 @@ extension HelpTopic {
         case .musicLibrary: "SyncMyPod reads your music straight from a folder of audio files."
         case .tagEditor: "Fix song details and cover art without leaving the app."
         case .playlists: "Build playlists in SyncMyPod and take them with you on your iPod."
+        case .podcasts: "Subscribe to podcasts, download episodes and take them with you."
         case .syncing: "Choose what goes on your iPod and keep it up to date."
         case .audioPlayer: "Take your music to a digital audio player or memory card."
         case .troubleshooting: "Solutions to common problems."
@@ -19,6 +20,7 @@ extension HelpTopic {
         case .musicLibrary: Self.musicLibrarySections
         case .tagEditor: Self.tagEditorSections
         case .playlists: Self.playlistSections
+        case .podcasts: Self.podcastSections
         case .syncing: Self.syncingSections
         case .audioPlayer: Self.audioPlayerSections
         case .troubleshooting: Self.troubleshootingSections
@@ -106,9 +108,9 @@ extension HelpTopic {
                         + "choose what to copy. **Settings** holds options for how songs are copied. **Device** "
                         + "shows the model, capacity and other details."),
         HelpSection(heading: "Sync All Songs or Custom Sync",
-                    body: "**Sync All Songs** copies every song and playlist in your music library. **Custom Sync** "
-                        + "lets you check artists and albums, genres, and playlists. SyncMyPod remembers your "
-                        + "choices for each iPod."),
+                    body: "**Sync All Songs** copies every song and playlist in your music library, and every "
+                        + "downloaded podcast episode. **Custom Sync** lets you check artists and albums, genres, "
+                        + "playlists and podcasts. SyncMyPod remembers your choices for each iPod."),
         HelpSection(heading: "Before You Sync",
                     body: "The bar at the bottom shows how many songs will be added, updated and removed, and how "
                         + "much free space the iPod has. **Sync Now** is unavailable if the songs won't fit."),
@@ -145,8 +147,9 @@ extension HelpTopic {
                         + "left out of .m3u playlists but still copied."),
         HelpSection(heading: "Sync All Songs or Custom Sync",
                     body: "In the **Sync** tab, **Sync All Songs** copies every song and playlist in your music "
-                        + "library. **Custom Sync** lets you check artists and albums, genres, and playlists. "
-                        + "FLAC, AIFF and WAV songs are copied too. SyncMyPod remembers your choices for each player."),
+                        + "library, and every downloaded podcast episode. **Custom Sync** lets you check artists "
+                        + "and albums, genres, playlists and podcasts. FLAC, AIFF and WAV songs are copied too. "
+                        + "SyncMyPod remembers your choices for each player."),
         HelpSection(heading: "Before You Sync",
                     body: "The bar at the bottom shows how many songs will be added, updated and removed, and how "
                         + "much free space the player has. Click **Sync Now** and wait for the sync to finish "

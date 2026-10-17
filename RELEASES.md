@@ -1,3 +1,6 @@
+SyncMyPod-1.12
+- Add podcast support
+
 SyncMyPod-1.11.5
 - Replace more "illegal" characters in filenames with \_ when writing files to device.
 - Add device option to use .m3u8 or .m3u playlists.

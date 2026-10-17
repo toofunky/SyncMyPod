@@ -3,6 +3,11 @@ import Foundation
 /// Builds an `mhit` for an AAC, Apple Lossless or MP3 file. Offsets follow libgpod's documented layout.
 nonisolated struct TrackRecordBuilder {
     static let minimumHeaderLength = 0x184
+    static let mediaTypeOffset = 0xD0
+    static let podcastMediaType: UInt32 = 4
+    static let unplayedOffset = 0xB2
+    static let unplayedPodcast: UInt8 = 2
+    static let playedPodcast: UInt8 = 1
     private static let audioMediaType: UInt32 = 1
     private static let hasArtwork: UInt8 = 1
     private static let noArtwork: UInt8 = 2
@@ -10,6 +15,9 @@ nonisolated struct TrackRecordBuilder {
     private static let artworkIDOffset = 0x160
     private static let dateAddedOffset = 0x68
     private static let lyricsFlagOffset = 0xB0
+    private static let releaseDateOffset = 0x8C
+    /// libgpod's skip_when_shuffling, remember_playback_position and flag4 (Now Playing shows title and album).
+    private static let podcastFlagOffsets = [0xA5, 0xA6, 0xA7]
 
     let headerLength: Int
 
@@ -20,15 +28,24 @@ nonisolated struct TrackRecordBuilder {
         mhit.set(UInt32(strings.count), at: 0x0C)
         writeIdentity(into: &mhit, id: id, databaseID: databaseID, albumID: albumID)
         mhit.set(ITunesTimestamp.seconds(from: draft.dateAdded), at: Self.dateAddedOffset)
+        if draft.isPodcast { mhit.set(Self.unplayedPodcast, at: Self.unplayedOffset) }
         apply(draft, to: &mhit, includingArtwork: true)
         return mhit
     }
 
-    /// Writes the draft's tags, format and optionally artwork link, leaving IDs, date added and play statistics.
+    /// Writes the draft's tags, format and optionally artwork link, leaving IDs, date added and play statistics,
+    /// including whether a podcast has been played.
     func apply(_ draft: ITunesTrackDraft, to mhit: inout ITunesDBRecord, includingArtwork: Bool) {
         writeTags(into: &mhit, from: draft)
         writeFormat(into: &mhit, from: draft)
+        if draft.isPodcast { writePodcastFlags(into: &mhit) }
         if includingArtwork { writeArtwork(into: &mhit, draft.artwork) }
+    }
+
+    /// Lists the track under Podcasts, where it resumes where it was left and isn't shuffled into music.
+    private func writePodcastFlags(into mhit: inout ITunesDBRecord) {
+        mhit.set(Self.podcastMediaType, at: Self.mediaTypeOffset)
+        for offset in Self.podcastFlagOffsets { mhit.set(UInt8(1), at: offset) }
     }
 
     static func stringRecords(for draft: ITunesTrackDraft) -> [ITunesDBRecord] {
@@ -48,7 +65,7 @@ nonisolated struct TrackRecordBuilder {
         mhit.set(UInt32(1), at: 0x14)
         mhit.set(databaseID, at: 0x70)
         mhit.set(databaseID, at: 0xA8)
-        mhit.set(Self.audioMediaType, at: 0xD0)
+        mhit.set(Self.audioMediaType, at: Self.mediaTypeOffset)
         mhit.set(albumID, at: Self.albumIDOffset)
     }
 
@@ -61,6 +78,10 @@ nonisolated struct TrackRecordBuilder {
         mhit.set(UInt32(clamping: draft.discNumber), at: 0x5C)
         mhit.set(UInt32(clamping: draft.discCount), at: 0x60)
         mhit.set(UInt8(draft.hasLyrics ? 1 : 0), at: Self.lyricsFlagOffset)
+        if let releaseDate = draft.releaseDate {
+            // Release dates are stored in UTC, unlike the iTunesDB's other times.
+            mhit.set(ITunesTimestamp.seconds(from: releaseDate, timeZone: .gmt), at: Self.releaseDateOffset)
+        }
     }
 
     /// Sets both the legacy count/size fields and the iTunes 7.1+ `mhii` link, so either firmware style finds it.

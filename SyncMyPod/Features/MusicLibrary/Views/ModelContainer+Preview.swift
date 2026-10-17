@@ -9,6 +9,7 @@ extension ModelContainer {
         container.mainContext.insert(LibraryPlaylist.preview)
         LibraryPlaylist.ensureFavorites(in: container.mainContext)
             .setFavorite([LibraryTrack.previewTracks[0]], true)
+        container.mainContext.insert(Podcast.preview)
         return container
     }()
 

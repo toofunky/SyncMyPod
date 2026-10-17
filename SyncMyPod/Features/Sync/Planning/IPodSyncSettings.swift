@@ -11,6 +11,8 @@ nonisolated final class IPodSyncSettings {
     var selectedPlaylistKeys: [String]?
     /// Optional because settings saved before genres synced hold `NULL`.
     var selectedGenreKeys: [String]?
+    /// Optional because settings saved before podcasts synced hold `NULL`.
+    var selectedPodcastKeys: [String]?
     /// Optional because settings saved before this option existed hold `NULL`.
     var preserveAlbumArtistValue: Bool?
     /// Optional, like `preserveAlbumArtistValue`, because settings saved before this option existed hold `NULL`.
@@ -50,8 +52,14 @@ nonisolated final class IPodSyncSettings {
         set { selectedGenreKeys = newValue.sorted() }
     }
 
+    var selectedPodcasts: Set<String> {
+        get { Set(selectedPodcastKeys ?? []) }
+        set { selectedPodcastKeys = newValue.sorted() }
+    }
+
     var selection: SyncSelection {
-        SyncSelection(mode: mode, albums: selectedAlbums, genres: selectedGenres, playlists: selectedPlaylists)
+        SyncSelection(mode: mode, albums: selectedAlbums, genres: selectedGenres, playlists: selectedPlaylists,
+                      podcasts: selectedPodcasts)
     }
 
     @MainActor

@@ -6,4 +6,6 @@ nonisolated struct IPodPlaylistRequest: Identifiable, Equatable, Sendable {
     let name: String
     let createdAt: Date
     let tracks: [IPodSyncRequest]
+    /// The iPod's Podcasts list, whose episodes are grouped by show; see `IPodPlaylistRequest.podcasts(_:)`.
+    var isPodcasts = false
 }

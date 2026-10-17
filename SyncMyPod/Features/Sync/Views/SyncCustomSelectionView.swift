@@ -1,20 +1,23 @@
 import SwiftUI
 
-/// Albums, genres and playlists are combined: a song syncs when any of them selects it.
+/// Albums, genres, playlists and podcasts are combined: a song syncs when any of them selects it.
 struct SyncCustomSelectionView: View {
     let artists: [SyncArtistNode]
     let genres: [SyncGenreNode]
     let playlists: [SyncPlaylistNode]
+    var podcasts: [SyncPodcastSnapshot] = []
+    var categories = SyncCategory.musicCategories
     @Binding var albumSelection: Set<String>
     @Binding var genreSelection: Set<String>
     @Binding var playlistSelection: Set<String>
+    var podcastSelection: Binding<Set<String>> = .constant([])
 
     @State private var category = SyncCategory.albums
 
     var body: some View {
         VStack(spacing: 0) {
             Picker("Show", selection: $category) {
-                ForEach(SyncCategory.allCases) { Text(title(for: $0)).tag($0) }
+                ForEach(categories) { Text(title(for: $0)).tag($0) }
             }
             .pickerStyle(.segmented)
             .labelsHidden()
@@ -29,6 +32,7 @@ struct SyncCustomSelectionView: View {
         case .albums: SyncAlbumTreeView(artists: artists, selection: $albumSelection)
         case .genres: SyncGenreListView(genres: genres, selection: $genreSelection)
         case .playlists: SyncPlaylistListView(playlists: playlists, selection: $playlistSelection)
+        case .podcasts: SyncPodcastListView(podcasts: podcasts, selection: podcastSelection)
         }
     }
 
@@ -37,6 +41,7 @@ struct SyncCustomSelectionView: View {
         case .albums: albumSelection.count
         case .genres: genreSelection.count
         case .playlists: playlistSelection.count
+        case .podcasts: podcastSelection.wrappedValue.count
         }
         return count == 0 ? category.title : "\(category.title) (\(count))"
     }
@@ -52,5 +57,6 @@ struct SyncCustomSelectionView: View {
         ])],
         genres: [SyncGenreNode(name: "Rock", trackCount: 21, byteCount: 180_000_000)],
         playlists: [SyncPlaylistNode(key: "road-trip", name: "Road Trip", trackCount: 24)],
+        categories: SyncCategory.allCases,
         albumSelection: $albums, genreSelection: $genres, playlistSelection: $playlists)
 }

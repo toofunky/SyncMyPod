@@ -19,14 +19,19 @@ nonisolated struct PlaylistRecordParser {
         )
     }
 
+    /// Skips the Podcasts list's show headers, which aren't tracks.
     private func parseTrackIDs(startingAt offset: Int, count: Int) throws -> [UInt32] {
         var trackIDs: [UInt32] = []
         var cursor = offset
         for _ in 0..<count {
             try reader.expectTag("mhip", at: cursor)
-            trackIDs.append(try reader.uint32(at: cursor + 0x18))
+            if try reader.uint32(at: cursor + 0x10) != Self.podcastGroupFlag {
+                trackIDs.append(try reader.uint32(at: cursor + 0x18))
+            }
             cursor += try reader.recordLength(at: cursor)
         }
         return trackIDs
     }
+
+    private static let podcastGroupFlag: UInt32 = 0x100
 }

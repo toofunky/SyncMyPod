@@ -5,6 +5,7 @@ enum HelpTopic: String, CaseIterable, Identifiable, Sendable {
     case musicLibrary
     case tagEditor
     case playlists
+    case podcasts
     case syncing
     case audioPlayer
     case troubleshooting
@@ -17,6 +18,7 @@ enum HelpTopic: String, CaseIterable, Identifiable, Sendable {
         case .musicLibrary: "Music Library"
         case .tagEditor: "Tag Editor"
         case .playlists: "Playlists"
+        case .podcasts: "Podcasts"
         case .syncing: "Syncing Your iPod"
         case .audioPlayer: "Syncing Your Audio Player"
         case .troubleshooting: "Troubleshooting"
@@ -29,6 +31,7 @@ enum HelpTopic: String, CaseIterable, Identifiable, Sendable {
         case .musicLibrary: "music.note.house"
         case .tagEditor: "tag"
         case .playlists: "music.note.list"
+        case .podcasts: "antenna.radiowaves.left.and.right"
         case .syncing: "arrow.triangle.2.circlepath"
         case .audioPlayer: "headphones"
         case .troubleshooting: "wrench.and.screwdriver"

@@ -24,7 +24,8 @@ nonisolated extension NanoLibraryItem {
             volumeNormalization: Int(mhit.uint32(at: 0x4C)), sampleCount: UInt64(mhit.uint32(at: 0xBC)),
             encoderDelay: Int(mhit.uint32(at: 0xB8)), encoderDrain: Int(mhit.uint32(at: 0xC8)),
             lastFrameResync: Int(mhit.uint32(at: 0xF8)), artworkID: mhit.uint32(at: 0x160),
-            albumID: mhit.uint32(at: 0x120), artistID: mhit.uint32(at: 0x1E0)
+            albumID: mhit.uint32(at: 0x120), artistID: mhit.uint32(at: 0x1E0),
+            skipsWhenShuffling: mhit.uint8(at: 0xA5) != 0, remembersPosition: mhit.uint8(at: 0xA6) != 0
         )
     }
 }
