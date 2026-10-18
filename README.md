@@ -23,7 +23,7 @@ The iPod nano (7th generation) reads its library from SQLite databases instead o
 - **Music Library**: scan any folder of AAC and ALAC (`.m4a`) and MP3 files. The library shows track, disc, album artist and codec, and sorts by album, disc and track.
 - **Tag editor**: edit tags and cover art from an inspector. Changes are written back to the MP4 or ID3 tags in the source files.
 - **Playlists**: create playlists in the app and sync them to the iPod.
-- **Podcasts**: subscribe by RSS feed address and download episodes into a folder you choose. On an iPod, episodes appear in the Podcasts menu, grouped by show, and resume where you left off. On other audio players, they're copied into a podcast folder, with a playlist for each show in the order the episodes came out. Episodes already on a device are never copied again, so the device keeps your place in them.
+- **Podcasts**: subscribe by RSS feed address and download episodes into a folder you choose. Play episodes in the app, and each one picks up where you stopped listening. On an iPod, episodes appear in the Podcasts menu, grouped by show, and resume where you left off. On other audio players, they're copied into a podcast folder, with a playlist for each show in the order the episodes came out. Episodes already on a device are never copied again, so the device keeps your place in them.
 - **Flexible syncing**: sync the entire library, or pick the artists, albums, genres, playlists and podcasts you want. The app remembers your choices for each iPod.
 - **Album artwork**: embedded cover art is resized for the iPod and deduplicated in the `ArtworkDB`.
 - **Change detection**: when a file's tags or artwork change, the track is updated on the iPod in place instead of being added again.

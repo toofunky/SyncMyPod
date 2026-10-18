@@ -16,7 +16,7 @@ struct PlaybackProgressBar: View {
             PlaybackScrubber(fraction: duration > 0 ? position / duration : 0,
                              onScrub: { scrubPosition = $0 * duration },
                              onCommit: commit)
-                .disabled(player.currentTrack == nil)
+                .disabled(!player.hasCurrentItem)
             timeText(duration - position, prefix: "-")
                 .frame(width: Self.timeWidth, alignment: .leading)
         }
@@ -25,7 +25,7 @@ struct PlaybackProgressBar: View {
         .monospacedDigit()
     }
 
-    private var duration: TimeInterval { player.currentTrack?.duration ?? 0 }
+    private var duration: TimeInterval { player.currentDuration }
 
     private var position: TimeInterval { min(scrubPosition ?? player.elapsed, duration) }
 

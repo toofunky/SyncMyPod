@@ -8,6 +8,7 @@ struct PodcastListView: View {
 
     @Environment(PodcastsModel.self) private var model
     @Environment(PodcastDownloads.self) private var downloads
+    @Environment(MusicPlayerModel.self) private var player: MusicPlayerModel?
     @Environment(\.modelContext) private var context
     @State private var podcastToRemove: Podcast?
 
@@ -61,6 +62,7 @@ struct PodcastListView: View {
     private func unsubscribe(from podcast: Podcast) {
         if selection == podcast.podcastID { selection = nil }
         downloads.cancel(podcast.episodes)
+        player?.stop(podcast.episodes)
         downloads.removeDownloads(of: podcast.episodes, context: context)
         model.unsubscribe(from: podcast, in: context)
     }

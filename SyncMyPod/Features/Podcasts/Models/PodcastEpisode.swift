@@ -24,6 +24,8 @@ nonisolated final class PodcastEpisode {
     var codecRawValue: String?
     var bitrate: Int?
     var sampleRate: Int?
+    /// Seconds into the episode where listening in the app stopped; 0 when unstarted or finished.
+    var playbackPosition: TimeInterval = 0
     var podcast: Podcast?
 
     init(guid: String, title: String, enclosureURL: String) {

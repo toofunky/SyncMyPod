@@ -18,6 +18,12 @@ extension HelpTopic {
                         + "choose **Download**. Up to three episodes download at once, and downloads carry on "
                         + "while you use the rest of the app. Each episode is tagged with its podcast's name and "
                         + "artwork when it's downloaded, and its file isn't changed after that."),
+        HelpSection(heading: "Listening in SyncMyPod",
+                    body: "Double-click a downloaded episode, or click the play button beside it. If you stopped "
+                        + "partway through, it picks up where you left off, and the episode shows how much time is "
+                        + "left. To start over, Control-click it, then choose **Play from Beginning**. While an "
+                        + "episode plays, the player's skip buttons go back 15 seconds and forward 30 seconds. "
+                        + "Your place in SyncMyPod is kept separately from your place on your devices."),
         HelpSection(heading: "Removing Episodes and Podcasts",
                     body: "To remove a downloaded episode, Control-click it, then choose **Remove Download**. To "
                         + "stop following a podcast, Control-click it, then choose **Unsubscribe…**. Removed "

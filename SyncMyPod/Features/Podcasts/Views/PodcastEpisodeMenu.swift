@@ -8,9 +8,15 @@ struct PodcastEpisodeMenu: View {
     let download: ([PodcastEpisode]) -> Void
 
     @Environment(PodcastDownloads.self) private var downloads
+    @Environment(MusicPlayerModel.self) private var player: MusicPlayerModel?
     @Environment(\.modelContext) private var context
 
     var body: some View {
+        Button("Play", systemImage: "play") { play(fromBeginning: false) }
+            .disabled(downloaded.isEmpty || player == nil)
+        Button("Play from Beginning", systemImage: "backward.end") { play(fromBeginning: true) }
+            .disabled(downloaded.isEmpty || player == nil)
+        Divider()
         Button("Download", systemImage: "arrow.down.circle") { download(downloadable) }
             .disabled(downloadable.isEmpty)
         Button("Cancel Download", systemImage: "xmark.circle") { downloads.cancel(inProgress) }
@@ -21,6 +27,7 @@ struct PodcastEpisodeMenu: View {
         }
         .disabled(downloaded.isEmpty)
         Button("Remove Download", systemImage: "trash") {
+            player?.stop(downloaded)
             downloads.removeDownloads(of: downloaded, context: context)
         }
         .disabled(downloaded.isEmpty)
@@ -33,6 +40,12 @@ struct PodcastEpisodeMenu: View {
     }
 
     private var downloaded: [PodcastEpisode] { episodes.filter(\.isDownloaded) }
+
+    private func play(fromBeginning: Bool) {
+        guard let episode = downloaded.first, let player else { return }
+        player.play(episode)
+        if fromBeginning { player.seek(to: 0) }
+    }
 }
 
 #if DEBUG
@@ -42,6 +55,7 @@ struct PodcastEpisodeMenu: View {
     }
     .padding()
     .environment(PodcastDownloads())
+    .environment(MusicPlayerModel())
     .modelContainer(.emptyPreview)
 }
 #endif
