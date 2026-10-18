@@ -1,12 +1,13 @@
 import SwiftData
 import SwiftUI
 
-/// An episode's download button, progress with a cancel button, or downloaded checkmark.
+/// An episode's download button, progress with a cancel button, or play button once downloaded.
 struct PodcastEpisodeStatusView: View {
     let episode: PodcastEpisode
     let download: ([PodcastEpisode]) -> Void
 
     @Environment(PodcastDownloads.self) private var downloads
+    @Environment(MusicPlayerModel.self) private var player: MusicPlayerModel?
 
     private static let progressWidth: CGFloat = 60
 
@@ -33,9 +34,7 @@ struct PodcastEpisodeStatusView: View {
     @ViewBuilder
     private var idle: some View {
         if episode.isDownloaded {
-            Image(systemName: "checkmark.circle.fill")
-                .foregroundStyle(.secondary)
-                .help("Downloaded")
+            playButton
         } else {
             Button("Download", systemImage: "arrow.down.circle") { download([episode]) }
                 .help("Download")
@@ -45,6 +44,20 @@ struct PodcastEpisodeStatusView: View {
                     .help("Couldn't download: \(error)")
             }
         }
+    }
+
+    private var isCurrent: Bool { player?.isCurrent(episode) == true }
+
+    private var isPlaying: Bool { isCurrent && player?.isPlaying == true }
+
+    private var playButton: some View {
+        Button(isPlaying ? "Pause" : "Play", systemImage: isPlaying ? "pause.circle.fill" : "play.circle") {
+            isPlaying ? player?.togglePlayPause() : player?.play(episode)
+        }
+        .foregroundStyle(isCurrent ? AnyShapeStyle(.tint) : AnyShapeStyle(.secondary))
+        .contentTransition(.symbolEffect(.replace))
+        .help(isPlaying ? "Pause" : "Play")
+        .disabled(player == nil)
     }
 
     private var cancelButton: some View {
@@ -63,6 +76,7 @@ struct PodcastEpisodeStatusView: View {
     }
     .padding()
     .environment(PodcastDownloads())
+    .environment(MusicPlayerModel())
     .modelContainer(.emptyPreview)
 }
 #endif

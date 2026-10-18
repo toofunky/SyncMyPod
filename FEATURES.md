@@ -33,5 +33,6 @@
 - [x] Playlist import/export
 - [x] Favorites
 - [x] Podcasts (subscribe by RSS feed, download episodes, sync to iPods and audio players)
+- [x] Play podcast episodes in the app, resuming where you left off
 - [ ] Mark podcast episodes played from the device's play counts
 - [ ] Automatically download new podcast episodes

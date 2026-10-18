@@ -1,5 +1,8 @@
+SyncMyPod-1.12.1
+- Add ability to play podcasts in app.
+
 SyncMyPod-1.12
-- Add podcast support
+- Add podcast support.
 
 SyncMyPod-1.11.5
 - Replace more "illegal" characters in filenames with \_ when writing files to device.
