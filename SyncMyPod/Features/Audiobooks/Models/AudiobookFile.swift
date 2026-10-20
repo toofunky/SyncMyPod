@@ -9,6 +9,9 @@ nonisolated final class AudiobookFile {
 
     @Attribute(.unique) var filePath: String
     var title = ""
+    var album = ""
+    var artist = ""
+    var albumArtist = ""
     var trackNumber = 0
     var discNumber = 0
     var duration: TimeInterval = 0
@@ -17,6 +20,7 @@ nonisolated final class AudiobookFile {
     var modificationDate = Date.distantPast
     var bitrate = 0
     var sampleRate = 0
+    var artworkFingerprint: String?
     var scanVersion = 0
     var book: Audiobook?
 
@@ -42,16 +46,21 @@ nonisolated final class AudiobookFile {
         duration = metadata.duration
         bitrate = metadata.bitrate
         sampleRate = metadata.sampleRate
+        artworkFingerprint = metadata.artworkFingerprint
         title = metadata.tags.title ?? file.url.deletingPathExtension().lastPathComponent
+        album = metadata.tags.album ?? ""
+        artist = metadata.tags.artist ?? ""
+        albumArtist = metadata.tags.albumArtist ?? ""
         trackNumber = metadata.tags.track.number
         discNumber = metadata.tags.disc.number
         scanVersion = Self.currentScanVersion
     }
 
+    /// Compares whole paths last, so untagged files in "CD 1" play before those in "CD 2".
     static func playsBefore(_ lhs: AudiobookFile, _ rhs: AudiobookFile) -> Bool {
         if lhs.discNumber != rhs.discNumber { return lhs.discNumber < rhs.discNumber }
         if lhs.trackNumber != rhs.trackNumber { return lhs.trackNumber < rhs.trackNumber }
-        return lhs.fileName.localizedStandardCompare(rhs.fileName) == .orderedAscending
+        return lhs.filePath.localizedStandardCompare(rhs.filePath) == .orderedAscending
     }
 }
 

@@ -9,7 +9,6 @@ nonisolated final class Audiobook {
     @Attribute(.unique) var folderPath: String
     var title: String
     var author = ""
-    @Attribute(.externalStorage) var artworkData: Data?
     var dateAdded: Date
     /// The file where listening in the app stopped; `nil` when the book is unstarted or finished.
     var currentFilePath: String?
@@ -39,6 +38,9 @@ nonisolated final class Audiobook {
     }
 
     var isStarted: Bool { currentFilePath != nil }
+
+    /// The first file with embedded artwork, which stands for the whole book.
+    var artworkFile: AudiobookFile? { sortedFiles.first { $0.artworkFingerprint != nil } }
 
     static let titleOrder = [SortDescriptor(\Audiobook.title, comparator: .localizedStandard)]
 }
