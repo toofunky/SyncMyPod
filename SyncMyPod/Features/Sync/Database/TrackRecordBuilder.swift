@@ -5,6 +5,7 @@ nonisolated struct TrackRecordBuilder {
     static let minimumHeaderLength = 0x184
     static let mediaTypeOffset = 0xD0
     static let podcastMediaType: UInt32 = 4
+    static let audiobookMediaType: UInt32 = 8
     static let unplayedOffset = 0xB2
     static let unplayedPodcast: UInt8 = 2
     static let playedPodcast: UInt8 = 1
@@ -18,6 +19,10 @@ nonisolated struct TrackRecordBuilder {
     private static let releaseDateOffset = 0x8C
     /// libgpod's skip_when_shuffling, remember_playback_position and flag4 (Now Playing shows title and album).
     private static let podcastFlagOffsets = [0xA5, 0xA6, 0xA7]
+    /// skip_when_shuffling and remember_playback_position, as iTunes sets for audiobooks.
+    private static let audiobookFlagOffsets = [0xA5, 0xA6]
+    /// "M4B ", which iTunes gives .m4b files in place of "M4A ".
+    private static let m4bFileType: UInt32 = 0x4D34_4220
 
     let headerLength: Int
 
@@ -28,24 +33,32 @@ nonisolated struct TrackRecordBuilder {
         mhit.set(UInt32(strings.count), at: 0x0C)
         writeIdentity(into: &mhit, id: id, databaseID: databaseID, albumID: albumID)
         mhit.set(ITunesTimestamp.seconds(from: draft.dateAdded), at: Self.dateAddedOffset)
-        if draft.isPodcast { mhit.set(Self.unplayedPodcast, at: Self.unplayedOffset) }
+        if draft.mediaKind == .podcast { mhit.set(Self.unplayedPodcast, at: Self.unplayedOffset) }
         apply(draft, to: &mhit, includingArtwork: true)
         return mhit
     }
 
     /// Writes the draft's tags, format and optionally artwork link, leaving IDs, date added and play statistics,
-    /// including whether a podcast has been played.
+    /// including whether a podcast has been played and where an audiobook was left.
     func apply(_ draft: ITunesTrackDraft, to mhit: inout ITunesDBRecord, includingArtwork: Bool) {
         writeTags(into: &mhit, from: draft)
         writeFormat(into: &mhit, from: draft)
-        if draft.isPodcast { writePodcastFlags(into: &mhit) }
+        writeMediaKind(into: &mhit, draft.mediaKind)
         if includingArtwork { writeArtwork(into: &mhit, draft.artwork) }
     }
 
-    /// Lists the track under Podcasts, where it resumes where it was left and isn't shuffled into music.
-    private func writePodcastFlags(into mhit: inout ITunesDBRecord) {
-        mhit.set(Self.podcastMediaType, at: Self.mediaTypeOffset)
-        for offset in Self.podcastFlagOffsets { mhit.set(UInt8(1), at: offset) }
+    /// Lists the track under Podcasts or Audiobooks, where it resumes where it was left and isn't shuffled into
+    /// music. Music keeps the media type set when the track was created.
+    private func writeMediaKind(into mhit: inout ITunesDBRecord, _ kind: SyncMediaKind) {
+        let mediaType: UInt32
+        let flagOffsets: [Int]
+        switch kind {
+        case .music: return
+        case .podcast: (mediaType, flagOffsets) = (Self.podcastMediaType, Self.podcastFlagOffsets)
+        case .audiobook: (mediaType, flagOffsets) = (Self.audiobookMediaType, Self.audiobookFlagOffsets)
+        }
+        mhit.set(mediaType, at: Self.mediaTypeOffset)
+        for offset in flagOffsets { mhit.set(UInt8(1), at: offset) }
     }
 
     static func stringRecords(for draft: ITunesTrackDraft) -> [ITunesDBRecord] {
@@ -100,7 +113,8 @@ nonisolated struct TrackRecordBuilder {
     }
 
     private func writeFormat(into mhit: inout ITunesDBRecord, from draft: ITunesTrackDraft) {
-        mhit.set(draft.codec.iTunesFileType, at: 0x18)
+        let isM4B = draft.location.lowercased().hasSuffix(".m4b")
+        mhit.set(isM4B ? Self.m4bFileType : draft.codec.iTunesFileType, at: 0x18)
         mhit.set(UInt32(clamping: draft.fileSize), at: 0x24)
         mhit.set(UInt32(clamping: draft.bitrate), at: 0x38)
         mhit.set(UInt32(clamping: draft.sampleRate) << 16, at: 0x3C)

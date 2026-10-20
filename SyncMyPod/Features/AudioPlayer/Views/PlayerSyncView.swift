@@ -7,10 +7,12 @@ struct PlayerSyncView: View {
     @Environment(\.modelContext) private var context
     @Environment(DeviceSyncModel.self) private var syncModel
     @Environment(PodcastFolder.self) private var podcastFolder: PodcastFolder?
+    @Environment(AudiobookFolder.self) private var audiobookFolder: AudiobookFolder?
     @Query private var tracks: [LibraryTrack]
     @Query private var folders: [LibraryFolder]
     @Query(sort: \LibraryPlaylist.createdAt) private var playlists: [LibraryPlaylist]
     @Query private var podcasts: [Podcast]
+    @Query private var audiobooks: [Audiobook]
     @State private var settings: IPodSyncSettings?
     @State private var contents: PlayerDeviceContents?
     @State private var missingSources: Set<String> = []
@@ -30,13 +32,14 @@ struct PlayerSyncView: View {
 
     @ViewBuilder
     private var content: some View {
-        if tracks.isEmpty && downloadedPaths.isEmpty {
+        if tracks.isEmpty && downloadedPaths.isEmpty && audiobooks.isEmpty {
             ContentUnavailableView("No Music to Sync", systemImage: "music.note.house",
-                                   description: Text("Choose a music folder in Music Library, or download podcast "
-                                                     + "episodes, first."))
+                                   description: Text("Choose a music folder in Music Library, download podcast "
+                                                     + "episodes or choose an audiobook folder first."))
         } else if let settings, let contents {
             PlayerSyncForm(settings: settings,
                            library: SyncLibrarySnapshot(tracks: tracks, playlists: playlists, podcasts: podcasts,
+                                                        audiobooks: audiobooks,
                                                         preservingAlbumArtist: device.config.preserveAlbumArtist),
                            contents: contents, config: device.config, missingSources: missingSources,
                            sidecars: sidecars, freeBytes: freeBytes ?? device.availableBytes,
@@ -53,7 +56,8 @@ struct PlayerSyncView: View {
         Set(podcasts.flatMap(\.episodes).compactMap(\.downloadedFilePath))
     }
 
-    /// Copies whose library file or download is gone for good are removed; ones on an unplugged drive are kept.
+    /// Copies whose library file, download or audiobook file is gone for good are removed; ones on an unplugged
+    /// drive are kept.
     private func reload() async {
         settings = IPodSyncSettings.settings(for: device.id, in: context)
         let loaded = await PlayerDeviceContents.load(from: device)
@@ -62,8 +66,12 @@ struct PlayerSyncView: View {
         let missingSongs = folders.first.map {
             MissingSourceFinder(folderPath: $0.path).missing(synced, notIn: Set(libraryPaths))
         } ?? []
-        missingSources = missingSongs.union(PodcastMissingSourceFinder(folderPath: podcastFolder?.path)
-            .missing(synced, downloaded: downloadedPaths))
+        let bookFiles = Set(audiobooks.flatMap(\.files).map(\.filePath))
+        let removedEpisodes = PodcastMissingSourceFinder(folderPath: podcastFolder?.path)
+            .missing(synced, downloaded: downloadedPaths)
+        let removedBookFiles = PodcastMissingSourceFinder(folderPath: audiobookFolder?.path)
+            .missing(synced, downloaded: bookFiles)
+        missingSources = missingSongs.union(removedEpisodes).union(removedBookFiles)
         sidecars = await LibrarySidecarFinder.find(besideSongsAt: libraryPaths, covers: device.config.copyCovers,
                                                    lyrics: device.config.copyLyricFiles)
         contents = loaded

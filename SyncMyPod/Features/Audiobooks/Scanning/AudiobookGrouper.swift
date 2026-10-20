@@ -49,7 +49,12 @@ nonisolated struct AudiobookGrouper {
     }
 
     private func isDiscFolder(_ folder: String) -> Bool {
-        name(of: folder).wholeMatch(of: Self.discFolderPattern) != nil
+        Self.isDiscFolderName(name(of: folder))
+    }
+
+    /// "CD 1", "Disc2" or "disk_3": a folder holding one disc of a book.
+    static func isDiscFolderName(_ name: String) -> Bool {
+        name.wholeMatch(of: discFolderPattern) != nil
     }
 
     /// The parent folder's name, which is usually the author's, unless the parent is the audiobook folder.

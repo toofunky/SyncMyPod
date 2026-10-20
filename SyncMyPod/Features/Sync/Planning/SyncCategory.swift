@@ -5,10 +5,11 @@ nonisolated enum SyncCategory: String, CaseIterable, Identifiable, Sendable {
     case genres
     case playlists
     case podcasts
+    case audiobooks
 
     var id: Self { self }
 
-    /// For a selection without podcasts.
+    /// For a selection without podcasts and audiobooks.
     static let musicCategories: [SyncCategory] = [.albums, .genres, .playlists]
 
     var title: String {
@@ -17,6 +18,7 @@ nonisolated enum SyncCategory: String, CaseIterable, Identifiable, Sendable {
         case .genres: "Genres"
         case .playlists: "Playlists"
         case .podcasts: "Podcasts"
+        case .audiobooks: "Audiobooks"
         }
     }
 }

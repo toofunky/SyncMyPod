@@ -1,16 +1,19 @@
 import SwiftUI
 
-/// Albums, genres, playlists and podcasts are combined: a song syncs when any of them selects it.
+/// Albums, genres and playlists are combined: a song syncs when any of them selects it. Podcasts and audiobooks
+/// are chosen on their own.
 struct SyncCustomSelectionView: View {
     let artists: [SyncArtistNode]
     let genres: [SyncGenreNode]
     let playlists: [SyncPlaylistNode]
     var podcasts: [SyncPodcastSnapshot] = []
+    var audiobooks: [SyncAudiobookSnapshot] = []
     var categories = SyncCategory.musicCategories
     @Binding var albumSelection: Set<String>
     @Binding var genreSelection: Set<String>
     @Binding var playlistSelection: Set<String>
     var podcastSelection: Binding<Set<String>> = .constant([])
+    var audiobookSelection: Binding<Set<String>> = .constant([])
 
     @State private var category = SyncCategory.albums
 
@@ -33,6 +36,7 @@ struct SyncCustomSelectionView: View {
         case .genres: SyncGenreListView(genres: genres, selection: $genreSelection)
         case .playlists: SyncPlaylistListView(playlists: playlists, selection: $playlistSelection)
         case .podcasts: SyncPodcastListView(podcasts: podcasts, selection: podcastSelection)
+        case .audiobooks: SyncAudiobookListView(audiobooks: audiobooks, selection: audiobookSelection)
         }
     }
 
@@ -42,6 +46,7 @@ struct SyncCustomSelectionView: View {
         case .genres: genreSelection.count
         case .playlists: playlistSelection.count
         case .podcasts: podcastSelection.wrappedValue.count
+        case .audiobooks: audiobookSelection.wrappedValue.count
         }
         return count == 0 ? category.title : "\(category.title) (\(count))"
     }

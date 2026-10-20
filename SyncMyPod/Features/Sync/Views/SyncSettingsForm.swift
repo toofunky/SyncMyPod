@@ -17,12 +17,13 @@ struct SyncSettingsForm: View {
     @State private var pendingRemoval: SyncPlan?
 
     private var planInput: SyncPlanInput {
-        SyncPlanInput(library: library, selection: settings.selection, onDevice: onDevice, manifest: manifest)
+        SyncPlanInput(library: library, selection: settings.selection, onDevice: onDevice, manifest: manifest,
+                      makesAudiobookPlaylists: settings.makesAudiobookPlaylists)
     }
 
     var body: some View {
         VStack(spacing: 0) {
-            SyncSelectionEditor(settings: settings, library: library, includesPodcasts: true)
+            SyncSelectionEditor(settings: settings, library: library, includesSpokenWord: true)
             Divider()
             let input = planInput
             SyncSummaryBar(totals: plan?.totals, isCalculating: plannedInput != input, freeBytes: freeBytes,
@@ -54,7 +55,9 @@ struct SyncSettingsForm: View {
     private var removalTitle: String {
         let removals = pendingRemoval?.removals ?? []
         let episodes = removals.count { ($0.mediaType ?? 0) & TrackRecordBuilder.podcastMediaType != 0 }
-        return SyncRemovalWording.title(songs: removals.count - episodes, episodes: episodes, deviceKind: "iPod")
+        let books = removals.count { ($0.mediaType ?? 0) & TrackRecordBuilder.audiobookMediaType != 0 }
+        return SyncRemovalWording.title(songs: removals.count - episodes - books, episodes: episodes,
+                                        audiobookFiles: books, deviceKind: "iPod")
     }
 
     private func removalMessage(_ plan: SyncPlan) -> String {

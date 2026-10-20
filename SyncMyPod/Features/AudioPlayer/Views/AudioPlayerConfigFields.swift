@@ -27,6 +27,9 @@ struct AudioPlayerConfigFields: View {
     private static let podcastPlaylistsInfo = "Each podcast gets a playlist of its episodes, oldest first, so they "
         + "play in the order they came out. Useful for players without a podcast menu, or when the podcast folder "
         + "is the same as the music folder."
+    private static let audiobookPlaylistsInfo = "Each audiobook gets a playlist of its files in listening order, "
+        + "so its parts play one after another. Useful for players without an audiobook menu, or when the "
+        + "audiobook folder is the same as the music folder."
     private static let blankFolderPrompt = "Leave blank to use the root folder"
 
     @Binding var config: AudioPlayerConfig
@@ -41,9 +44,11 @@ struct AudioPlayerConfigFields: View {
             TextField("Music Folder", text: $config.musicFolder, prompt: Text(Self.blankFolderPrompt))
             TextField("Playlist Folder", text: $config.playlistFolder, prompt: Text(Self.blankFolderPrompt))
             TextField("Podcast Folder", text: $config.podcastFolder, prompt: Text(Self.blankFolderPrompt))
+            TextField("Audiobook Folder", text: $config.audiobookFolder, prompt: Text(Self.blankFolderPrompt))
         } footer: {
-            Text("Folders inside the root folder. Songs are filed by album artist and album, and podcast episodes "
-                 + "by show. For players that don't separate podcasts, use the music folder.")
+            Text("Folders inside the root folder. Songs are filed by album artist and album, podcast episodes "
+                 + "by show, and audiobooks by author and book. For players that don't separate podcasts or "
+                 + "audiobooks, use the music folder.")
                 .foregroundStyle(.secondary)
         }
         playlistFormatSection
@@ -68,6 +73,8 @@ struct AudioPlayerConfigFields: View {
                    infoTitle: "Copy Lyric Files", info: Self.lyricsInfo)
             option("Make Podcast Playlists?", isOn: $config.makesPodcastPlaylists,
                    infoTitle: "Make Podcast Playlists", info: Self.podcastPlaylistsInfo)
+            option("Make Audiobook Playlists?", isOn: $config.makesAudiobookPlaylists,
+                   infoTitle: "Make Audiobook Playlists", info: Self.audiobookPlaylistsInfo)
         }
     }
 

@@ -7,6 +7,7 @@ nonisolated struct SyncSelection: Equatable, Sendable {
     var genres: Set<String> = []
     var playlists: Set<String> = []
     var podcasts: Set<String> = []
+    var audiobooks: Set<String> = []
 
     func playlists(in library: [SyncPlaylistSnapshot]) -> [IPodPlaylistRequest] {
         library.filter { mode == .allSongs || playlists.contains($0.key) }.map(\.request)
@@ -16,6 +17,13 @@ nonisolated struct SyncSelection: Equatable, Sendable {
     func partition(_ library: [SyncPodcastSnapshot])
         -> (selected: [SyncPodcastSnapshot], unselected: [SyncPodcastSnapshot]) {
         let isSelected = { (podcast: SyncPodcastSnapshot) in mode == .allSongs || podcasts.contains(podcast.key) }
+        return (library.filter(isSelected), library.filter { !isSelected($0) })
+    }
+
+    /// Every file of each chosen book, or of every book when syncing everything.
+    func partition(_ library: [SyncAudiobookSnapshot])
+        -> (selected: [SyncAudiobookSnapshot], unselected: [SyncAudiobookSnapshot]) {
+        let isSelected = { (book: SyncAudiobookSnapshot) in mode == .allSongs || audiobooks.contains(book.key) }
         return (library.filter(isSelected), library.filter { !isSelected($0) })
     }
 

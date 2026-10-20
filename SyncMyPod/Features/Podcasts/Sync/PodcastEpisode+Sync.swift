@@ -10,10 +10,10 @@ extension PodcastEpisode {
         guard !forIPod || fileCodec?.syncsToIPod == true else { return nil }
         var draft = self.draft(show: show, author: author)
         draft.codec = fileCodec ?? .mp3
-        draft.isPodcast = forIPod
+        draft.mediaKind = forIPod ? .podcast : .music
         let source = forIPod ? SyncSource(fileSize: draft.fileSize, modificationDate: downloadedAt ?? .distantPast,
                                           artworkFingerprint: nil) : nil
-        return IPodSyncRequest(sourceURL: url, draft: draft, source: source, isPodcast: true)
+        return IPodSyncRequest(sourceURL: url, draft: draft, source: source, kind: .podcast)
     }
 
     private func draft(show: String, author: String) -> ITunesTrackDraft {

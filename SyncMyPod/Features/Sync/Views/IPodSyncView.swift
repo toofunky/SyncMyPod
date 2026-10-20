@@ -9,10 +9,12 @@ struct IPodSyncView: View {
     @Environment(DeviceSyncModel.self) private var syncModel
     @Environment(PodcastDownloads.self) private var podcastDownloads: PodcastDownloads?
     @Environment(PodcastFolder.self) private var podcastFolder: PodcastFolder?
+    @Environment(AudiobookFolder.self) private var audiobookFolder: AudiobookFolder?
     @Query private var tracks: [LibraryTrack]
     @Query private var folders: [LibraryFolder]
     @Query(sort: \LibraryPlaylist.createdAt) private var playlists: [LibraryPlaylist]
     @Query private var podcasts: [Podcast]
+    @Query private var audiobooks: [Audiobook]
     @State private var settings: IPodSyncSettings?
     @State private var onDevice: ITunesDatabase?
     @State private var manifest = LoadedSyncManifest()
@@ -27,10 +29,10 @@ struct IPodSyncView: View {
 
     @ViewBuilder
     private var content: some View {
-        if tracks.isEmpty && !hasDownloads {
+        if tracks.isEmpty && !hasDownloads && audiobooks.isEmpty {
             ContentUnavailableView("No Music to Sync", systemImage: "music.note.house",
-                                   description: Text("Choose a music folder in Music Library, or download podcast "
-                                                     + "episodes, first."))
+                                   description: Text("Choose a music folder in Music Library, download podcast "
+                                                     + "episodes or choose an audiobook folder first."))
         } else if let loadError {
             ContentUnavailableView("Couldn't Read iPod", systemImage: "exclamationmark.triangle",
                                    description: Text(loadError))
@@ -53,8 +55,8 @@ struct IPodSyncView: View {
     private var hasDownloads: Bool { podcasts.contains { $0.episodes.contains(where: \.isDownloaded) } }
 
     private func library(_ settings: IPodSyncSettings) -> SyncLibrarySnapshot {
-        SyncLibrarySnapshot(tracks: iPodTracks, playlists: playlists, podcasts: podcasts, podcastsForIPod: true,
-                            preservingAlbumArtist: settings.preservesAlbumArtist,
+        SyncLibrarySnapshot(tracks: iPodTracks, playlists: playlists, podcasts: podcasts, audiobooks: audiobooks,
+                            forIPod: true, preservingAlbumArtist: settings.preservesAlbumArtist,
                             embeddingLyricsSidecars: embedsLyricsSidecars(settings))
     }
 
@@ -68,6 +70,7 @@ struct IPodSyncView: View {
         await podcastDownloads?.readMissingAudioDetails(of: podcasts, context: context)
         let library = library(settings)
         let requests = library.tracks.map(\.request) + library.podcasts.flatMap(\.episodes)
+            + library.audiobooks.flatMap(\.files)
         do {
             let database = try await loader.load(device.volumeURL)
             let loaded = await IPodControlFiles(volumeURL: device.volumeURL)
@@ -82,12 +85,16 @@ struct IPodSyncView: View {
         freeBytes = values?.volumeAvailableCapacity.map(Int64.init)
     }
 
-    /// Episodes whose download was removed come off the iPod too, as their copies do on a player.
+    /// Episodes whose download was removed, and books gone from the audiobook folder, come off the iPod too, as
+    /// their copies do on a player.
     private func withRemovedDownloads(_ loaded: LoadedSyncManifest) -> LoadedSyncManifest {
         let downloaded = Set(podcasts.flatMap(\.episodes).compactMap(\.downloadedFilePath))
+        let bookFiles = Set(audiobooks.flatMap(\.files).map(\.filePath))
         let entries = loaded.manifest.entries
         let removed = PodcastMissingSourceFinder(folderPath: podcastFolder?.path)
             .missing(entries.keys, downloaded: downloaded)
+            .union(PodcastMissingSourceFinder(folderPath: audiobookFolder?.path)
+                .missing(entries.keys, downloaded: bookFiles))
         var updated = loaded
         updated.strayDatabaseIDs.formUnion(removed.compactMap { entries[$0]?.databaseID })
         return updated

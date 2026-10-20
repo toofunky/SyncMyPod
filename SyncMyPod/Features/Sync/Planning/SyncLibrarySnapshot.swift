@@ -9,13 +9,18 @@ nonisolated struct SyncLibrarySnapshot: Equatable, Sendable {
     let playlistNodes: [SyncPlaylistNode]
     /// Podcasts with downloaded episodes, each oldest first.
     let podcasts: [SyncPodcastSnapshot]
+    /// Books with files, each in listening order.
+    let audiobooks: [SyncAudiobookSnapshot]
 
-    /// `podcastsForIPod` leaves out episodes an iPod can't play and gives the rest what its manifest needs.
+    /// `forIPod` leaves out episodes and book files an iPod can't play and gives the rest what its manifest needs.
     @MainActor
-    init(tracks: [LibraryTrack], playlists: [LibraryPlaylist], podcasts: [Podcast] = [], podcastsForIPod: Bool = false,
-         preservingAlbumArtist: Bool, embeddingLyricsSidecars: Bool = false) {
-        self.podcasts = podcasts.compactMap { $0.syncSnapshot(forIPod: podcastsForIPod) }
+    init(tracks: [LibraryTrack], playlists: [LibraryPlaylist], podcasts: [Podcast] = [],
+         audiobooks: [Audiobook] = [], forIPod: Bool = false, preservingAlbumArtist: Bool,
+         embeddingLyricsSidecars: Bool = false) {
+        self.podcasts = podcasts.compactMap { $0.syncSnapshot(forIPod: forIPod) }
             .sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
+        self.audiobooks = audiobooks.compactMap { $0.syncSnapshot(forIPod: forIPod) }
+            .sorted { $0.title.localizedStandardCompare($1.title) == .orderedAscending }
         let snapshots = tracks.map {
             $0.syncSnapshot(preservingAlbumArtist: preservingAlbumArtist, embeddingLyricsSidecar: embeddingLyricsSidecars)
         }
