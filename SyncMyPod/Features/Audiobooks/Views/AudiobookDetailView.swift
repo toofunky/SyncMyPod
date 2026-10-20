@@ -17,6 +17,7 @@ struct AudiobookDetailView: View {
 #if DEBUG
 #Preview {
     AudiobookDetailView(book: .preview)
+        .environment(MusicPlayerModel())
         .modelContainer(.preview)
         .frame(width: 720, height: 400)
 }

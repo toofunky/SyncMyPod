@@ -34,17 +34,21 @@ struct MusicPlayerOverlay: View {
 
     @ViewBuilder
     private var artwork: some View {
-        if let episode = player.currentEpisode {
-            PodcastArtworkView(data: episode.artworkData, size: Self.artworkSize)
-        } else {
+        switch player.currentSpoken?.artwork {
+        case .podcast(let data):
+            PodcastArtworkView(data: data, size: Self.artworkSize)
+        case .embedded(let path, let fingerprint):
+            AlbumArtworkView(path: path, fingerprint: fingerprint, placeholderSystemImage: "book.closed")
+                .frame(width: Self.artworkSize, height: Self.artworkSize)
+        case nil:
             AlbumArtworkView(path: player.currentTrack?.filePath, fingerprint: player.currentTrack?.artworkFingerprint)
                 .frame(width: Self.artworkSize, height: Self.artworkSize)
         }
     }
 
-    private var title: String? { player.currentEpisode?.title ?? player.currentTrack?.title }
+    private var title: String? { player.currentSpoken?.currentFile.title ?? player.currentTrack?.title }
 
-    private var subtitle: String? { player.currentEpisode?.show ?? player.currentTrack?.artist }
+    private var subtitle: String? { player.currentSpoken?.collectionTitle ?? player.currentTrack?.artist }
 
     private var nowPlaying: some View {
         VStack(spacing: 0) {
@@ -62,20 +66,20 @@ struct MusicPlayerOverlay: View {
     private var controls: some View {
         HStack(spacing: Self.controlSpacing) {
             toggle("Shuffle", systemImage: "shuffle", isOn: player.isShuffled, action: player.toggleShuffle)
-                .disabled(isEpisode)
-            Button(isEpisode ? "Back 15 Seconds" : "Previous",
-                   systemImage: isEpisode ? "gobackward.15" : "backward.fill", action: player.skipBackward)
+                .disabled(isSpoken)
+            Button(isSpoken ? "Back 15 Seconds" : "Previous",
+                   systemImage: isSpoken ? "gobackward.15" : "backward.fill", action: player.skipBackward)
                 .disabled(!player.hasCurrentItem)
             Button(player.isPlaying ? "Pause" : "Play", systemImage: player.isPlaying ? "pause.fill" : "play.fill",
                    action: player.togglePlayPause)
                 .font(.title)
                 .contentTransition(.symbolEffect(.replace))
                 .disabled(!player.hasCurrentItem)
-            Button(isEpisode ? "Forward 30 Seconds" : "Next",
-                   systemImage: isEpisode ? "goforward.30" : "forward.fill", action: player.skipForward)
+            Button(isSpoken ? "Forward 30 Seconds" : "Next",
+                   systemImage: isSpoken ? "goforward.30" : "forward.fill", action: player.skipForward)
                 .disabled(!player.canSkipForward)
             toggle("Repeat", systemImage: "repeat", isOn: player.isRepeating, action: player.toggleRepeat)
-                .disabled(isEpisode)
+                .disabled(isSpoken)
         }
         .font(.title3)
         .buttonStyle(.borderless)
@@ -89,7 +93,8 @@ struct MusicPlayerOverlay: View {
             .accessibilityValue(isOn ? "On" : "Off")
     }
 
-    private var isEpisode: Bool { player.currentEpisode != nil }
+    /// Episodes and books skip by seconds and have no shuffle or repeat.
+    private var isSpoken: Bool { player.currentSpoken != nil }
 
     private var nowPlayingText: String {
         guard let title else { return "Not Playing" }

@@ -7,6 +7,7 @@ struct AudiobooksView: View {
 
     @Environment(AudiobooksModel.self) private var model
     @Environment(AudiobookFolder.self) private var folder
+    @Environment(MusicPlayerModel.self) private var player: MusicPlayerModel?
     @Environment(\.modelContext) private var context
     @Query(sort: Audiobook.titleOrder) private var books: [Audiobook]
     @State private var isChoosingFolder = false
@@ -25,6 +26,7 @@ struct AudiobooksView: View {
         .task(id: folder.url) {
             if let url = folder.url { model.scanIfNeeded(url, in: context) }
         }
+        .onChange(of: books.map(\.bookID)) { player?.stopAudiobook(missingFrom: books) }
     }
 
     @ToolbarContentBuilder
@@ -81,6 +83,7 @@ struct AudiobooksView: View {
     @Previewable @State var selection: UUID? = Audiobook.preview.bookID
     AudiobooksView(selection: $selection)
         .environment(AudiobooksModel())
+        .environment(MusicPlayerModel())
         .environment(AudiobookFolder.preview)
         .environment(PodcastFolder.preview)
         .modelContainer(.preview)
@@ -89,6 +92,7 @@ struct AudiobooksView: View {
 #Preview("No Folder") {
     AudiobooksView(selection: .constant(nil))
         .environment(AudiobooksModel())
+        .environment(MusicPlayerModel())
         .environment(AudiobookFolder.preview)
         .environment(PodcastFolder.preview)
         .modelContainer(.emptyPreview)
