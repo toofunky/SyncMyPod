@@ -7,6 +7,7 @@ struct ContentView: View {
     @State private var selection: SidebarItem? = .library(.artists)
     @State private var selectedPlaylistID: UUID?
     @State private var selectedPodcastID: UUID?
+    @State private var selectedAudiobookID: UUID?
     @State private var playlistTrackSelections: [UUID: Set<PlaylistEntry.ID>] = [:]
     @State private var libraryModel = MusicLibraryModel()
     @State private var librarySelection = Set<LibraryTrack.ID>()
@@ -24,6 +25,7 @@ struct ContentView: View {
             case .noDevice: DeviceDetailView(deviceID: nil)
             case .playlists: PlaylistsView(selection: $selectedPlaylistID, trackSelections: $playlistTrackSelections)
             case .podcasts: PodcastsView(selection: $selectedPodcastID)
+            case .audiobooks: AudiobooksView(selection: $selectedAudiobookID)
             case .library(let section):
                 libraryView(section)
             case nil:
@@ -81,6 +83,8 @@ struct ContentView: View {
         .environment(PodcastsModel())
         .environment(PodcastDownloads())
         .environment(PodcastFolder.preview)
+        .environment(AudiobooksModel())
+        .environment(AudiobookFolder.preview)
         .environment(\.iTunesDBLoader, .preview)
         .modelContainer(.preview)
 }

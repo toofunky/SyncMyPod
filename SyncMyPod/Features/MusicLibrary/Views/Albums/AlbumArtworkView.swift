@@ -6,6 +6,7 @@ struct AlbumArtworkView: View {
     let path: String?
     let fingerprint: String?
     var placeholderFont: Font = .largeTitle
+    var placeholderSystemImage = "music.note"
 
     @Environment(\.albumArtworkLoader) private var loader
     @State private var image: CGImage?
@@ -26,7 +27,7 @@ struct AlbumArtworkView: View {
                 .resizable()
                 .scaledToFill()
         } else {
-            Image(systemName: "music.note")
+            Image(systemName: placeholderSystemImage)
                 .font(placeholderFont)
                 .foregroundStyle(.secondary)
         }

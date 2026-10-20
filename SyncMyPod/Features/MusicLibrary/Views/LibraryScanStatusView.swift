@@ -7,11 +7,13 @@ struct LibraryScanStatusView: View {
     let lastScanDate: Date?
     let state: LibraryScanState
     let onCancel: () -> Void
+    /// What the folder holds, in the singular; the count inflects it.
+    var itemName = "song"
 
     var body: some View {
         HStack {
             folderLabel
-            Text("\(trackCount) songs")
+            Text("^[\(trackCount) \(itemName)](inflect: true)")
                 .foregroundStyle(.secondary)
             Spacer()
             status

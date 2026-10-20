@@ -4,18 +4,19 @@ enum SidebarItem: Hashable, Identifiable {
     case library(LibrarySection)
     case playlists
     case podcasts
+    case audiobooks
     case device(id: String)
     /// Shown in place of the device rows while nothing is connected.
     case noDevice
 
-    static let libraryItems = LibrarySection.allCases.map(SidebarItem.library) + [.playlists, .podcasts]
+    static let libraryItems = LibrarySection.allCases.map(SidebarItem.library) + [.playlists, .podcasts, .audiobooks]
 
     var id: Self { self }
 
     var isDevice: Bool {
         switch self {
         case .device, .noDevice: true
-        case .library, .playlists, .podcasts: false
+        case .library, .playlists, .podcasts, .audiobooks: false
         }
     }
 
@@ -24,6 +25,7 @@ enum SidebarItem: Hashable, Identifiable {
         case .library(let section): section.title
         case .playlists: "Playlists"
         case .podcasts: "Podcasts"
+        case .audiobooks: "Audiobooks"
         case .device: "Device"
         case .noDevice: "No Device"
         }
@@ -34,6 +36,7 @@ enum SidebarItem: Hashable, Identifiable {
         case .library(let section): section.systemImage
         case .playlists: "music.note.list"
         case .podcasts: "antenna.radiowaves.left.and.right"
+        case .audiobooks: "book.closed"
         case .device, .noDevice: "ipod"
         }
     }

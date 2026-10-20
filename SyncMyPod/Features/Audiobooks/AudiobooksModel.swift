@@ -9,12 +9,20 @@ final class AudiobooksModel {
     private(set) var state = LibraryScanState.idle
 
     @ObservationIgnored private var scanTask: Task<Void, Never>?
+    /// The folder scanned since launch, so showing the books again doesn't rescan them.
+    @ObservationIgnored private var scannedFolder: URL?
 
     var isScanning: Bool {
         if case .scanning = state { true } else { false }
     }
 
+    func scanIfNeeded(_ folderURL: URL, in context: ModelContext) {
+        guard folderURL != scannedFolder else { return }
+        rescan(folderURL, in: context)
+    }
+
     func rescan(_ folderURL: URL, in context: ModelContext) {
+        scannedFolder = folderURL
         scanTask?.cancel()
         scanTask = Task { await scan(folderURL, container: context.container) }
     }
