@@ -24,7 +24,8 @@ The iPod nano (7th generation) reads its library from SQLite databases instead o
 - **Tag editor**: edit tags and cover art from an inspector. Changes are written back to the MP4 or ID3 tags in the source files.
 - **Playlists**: create playlists in the app and sync them to the iPod.
 - **Podcasts**: subscribe by RSS feed address and download episodes into a folder you choose. Play episodes in the app, and each one picks up where you stopped listening. On an iPod, episodes appear in the Podcasts menu, grouped by show, and resume where you left off. On other audio players, they're copied into a podcast folder, with a playlist for each show in the order the episodes came out. Episodes already on a device are never copied again, so the device keeps your place in them.
-- **Flexible syncing**: sync the entire library, or pick the artists, albums, genres, playlists and podcasts you want. The app remembers your choices for each iPod.
+- **Audiobooks**: choose a folder of audiobooks, where each folder of audio files or .m4b file is a book. Play books in the app, file after file, and each one picks up where you stopped listening. On an iPod, books appear in the Audiobooks menu and resume where you left off, and each book can get its own playlist so its parts play in order. On other audio players, they're copied into an audiobook folder by author and book, with a playlist for each book. Files already on a device are never copied again, so the device keeps your place in them.
+- **Flexible syncing**: sync the entire library, or pick the artists, albums, genres, playlists, podcasts and audiobooks you want. The app remembers your choices for each iPod.
 - **Album artwork**: embedded cover art is resized for the iPod and deduplicated in the `ArtworkDB`.
 - **Change detection**: when a file's tags or artwork change, the track is updated on the iPod in place instead of being added again.
 - **Housekeeping**: songs you deselect are removed from the iPod, play counts recorded on the iPod are merged back, and unused artwork is compacted.
@@ -48,7 +49,7 @@ Download the latest `SyncMyPod-<version>.zip` from [Releases](https://github.com
 
 1. Open **Music Library** and choose the folder that contains your music. The app scans the folder and indexes it.
 2. Connect your iPod. It appears under **iPod** in the sidebar with its model and capacity.
-3. Choose **Sync All Songs**, or choose **Custom Sync** and select artists, albums, genres, playlists or podcasts. To sync podcasts, subscribe and download episodes in **Podcasts** first.
+3. Choose **Sync All Songs**, or choose **Custom Sync** and select artists, albums, genres, playlists, podcasts or audiobooks. To sync podcasts, subscribe and download episodes in **Podcasts** first. To sync audiobooks, choose your audiobook folder in **Audiobooks** first.
 4. Click **Sync** and wait for it to finish before ejecting the iPod.
 
 > [!TIP]
@@ -78,6 +79,7 @@ Some tests run against real databases copied from a device. To enable them, copy
 SyncMyPod/
   App/               App entry point, sidebar and appearance
   Features/
+    Audiobooks/      Audiobook folder scanning, book models and views, and audiobook sync snapshots
     DeviceDetection/ Mount watching, SysInfo and model identification
     Library/         iTunesDB parsing and the lossless record tree
     MusicLibrary/    Folder scanning, SwiftData library and tag editing

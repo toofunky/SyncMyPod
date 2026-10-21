@@ -34,5 +34,7 @@
 - [x] Favorites
 - [x] Podcasts (subscribe by RSS feed, download episodes, sync to iPods and audio players)
 - [x] Play podcast episodes in the app, resuming where you left off
+- [x] Audiobooks (scan a folder of books, sync to iPods and audio players, with a playlist for each book)
+- [x] Play audiobooks in the app, file after file, resuming where you left off
 - [ ] Mark podcast episodes played from the device's play counts
 - [ ] Automatically download new podcast episodes
