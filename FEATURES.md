@@ -36,5 +36,6 @@
 - [x] Play podcast episodes in the app, resuming where you left off
 - [x] Audiobooks (scan a folder of books, sync to iPods and audio players, with a playlist for each book)
 - [x] Play audiobooks in the app, file after file, resuming where you left off
+- [x] Pick up podcast and audiobook positions from the iPod
 - [ ] Mark podcast episodes played from the device's play counts
 - [ ] Automatically download new podcast episodes

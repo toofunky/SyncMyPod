@@ -14,13 +14,17 @@ extension AudiobookFile {
                                      sampleRate: sampleRate, dateAdded: book.dateAdded,
                                      lastModified: modificationDate, codec: codec ?? .aac)
         draft.mediaKind = forIPod ? .audiobook : .music
-        return IPodSyncRequest(sourceURL: fileURL, draft: draft, source: forIPod ? syncSource : nil, kind: .audiobook)
+        let cover = artworkFingerprint == nil ? book.coverFilePath : nil
+        return IPodSyncRequest(sourceURL: fileURL, draft: draft, source: forIPod ? syncSource(book: book) : nil,
+                               kind: .audiobook, coverImageURL: cover.map { URL(filePath: $0) })
     }
 
-    /// `nil` until the file has been scanned, so the manifest never records a stale size.
-    private var syncSource: SyncSource? {
+    /// `nil` until the file has been scanned, so the manifest never records a stale size. A file without
+    /// artwork of its own takes the book's cover image, whose fingerprint changes when the image does.
+    private func syncSource(book: Audiobook) -> SyncSource? {
         guard scanVersion == Self.currentScanVersion else { return nil }
+        let cover = book.coverFilePath.map { Audiobook.coverFingerprint(path: $0, date: book.coverFileDate) }
         return SyncSource(fileSize: fileSize, modificationDate: modificationDate,
-                          artworkFingerprint: artworkFingerprint)
+                          artworkFingerprint: artworkFingerprint ?? cover)
     }
 }

@@ -15,6 +15,7 @@ nonisolated extension IPodSyncRequest {
         guard var source, source.artworkFingerprint != nil else { return self }
         source.artworkPixelLimit = pixelLimit
         return IPodSyncRequest(sourceURL: sourceURL, draft: draft, source: source,
-                               embedsLyricsSidecar: embedsLyricsSidecar, kind: kind)
+                               embedsLyricsSidecar: embedsLyricsSidecar, kind: kind,
+                               coverImageURL: coverImageURL)
     }
 }

@@ -51,6 +51,16 @@ struct AudiobookPlayerSyncTests {
         #expect(book("Walden", author: "Thoreau", paths: ["1.flac"], codec: .flac).syncSnapshot(forIPod: true) == nil)
     }
 
+    @Test func iPodCopiesWithoutArtworkTakeTheBooksCoverImage() throws {
+        let book = book("Emma", author: "Jane Austen", paths: ["1.m4a", "2.m4a"])
+        book.coverFilePath = "/Audiobooks/Jane Austen/Emma/cover.jpg"
+        book.sortedFiles[1].artworkFingerprint = "embedded"
+        let files = try #require(book.syncSnapshot(forIPod: true)).files
+        #expect(files.map(\.coverImageURL?.lastPathComponent) == ["cover.jpg", nil])
+        #expect(files[0].source?.artworkFingerprint?.hasPrefix("cover:") == true)
+        #expect(files[1].source?.artworkFingerprint == "embedded")
+    }
+
     @Test func booksGoInTheAudiobookFolderUnderAuthorAndTitle() async {
         let plan = await plan([book("Frankenstein", paths: ["01.mp3"])], selection: SyncSelection(mode: .allSongs))
         #expect(plan.copies.map(\.destination) == ["Audiobooks/Mary Shelley/Frankenstein/01.mp3"])

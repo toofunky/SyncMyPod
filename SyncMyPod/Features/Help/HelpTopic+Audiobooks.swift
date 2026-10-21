@@ -13,14 +13,15 @@ extension HelpTopic {
                         + "named like **CD 1** or **Disc 2** inside a book are part of it. A .m4b file on its own "
                         + "is a book by itself, and .m4b parts that share an album tag stay together. A book is "
                         + "named from its files' album and artist tags, or from its folders when they're untagged. "
-                        + "Its files play by disc and track number, then by file name."),
+                        + "Its files play by disc and track number, then by file name. A book whose files have no "
+                        + "cover art of their own shows the cover.jpg, folder.jpg, cover.png or folder.png in its "
+                        + "folder, in SyncMyPod and on your devices."),
         HelpSection(heading: "Listening in SyncMyPod",
                     body: "Double-click a book to carry on where you left off, or click **Play** beside its title. "
                         + "Double-click a file to start from there. The files play one after another, and the book "
                         + "shows how much time is left. A bookmark marks the file where you stopped. To start "
                         + "over, Control-click the book, then choose **Play from Beginning**. The player's skip "
-                        + "buttons go back 15 seconds and forward 30 seconds. Your place in SyncMyPod is kept "
-                        + "separately from your place on your devices."),
+                        + "buttons go back 15 seconds and forward 30 seconds."),
         HelpSection(heading: "Putting Audiobooks on Your Devices",
                     body: "**Sync All Songs** copies every book. With **Custom Sync**, check the books you want in "
                         + "the **Audiobooks** list; all of a book's files are copied. Books removed from your "
@@ -38,6 +39,9 @@ extension HelpTopic {
                         + "also gets a playlist of its files in listening order."),
         HelpSection(heading: "Picking Up Where You Left Off",
                     body: "iPods and most players remember your place in a book. SyncMyPod never replaces a file "
-                        + "that's already on a device, so your place is kept when you sync again."),
+                        + "that's already on a device, so your place is kept when you sync again. When you connect "
+                        + "an iPod, SyncMyPod picks up where you got to on it, if that's further into the book than "
+                        + "where you stopped in SyncMyPod. On an iPod nano (7th generation), that happens after "
+                        + "you sync."),
     ]
 }

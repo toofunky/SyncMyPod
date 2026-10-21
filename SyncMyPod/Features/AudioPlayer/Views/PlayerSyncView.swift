@@ -67,12 +67,13 @@ struct PlayerSyncView: View {
             MissingSourceFinder(folderPath: $0.path).missing(synced, notIn: Set(libraryPaths))
         } ?? []
         let bookFiles = Set(audiobooks.flatMap(\.files).map(\.filePath))
-        let removedEpisodes = PodcastMissingSourceFinder(folderPath: podcastFolder?.path)
-            .missing(synced, downloaded: downloadedPaths)
-        let removedBookFiles = PodcastMissingSourceFinder(folderPath: audiobookFolder?.path)
-            .missing(synced, downloaded: bookFiles)
+        let removedEpisodes = RemovedSourceFinder(folderPath: podcastFolder?.path)
+            .missing(synced, known: downloadedPaths)
+        let removedBookFiles = RemovedSourceFinder(folderPath: audiobookFolder?.path)
+            .missing(synced, known: bookFiles)
         missingSources = missingSongs.union(removedEpisodes).union(removedBookFiles)
-        sidecars = await LibrarySidecarFinder.find(besideSongsAt: libraryPaths, covers: device.config.copyCovers,
+        sidecars = await LibrarySidecarFinder.find(besideSongsAt: libraryPaths + bookFiles.sorted(),
+                                                   covers: device.config.copyCovers,
                                                    lyrics: device.config.copyLyricFiles)
         contents = loaded
         let values = try? device.volumeURL.resourceValues(forKeys: [.volumeAvailableCapacityKey])

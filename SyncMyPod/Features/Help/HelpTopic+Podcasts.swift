@@ -22,8 +22,7 @@ extension HelpTopic {
                     body: "Double-click a downloaded episode, or click the play button beside it. If you stopped "
                         + "partway through, it picks up where you left off, and the episode shows how much time is "
                         + "left. To start over, Control-click it, then choose **Play from Beginning**. While an "
-                        + "episode plays, the player's skip buttons go back 15 seconds and forward 30 seconds. "
-                        + "Your place in SyncMyPod is kept separately from your place on your devices."),
+                        + "episode plays, the player's skip buttons go back 15 seconds and forward 30 seconds."),
         HelpSection(heading: "Removing Episodes and Podcasts",
                     body: "To remove a downloaded episode, Control-click it, then choose **Remove Download**. To "
                         + "stop following a podcast, Control-click it, then choose **Unsubscribe…**. Removed "
@@ -40,8 +39,10 @@ extension HelpTopic {
                         + "gets a playlist of its episodes, oldest first, so they play in the order they came out."),
         HelpSection(heading: "Picking Up Where You Left Off",
                     body: "iPods and most players remember your place in each episode. SyncMyPod never replaces an "
-                        + "episode that's already on a device, so your place is kept when you sync again. On an "
-                        + "iPod, new episodes show a dot until you play them."),
+                        + "episode that's already on a device, so your place is kept when you sync again. When you "
+                        + "connect an iPod, SyncMyPod picks up where you got to on it, if that's further along than "
+                        + "where you stopped in SyncMyPod. On an iPod nano (7th generation), that happens after "
+                        + "you sync. On an iPod, new episodes show a dot until you play them."),
         HelpSection(heading: "Podcasts in the Music Menus",
                     body: "On an iPod (video) 5G or 5.5G, episodes also appear under Songs, Artists and Albums. "
                         + "That's how those iPods list podcasts, even when synced with iTunes. iPod classic and "

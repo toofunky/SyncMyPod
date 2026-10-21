@@ -119,10 +119,10 @@ struct PodcastPlayerSyncTests {
         let kept = folder.appending(path: "kept.mp3")
         try Data().write(to: kept)
         let gone = root + "/gone.mp3"
-        let finder = PodcastMissingSourceFinder(folderPath: root)
+        let finder = RemovedSourceFinder(folderPath: root)
         #expect(finder.missing([kept.path(percentEncoded: false), gone, "/Music/song.m4a"],
-                               downloaded: [kept.path(percentEncoded: false)]) == [gone])
-        #expect(PodcastMissingSourceFinder(folderPath: "/Volumes/Unplugged/Podcasts")
-            .missing(["/Volumes/Unplugged/Podcasts/a.mp3"], downloaded: []).isEmpty)
+                               known: [kept.path(percentEncoded: false)]) == [gone])
+        #expect(RemovedSourceFinder(folderPath: "/Volumes/Unplugged/Podcasts")
+            .missing(["/Volumes/Unplugged/Podcasts/a.mp3"], known: []).isEmpty)
     }
 }

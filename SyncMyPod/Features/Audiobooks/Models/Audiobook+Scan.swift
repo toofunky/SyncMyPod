@@ -10,10 +10,18 @@ extension Audiobook {
             ?? group.fallbackAuthor
         if self.title != title { self.title = title }
         if self.author != author { self.author = author }
+        applyCover(folderBook: group.key != group.filePaths.first ? group.key : nil)
         if let currentFilePath, !group.filePaths.contains(currentFilePath) {
             self.currentFilePath = nil
             playbackPosition = 0
         }
+    }
+
+    /// A book of its own .m4b file shares its folder with other books, so only folder books take a cover image.
+    private func applyCover(folderBook folder: String?) {
+        let cover = folder.flatMap(LibrarySidecarFinder.firstCover(in:))
+        if coverFilePath != cover?.path { coverFilePath = cover?.path }
+        if coverFileDate != cover?.modificationDate { coverFileDate = cover?.modificationDate }
     }
 
     private static func mostCommon(_ values: [String]) -> String? {

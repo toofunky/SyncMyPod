@@ -23,6 +23,11 @@ nonisolated enum LibrarySidecarFinder {
         return sidecars
     }
 
+    /// The folder's first cover image, as a song's would be chosen, or `nil` when it has none.
+    static func firstCover(in folder: String) -> SidecarFile? {
+        coverFiles(in: folder, names: names(in: folder)).first
+    }
+
     /// Keyed by lowercased name, so "Cover.JPG" is found as "cover.jpg".
     private static func names(in folder: String) -> [String: String] {
         let names = (try? FileManager.default.contentsOfDirectory(atPath: folder)) ?? []

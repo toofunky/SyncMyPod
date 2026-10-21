@@ -9,6 +9,10 @@ nonisolated final class Audiobook {
     @Attribute(.unique) var folderPath: String
     var title: String
     var author = ""
+    /// The book folder's cover.jpg, folder.jpg, cover.png or folder.png, for books whose files have no artwork.
+    var coverFilePath: String?
+    /// When the cover file last changed, so editing it updates the copies on an iPod.
+    var coverFileDate: Date?
     var dateAdded: Date
     /// The file where listening in the app stopped; `nil` when the book is unstarted or finished.
     var currentFilePath: String?
@@ -41,6 +45,17 @@ nonisolated final class Audiobook {
 
     /// The first file with embedded artwork, which stands for the whole book.
     var artworkFile: AudiobookFile? { sortedFiles.first { $0.artworkFingerprint != nil } }
+
+    /// What to draw the book's cover from: its first file with embedded artwork, or else its folder's cover
+    /// image. The fingerprint keys the artwork cache.
+    var artwork: (path: String, fingerprint: String)? {
+        if let file = artworkFile, let fingerprint = file.artworkFingerprint { return (file.filePath, fingerprint) }
+        return coverFilePath.map { ($0, Self.coverFingerprint(path: $0, date: coverFileDate)) }
+    }
+
+    static func coverFingerprint(path: String, date: Date?) -> String {
+        "cover:\(path)#\(date?.timeIntervalSinceReferenceDate ?? 0)"
+    }
 
     static let titleOrder = [SortDescriptor(\Audiobook.title, comparator: .localizedStandard)]
 }

@@ -9,14 +9,17 @@ nonisolated struct IPodSyncRequest: Equatable, Sendable {
     let embedsLyricsSidecar: Bool
     /// Podcast episodes and audiobooks are filed in a player's own folders for them instead of its music folder.
     let kind: SyncMediaKind
+    /// An image file, such as an audiobook folder's cover.jpg, for the iPod's cover when the file has none.
+    let coverImageURL: URL?
 
     init(sourceURL: URL, draft: ITunesTrackDraft, source: SyncSource? = nil, embedsLyricsSidecar: Bool = false,
-         kind: SyncMediaKind = .music) {
+         kind: SyncMediaKind = .music, coverImageURL: URL? = nil) {
         self.sourceURL = sourceURL
         self.draft = draft
         self.source = source
         self.embedsLyricsSidecar = embedsLyricsSidecar
         self.kind = kind
+        self.coverImageURL = coverImageURL
     }
 
     var matchKey: IPodTrackMatchKey { IPodTrackMatchKey(draft) }

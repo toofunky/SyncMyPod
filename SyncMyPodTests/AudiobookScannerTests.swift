@@ -42,6 +42,21 @@ struct AudiobookScannerTests {
         #expect(try books().first?.files.count == 1)
     }
 
+    @Test func folderBooksTakeTheirFoldersCoverImage() async throws {
+        defer { try? FileManager.default.removeItem(at: folder) }
+        try AudioFixtureWriter.writeSilence(to: folder.appending(path: "Book/01.m4a"))
+        try Data("image".utf8).write(to: folder.appending(path: "Book/Cover.JPG"))
+        try writeM4B(at: "Loose.m4b")
+        try Data("image".utf8).write(to: folder.appending(path: "folder.jpg"))
+        _ = try await scan()
+
+        let books = try books()
+        let folderBook = try #require(books.first { $0.title == "Book" })
+        #expect(folderBook.coverFilePath?.hasSuffix("/Book/Cover.JPG") == true)
+        #expect(folderBook.artwork?.path == folderBook.coverFilePath)
+        #expect(books.first { $0.title == "Loose" }?.coverFilePath == nil)
+    }
+
     @Test func removesBooksWhoseFilesAreGone() async throws {
         defer { try? FileManager.default.removeItem(at: folder) }
         let file = try AudioFixtureWriter.writeSilence(to: folder.appending(path: "Book/01.m4a"))

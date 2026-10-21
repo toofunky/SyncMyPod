@@ -76,6 +76,7 @@ struct IPodSyncView: View {
             let loaded = await IPodControlFiles(volumeURL: device.volumeURL)
                 .manifest(adopting: requests, onDevice: database.tracks, libraryFolder: folders.first?.path)
             manifest = withRemovedDownloads(loaded)
+            importPositions(from: database, manifest: loaded.manifest)
             onDevice = database
             loadError = nil
         } catch {
@@ -85,16 +86,24 @@ struct IPodSyncView: View {
         freeBytes = values?.volumeAvailableCapacity.map(Int64.init)
     }
 
+    /// Positions saved on the iPod since its last sync are still in its Play Counts file, so they're read too.
+    private func importPositions(from database: ITunesDatabase, manifest: SyncManifest) {
+        let playCounts = IPodControlFiles(volumeURL: device.volumeURL).playCounts()
+        let tracks = IPodPositionImporter.withPendingBookmarks(database.tracks, playCounts: playCounts)
+        IPodPositionImporter(deviceID: device.id, context: context)
+            .importPositions(from: tracks, manifest: manifest, podcasts: podcasts, audiobooks: audiobooks)
+    }
+
     /// Episodes whose download was removed, and books gone from the audiobook folder, come off the iPod too, as
     /// their copies do on a player.
     private func withRemovedDownloads(_ loaded: LoadedSyncManifest) -> LoadedSyncManifest {
         let downloaded = Set(podcasts.flatMap(\.episodes).compactMap(\.downloadedFilePath))
         let bookFiles = Set(audiobooks.flatMap(\.files).map(\.filePath))
         let entries = loaded.manifest.entries
-        let removed = PodcastMissingSourceFinder(folderPath: podcastFolder?.path)
-            .missing(entries.keys, downloaded: downloaded)
-            .union(PodcastMissingSourceFinder(folderPath: audiobookFolder?.path)
-                .missing(entries.keys, downloaded: bookFiles))
+        let removed = RemovedSourceFinder(folderPath: podcastFolder?.path)
+            .missing(entries.keys, known: downloaded)
+            .union(RemovedSourceFinder(folderPath: audiobookFolder?.path)
+                .missing(entries.keys, known: bookFiles))
         var updated = loaded
         updated.strayDatabaseIDs.formUnion(removed.compactMap { entries[$0]?.databaseID })
         return updated

@@ -1,5 +1,4 @@
 import AppKit
-import AVFoundation
 import Observation
 import SwiftData
 
@@ -23,9 +22,7 @@ final class MusicPlayerModel {
     /// Seconds into the current song or file, refreshed while it plays.
     private(set) var elapsed: TimeInterval = 0
 
-    @ObservationIgnored private let player = AVPlayer()
-    @ObservationIgnored private var endObserver: Task<Void, Never>?
-    @ObservationIgnored private var progressUpdates: Task<Void, Never>?
+    @ObservationIgnored private let engine = PlaybackEngine()
     @ObservationIgnored private var spokenContext: ModelContext?
     @ObservationIgnored private var savedPosition: TimeInterval = 0
 
@@ -99,7 +96,7 @@ final class MusicPlayerModel {
 
     func seek(to seconds: TimeInterval) {
         elapsed = seconds
-        player.seek(to: CMTime(seconds: seconds, preferredTimescale: 600))
+        engine.seek(to: seconds)
     }
 
     func toggleShuffle() {
@@ -129,31 +126,20 @@ final class MusicPlayerModel {
 
     private func resume() {
         guard hasCurrentItem else { return }
-        player.play()
+        engine.play()
         isPlaying = true
-        trackProgress()
+        engine.startTicking(every: Self.progressInterval) { [weak self] in self?.updateElapsed() }
     }
 
     private func pause() {
-        player.pause()
+        engine.pause()
         isPlaying = false
-        progressUpdates?.cancel()
+        engine.stopTicking()
         saveSpokenPosition()
     }
 
-    private func trackProgress() {
-        progressUpdates?.cancel()
-        progressUpdates = Task { [weak self] in
-            while !Task.isCancelled {
-                self?.updateElapsed()
-                try? await Task.sleep(for: Self.progressInterval)
-            }
-        }
-    }
-
     private func updateElapsed() {
-        let seconds = player.currentTime().seconds
-        elapsed = seconds.isFinite ? seconds : 0
+        elapsed = engine.currentTime
         if currentSpoken != nil, abs(elapsed - savedPosition) >= Self.positionSaveInterval {
             saveSpokenPosition()
         }
@@ -179,9 +165,8 @@ final class MusicPlayerModel {
 
     private func loadDuration(of url: URL) {
         Task { [weak self] in
-            guard let duration = try? await AVURLAsset(url: url).load(.duration),
-                  duration.seconds.isFinite else { return }
-            self?.currentSpoken?.setDuration(duration.seconds, of: url)
+            guard let duration = await PlaybackEngine.duration(of: url) else { return }
+            self?.currentSpoken?.setDuration(duration, of: url)
         }
     }
 
@@ -189,22 +174,9 @@ final class MusicPlayerModel {
         load(currentTrack.map { URL(filePath: $0.filePath) })
     }
 
-    /// The player pauses itself when an item ends, so restart it if we were playing.
     private func load(_ url: URL?, at start: TimeInterval = 0) {
-        endObserver?.cancel()
         elapsed = start
-        guard let url else { return player.replaceCurrentItem(with: nil) }
-        let item = AVPlayerItem(url: url)
-        player.replaceCurrentItem(with: item)
-        if start > 0 { player.seek(to: CMTime(seconds: start, preferredTimescale: 600)) }
-        if isPlaying { player.play() }
-        endObserver = Task { [weak self] in
-            let ends = NotificationCenter.default.notifications(named: AVPlayerItem.didPlayToEndTimeNotification,
-                                                                object: item)
-            for await _ in ends {
-                self?.trackDidEnd()
-            }
-        }
+        engine.load(url, at: start, playing: isPlaying) { [weak self] in self?.trackDidEnd() }
     }
 
     /// A book goes on to its next file. At the end of the last song, episode or book the player stops, with the
