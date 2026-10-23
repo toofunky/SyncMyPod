@@ -1,11 +1,18 @@
 import Foundation
 
 nonisolated struct AudioFileEnumerator {
-    private static let fileExtensions = Set(["m4a", "mp3", "flac"])
+    static let musicExtensions = Set(["m4a", "mp3", "flac"])
         .union(AudioCodec.aiffExtensions).union(AudioCodec.wavExtensions)
+    static let audiobookExtensions = musicExtensions.union(["m4b"])
     private static let resourceKeys: [URLResourceKey] = [
         .isRegularFileKey, .fileSizeKey, .contentModificationDateKey,
     ]
+
+    let fileExtensions: Set<String>
+
+    init(fileExtensions: Set<String> = Self.musicExtensions) {
+        self.fileExtensions = fileExtensions
+    }
 
     func files(in folderURL: URL) throws -> [ScannedAudioFile] {
         var isDirectory: ObjCBool = false
@@ -20,7 +27,7 @@ nonisolated struct AudioFileEnumerator {
     }
 
     func scannedFile(at url: URL) -> ScannedAudioFile? {
-        guard Self.fileExtensions.contains(url.pathExtension.lowercased()),
+        guard fileExtensions.contains(url.pathExtension.lowercased()),
               let values = try? url.resourceValues(forKeys: Set(Self.resourceKeys)),
               values.isRegularFile == true else { return nil }
         return ScannedAudioFile(url: url, fileSize: values.fileSize ?? 0,

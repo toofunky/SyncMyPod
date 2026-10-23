@@ -29,8 +29,9 @@ nonisolated struct ITunesTrackDraft: Equatable, Sendable {
     var sortComposer = ""
     /// Whether the file holds lyrics. The iPod only reads them when the track says so.
     var hasLyrics = false
-    /// A podcast episode, listed in the iPod's Podcasts menu instead of with the music.
-    var isPodcast = false
+    /// Podcast episodes and audiobooks are listed in the iPod's Podcasts and Audiobooks menus instead of with the
+    /// music, resume where they were left and aren't shuffled.
+    var mediaKind = SyncMediaKind.music
     var releaseDate: Date?
 
     var albumListArtist: String { albumArtist.isEmpty ? artist : albumArtist }

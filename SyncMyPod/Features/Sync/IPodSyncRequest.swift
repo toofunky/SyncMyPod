@@ -7,16 +7,19 @@ nonisolated struct IPodSyncRequest: Equatable, Sendable {
     let source: SyncSource?
     /// Whether the song's .lrc lyric file is written into the copy, which has no lyrics of its own.
     let embedsLyricsSidecar: Bool
-    /// A downloaded podcast episode, filed in a player's podcast folder instead of its music folder.
-    let isPodcast: Bool
+    /// Podcast episodes and audiobooks are filed in a player's own folders for them instead of its music folder.
+    let kind: SyncMediaKind
+    /// An image file, such as an audiobook folder's cover.jpg, for the iPod's cover when the file has none.
+    let coverImageURL: URL?
 
     init(sourceURL: URL, draft: ITunesTrackDraft, source: SyncSource? = nil, embedsLyricsSidecar: Bool = false,
-         isPodcast: Bool = false) {
+         kind: SyncMediaKind = .music, coverImageURL: URL? = nil) {
         self.sourceURL = sourceURL
         self.draft = draft
         self.source = source
         self.embedsLyricsSidecar = embedsLyricsSidecar
-        self.isPodcast = isPodcast
+        self.kind = kind
+        self.coverImageURL = coverImageURL
     }
 
     var matchKey: IPodTrackMatchKey { IPodTrackMatchKey(draft) }

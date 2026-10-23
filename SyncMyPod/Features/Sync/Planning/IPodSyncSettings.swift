@@ -13,10 +13,14 @@ nonisolated final class IPodSyncSettings {
     var selectedGenreKeys: [String]?
     /// Optional because settings saved before podcasts synced hold `NULL`.
     var selectedPodcastKeys: [String]?
+    /// Optional because settings saved before audiobooks synced hold `NULL`.
+    var selectedAudiobookKeys: [String]?
     /// Optional because settings saved before this option existed hold `NULL`.
     var preserveAlbumArtistValue: Bool?
     /// Optional, like `preserveAlbumArtistValue`, because settings saved before this option existed hold `NULL`.
     var syncLyricsSidecarValue: Bool?
+    /// Optional, like `preserveAlbumArtistValue`, because settings saved before this option existed hold `NULL`.
+    var makeAudiobookPlaylistsValue: Bool?
 
     init(deviceID: String) {
         self.deviceID = deviceID
@@ -35,6 +39,12 @@ nonisolated final class IPodSyncSettings {
     var syncsLyricsSidecars: Bool {
         get { syncLyricsSidecarValue ?? false }
         set { syncLyricsSidecarValue = newValue }
+    }
+
+    /// On unless turned off, since the iPod's Audiobooks menu mixes every book's parts together.
+    var makesAudiobookPlaylists: Bool {
+        get { makeAudiobookPlaylistsValue ?? true }
+        set { makeAudiobookPlaylistsValue = newValue }
     }
 
     var selectedAlbums: Set<String> {
@@ -57,9 +67,14 @@ nonisolated final class IPodSyncSettings {
         set { selectedPodcastKeys = newValue.sorted() }
     }
 
+    var selectedAudiobooks: Set<String> {
+        get { Set(selectedAudiobookKeys ?? []) }
+        set { selectedAudiobookKeys = newValue.sorted() }
+    }
+
     var selection: SyncSelection {
         SyncSelection(mode: mode, albums: selectedAlbums, genres: selectedGenres, playlists: selectedPlaylists,
-                      podcasts: selectedPodcasts)
+                      podcasts: selectedPodcasts, audiobooks: selectedAudiobooks)
     }
 
     @MainActor

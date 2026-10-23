@@ -25,7 +25,7 @@ struct PlayerSyncForm: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            SyncSelectionEditor(settings: settings, library: library, deviceKind: "player", includesPodcasts: true)
+            SyncSelectionEditor(settings: settings, library: library, deviceKind: "player", includesSpokenWord: true)
             Divider()
             let input = planInput
             SyncSummaryBar(totals: plan?.totals, deviceKind: "player", isCalculating: plannedInput != input,
@@ -54,12 +54,19 @@ struct PlayerSyncForm: View {
         Binding(get: { pendingRemoval != nil }, set: { if !$0 { pendingRemoval = nil } })
     }
 
-    /// Episodes are told apart by their folder, unless podcasts share the music folder or sit at the root.
+    /// Episodes and audiobook files are told apart by their folder, unless it's shared with the music folder or
+    /// is the root.
     private var removalTitle: String {
         let removals = pendingRemoval?.removals ?? []
-        let separate = !config.podcastPath.isEmpty && config.podcastPath != config.musicPath
-        let episodes = separate ? removals.count { $0.path.hasPrefix(config.podcastPath + "/") } : 0
-        return SyncRemovalWording.title(songs: removals.count - episodes, episodes: episodes, deviceKind: "player")
+        let episodes = count(removals, in: config.podcastPath)
+        let books = config.audiobookPath == config.podcastPath ? 0 : count(removals, in: config.audiobookPath)
+        return SyncRemovalWording.title(songs: removals.count - episodes - books, episodes: episodes,
+                                        audiobookFiles: books, deviceKind: "player")
+    }
+
+    private func count(_ removals: [PlayerFileRemoval], in folder: String) -> Int {
+        guard !folder.isEmpty, folder != config.musicPath else { return 0 }
+        return removals.count { $0.path.hasPrefix(folder + "/") }
     }
 
     private func removalMessage(_ plan: PlayerSyncPlan) -> String {

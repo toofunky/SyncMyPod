@@ -12,4 +12,17 @@ nonisolated struct CoverArtReader: Sendable {
               let image = CGImageSourceCreateImageAtIndex(source, 0, nil) else { return nil }
         return CoverArt(image: image, byteCount: data.count)
     }
+
+    /// A cover image file, such as an audiobook folder's cover.jpg, at full size.
+    @concurrent
+    func readImageFile(_ url: URL) async -> CoverArt? {
+        guard let source = CGImageSourceCreateWithURL(url as CFURL, nil),
+              let image = CGImageSourceCreateImageAtIndex(source, 0, nil) else { return nil }
+        let byteCount = (try? url.resourceValues(forKeys: [.fileSizeKey]).fileSize) ?? 0
+        return CoverArt(image: image, byteCount: byteCount)
+    }
+
+    static func isImageFile(_ url: URL) -> Bool {
+        ["jpg", "jpeg", "png"].contains(url.pathExtension.lowercased())
+    }
 }

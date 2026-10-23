@@ -2,12 +2,13 @@ import SwiftData
 import SwiftUI
 import UniformTypeIdentifiers
 
-/// Picks the podcast download folder, refusing one that overlaps the music folder.
+/// Picks the podcast download folder, refusing one that overlaps the music or audiobook folder.
 struct PodcastFolderChooser: ViewModifier {
     @Binding var isPresented: Bool
     var onChoose: (URL) -> Void = { _ in }
 
     @Environment(PodcastFolder.self) private var folder
+    @Environment(AudiobookFolder.self) private var audiobookFolder: AudiobookFolder?
     @Query private var libraryFolders: [LibraryFolder]
     @State private var errorMessage: String?
 
@@ -16,7 +17,7 @@ struct PodcastFolderChooser: ViewModifier {
             .fileImporter(isPresented: $isPresented, allowedContentTypes: [.folder]) { result in
                 if case .success(let url) = result { choose(url) }
             }
-            .fileDialogMessage("Choose a folder for podcast downloads, outside your music folder.")
+            .fileDialogMessage("Choose a folder for podcast downloads, outside your music and audiobook folders.")
             .fileDialogConfirmationLabel("Choose")
             .alert("Couldn't Use That Folder", isPresented: isShowingError, presenting: errorMessage) { _ in
                 Button("OK") {}
@@ -31,7 +32,8 @@ struct PodcastFolderChooser: ViewModifier {
 
     private func choose(_ url: URL) {
         do {
-            try folder.choose(url, libraryFolderPaths: libraryFolders.map(\.path))
+            try folder.choose(url, libraryFolderPaths: libraryFolders.map(\.path),
+                              audiobookFolderPath: audiobookFolder?.path)
             onChoose(url)
         } catch {
             errorMessage = error.localizedDescription

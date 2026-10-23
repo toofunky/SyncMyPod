@@ -48,9 +48,9 @@ struct PodcastFeedMergeTests {
 
     @Test func folderMayNotOverlapTheMusicLibrary() {
         let libraries = ["/Users/me/Music"]
-        #expect(PodcastFolder.overlappingLibrary("/Users/me/Music/Podcasts", libraries) == "/Users/me/Music")
-        #expect(PodcastFolder.overlappingLibrary("/Users/me", libraries) == "/Users/me/Music")
-        #expect(PodcastFolder.overlappingLibrary("/Users/me/Music Podcasts", libraries) == nil)
-        #expect(PodcastFolder.overlappingLibrary("/Users/me/Podcasts", libraries) == nil)
+        #expect(FolderOverlap.first("/Users/me/Music/Podcasts", in: libraries) == "/Users/me/Music")
+        #expect(FolderOverlap.first("/Users/me", in: libraries) == "/Users/me/Music")
+        #expect(FolderOverlap.first("/Users/me/Music Podcasts", in: libraries) == nil)
+        #expect(FolderOverlap.first("/Users/me/Podcasts", in: libraries) == nil)
     }
 }

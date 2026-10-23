@@ -10,11 +10,11 @@ struct IPodPodcastSyncTests {
 
     private func episode(_ title: String, show: String, in volume: TemporaryIPodVolume) throws -> IPodSyncRequest {
         var draft = ITunesTrackDraft(title: title, artist: "Host", album: show, fileSize: 1_024)
-        draft.isPodcast = true
+        draft.mediaKind = .podcast
         draft.releaseDate = Self.released
         return IPodSyncRequest(sourceURL: try volume.makeSourceFile(named: "\(title).mp3"), draft: draft,
                                source: SyncSource(fileSize: 1_024, modificationDate: .distantPast,
-                                                  artworkFingerprint: nil), isPodcast: true)
+                                                  artworkFingerprint: nil), kind: .podcast)
     }
 
     private func podcastsList(_ episodes: [IPodSyncRequest]) -> IPodPlaylistRequest {
@@ -90,7 +90,7 @@ struct IPodPodcastSyncTests {
 
     @Test func updatingAnEpisodeKeepsWhetherItWasPlayed() throws {
         var draft = ITunesTrackDraft(title: "Episode", fileSize: 1)
-        draft.isPodcast = true
+        draft.mediaKind = .podcast
         let builder = TrackRecordBuilder(headerLength: TrackRecordBuilder.minimumHeaderLength)
         var mhit = builder.build(draft, id: 1, databaseID: 1, albumID: 0)
         mhit.set(TrackRecordBuilder.playedPodcast, at: TrackRecordBuilder.unplayedOffset)
@@ -100,7 +100,7 @@ struct IPodPodcastSyncTests {
 
     @Test func playingAnEpisodeClearsItsUnplayedDot() throws {
         var draft = ITunesTrackDraft(title: "Episode", fileSize: 1)
-        draft.isPodcast = true
+        draft.mediaKind = .podcast
         var root = try ITunesDBRecordParser(data: fixture).parse()
         var editor = try ITunesDBEditor(root: root)
         _ = editor.addTrack(draft)

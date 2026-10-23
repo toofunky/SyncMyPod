@@ -19,6 +19,8 @@ nonisolated struct ITunesTrack: Identifiable, Equatable, Sendable {
     let dateAdded: Date?
     let lastPlayed: Date?
     let lastModified: Date?
+    /// Where listening stopped in a podcast episode or audiobook, in seconds; 0 when unstarted or finished.
+    var bookmark: TimeInterval = 0
 
     var title: String { strings[.title] ?? "" }
     var artist: String { strings[.artist] ?? "" }

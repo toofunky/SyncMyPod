@@ -10,6 +10,9 @@ struct IPodSettingsView: View {
     private static let lyricsInfo = "When a song has no lyrics of its own, the lyrics in its .lrc lyric file, "
         + "in the same folder and with the same name, are added to the copy on the iPod. Their timings are "
         + "left out, since the iPod shows lyrics as plain text. Your music files aren't changed."
+    private static let audiobookPlaylistsInfo = "Each synced audiobook gets a playlist of its files in listening "
+        + "order, under Playlists on the iPod. The iPod's Audiobooks menu lists every book's files together, so "
+        + "play a book from its playlist to hear it in order."
 
     let device: IPodDevice
 
@@ -30,6 +33,11 @@ struct IPodSettingsView: View {
                 } footer: {
                     Text("Songs already on the iPod are updated to match at the next sync.")
                         .foregroundStyle(.secondary)
+                }
+                .disabled(syncModel.isSyncing)
+                Section {
+                    option("Make Audiobook Playlists?", isOn: Bindable(settings).makesAudiobookPlaylists,
+                           infoTitle: "Make Audiobook Playlists", info: Self.audiobookPlaylistsInfo)
                 }
                 .disabled(syncModel.isSyncing)
             }

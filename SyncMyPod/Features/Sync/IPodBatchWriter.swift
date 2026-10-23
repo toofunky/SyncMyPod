@@ -37,7 +37,7 @@ nonisolated struct IPodBatchWriter {
 
     private mutating func add(_ request: IPodSyncRequest) async throws {
         var draft = try await copy(request)
-        let prepared = try await artwork.prepare(coverFrom: request.sourceURL,
+        let prepared = try await artwork.prepare(coverFrom: request.sourceURL, fallback: request.coverImageURL,
                                                  albumTracks: albumTracks[IPodAlbumKey(draft)] ?? [])
         draft.artwork = prepared?.trackArtwork
         let databaseID = editor.addTrack(draft)
@@ -51,7 +51,8 @@ nonisolated struct IPodBatchWriter {
         if update.artworkChanged {
             artwork.removeImages(forTracks: [update.databaseID])
             let others = (albumTracks[IPodAlbumKey(draft)] ?? []).filter { $0 != update.databaseID }
-            let prepared = try await artwork.prepare(coverFrom: update.request.sourceURL, albumTracks: others)
+            let prepared = try await artwork.prepare(coverFrom: update.request.sourceURL,
+                                                     fallback: update.request.coverImageURL, albumTracks: others)
             draft.artwork = prepared?.trackArtwork
             if let prepared { artwork.attach(prepared, toTrack: update.databaseID) }
         }

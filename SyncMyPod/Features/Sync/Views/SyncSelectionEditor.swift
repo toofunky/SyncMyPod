@@ -1,13 +1,13 @@
 import SwiftData
 import SwiftUI
 
-/// Chooses between syncing everything and a custom selection of albums, genres, playlists and, for players,
-/// podcasts.
+/// Chooses between syncing everything and a custom selection of albums, genres, playlists and, when the device
+/// takes them, podcasts and audiobooks.
 struct SyncSelectionEditor: View {
     @Bindable var settings: IPodSyncSettings
     let library: SyncLibrarySnapshot
     var deviceKind = "iPod"
-    var includesPodcasts = false
+    var includesSpokenWord = false
 
     var body: some View {
         VStack(spacing: 0) {
@@ -34,17 +34,20 @@ struct SyncSelectionEditor: View {
         case .custom:
             SyncCustomSelectionView(artists: library.artists, genres: library.genres,
                                     playlists: library.playlistNodes, podcasts: library.podcasts,
-                                    categories: includesPodcasts ? SyncCategory.allCases : SyncCategory.musicCategories,
+                                    audiobooks: library.audiobooks,
+                                    categories: includesSpokenWord ? SyncCategory.allCases
+                                        : SyncCategory.musicCategories,
                                     albumSelection: $settings.selectedAlbums,
                                     genreSelection: $settings.selectedGenres,
                                     playlistSelection: $settings.selectedPlaylists,
-                                    podcastSelection: $settings.selectedPodcasts)
+                                    podcastSelection: $settings.selectedPodcasts,
+                                    audiobookSelection: $settings.selectedAudiobooks)
                 .padding(.top)
         }
     }
 
     private var allSongsDescription: String {
-        let contents = includesPodcasts ? "song, playlist and downloaded podcast episode"
+        let contents = includesSpokenWord ? "song, playlist, downloaded podcast episode and audiobook"
             : "song and playlist in your music library"
         return "Every \(contents) will be copied to the \(deviceKind)."
     }

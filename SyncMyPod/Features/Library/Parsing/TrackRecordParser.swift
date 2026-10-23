@@ -35,7 +35,8 @@ nonisolated struct TrackRecordParser {
             mediaType: hasMediaType ? reader.uint32(at: offset + 0xD0) : nil,
             dateAdded: reader.macDate(at: offset + 0x68),
             lastPlayed: reader.macDate(at: offset + 0x58),
-            lastModified: reader.macDate(at: offset + 0x20)
+            lastModified: reader.macDate(at: offset + 0x20),
+            bookmark: TimeInterval(reader.uint32(at: offset + 0x6C)) / 1000
         )
     }
 }

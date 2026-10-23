@@ -13,51 +13,31 @@ final class PodcastFolder {
     #endif
 
     private(set) var url: URL?
-    @ObservationIgnored private let defaults: UserDefaults
+    @ObservationIgnored private let bookmark: FolderBookmark
 
     init(defaults: UserDefaults = .standard) {
-        self.defaults = defaults
-        if let data = defaults.data(forKey: Self.bookmarkKey) { open(bookmark: data) }
+        bookmark = FolderBookmark(key: Self.bookmarkKey, defaults: defaults)
+        if let resolved = bookmark.resolve() { open(resolved) }
     }
 
     var path: String? { url?.path(percentEncoded: false) }
 
-    func choose(_ newURL: URL, libraryFolderPaths: [String]) throws {
-        if let overlap = Self.overlappingLibrary(newURL.path(percentEncoded: false), libraryFolderPaths) {
+    func choose(_ newURL: URL, libraryFolderPaths: [String], audiobookFolderPath: String?) throws {
+        let newPath = newURL.path(percentEncoded: false)
+        if let overlap = FolderOverlap.first(newPath, in: libraryFolderPaths) {
             throw PodcastFolderError.overlapsLibrary(overlap)
         }
-        let data = try newURL.bookmarkData(options: .withSecurityScope, includingResourceValuesForKeys: nil,
-                                           relativeTo: nil)
-        defaults.set(data, forKey: Self.bookmarkKey)
-        open(bookmark: data)
+        if let overlap = FolderOverlap.first(newPath, in: audiobookFolderPath.map { [$0] } ?? []) {
+            throw PodcastFolderError.overlapsAudiobooks(overlap)
+        }
+        try bookmark.save(newURL)
+        open(newURL)
     }
 
-    /// The library folder `path` lies inside or contains, if any.
-    nonisolated static func overlappingLibrary(_ path: String, _ libraryFolderPaths: [String]) -> String? {
-        let folder = normalized(path)
-        return libraryFolderPaths.first { library in
-            let library = normalized(library)
-            return folder.hasPrefix(library) || library.hasPrefix(folder)
-        }
-    }
-
-    private func open(bookmark data: Data) {
-        var isStale = false
-        guard let resolved = try? URL(resolvingBookmarkData: data, options: .withSecurityScope, relativeTo: nil,
-                                      bookmarkDataIsStale: &isStale) else { return }
-        if isStale, let fresh = try? resolved.bookmarkData(options: .withSecurityScope,
-                                                           includingResourceValuesForKeys: nil, relativeTo: nil) {
-            defaults.set(fresh, forKey: Self.bookmarkKey)
-        }
+    private func open(_ resolved: URL) {
         url?.stopAccessingSecurityScopedResource()
         _ = resolved.startAccessingSecurityScopedResource()
         url = resolved
-    }
-
-    /// With a trailing slash, so "/Music" doesn't count as containing "/Music Podcasts".
-    private nonisolated static func normalized(_ path: String) -> String {
-        let standardized = URL(filePath: path, directoryHint: .isDirectory).standardizedFileURL.path(percentEncoded: false)
-        return standardized.hasSuffix("/") ? standardized : standardized + "/"
     }
 }
 

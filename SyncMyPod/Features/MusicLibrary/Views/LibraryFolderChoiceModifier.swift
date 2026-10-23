@@ -8,8 +8,9 @@ struct LibraryFolderChoiceModifier: ViewModifier {
     let onChoose: (URL) -> Void
 
     @Environment(PodcastFolder.self) private var podcastFolder: PodcastFolder?
+    @Environment(AudiobookFolder.self) private var audiobookFolder: AudiobookFolder?
     @State private var pendingURL: URL?
-    @State private var overlappedPodcastFolder: String?
+    @State private var overlapMessage: String?
 
     func body(content: Content) -> some View {
         content
@@ -21,11 +22,10 @@ struct LibraryFolderChoiceModifier: ViewModifier {
             } message: { url in
                 Text(switchMessage(to: url))
             }
-            .alert("Couldn't Use That Folder", isPresented: isShowingOverlap, presenting: overlappedPodcastFolder) { _ in
+            .alert("Couldn't Use That Folder", isPresented: isShowingOverlap, presenting: overlapMessage) { _ in
                 Button("OK") {}
-            } message: { path in
-                Text("Your music folder can't be inside or around your podcast folder “\(path)”, or scanning it "
-                     + "would add every episode to your music library. Choose a folder outside it.")
+            } message: { message in
+                Text(message)
             }
     }
 
@@ -34,7 +34,7 @@ struct LibraryFolderChoiceModifier: ViewModifier {
     }
 
     private var isShowingOverlap: Binding<Bool> {
-        Binding(get: { overlappedPodcastFolder != nil }, set: { if !$0 { overlappedPodcastFolder = nil } })
+        Binding(get: { overlapMessage != nil }, set: { if !$0 { overlapMessage = nil } })
     }
 
     private func switchMessage(to url: URL) -> String {
@@ -45,14 +45,26 @@ struct LibraryFolderChoiceModifier: ViewModifier {
     }
 
     private func choose(_ url: URL) {
-        if let podcastPath = podcastFolder?.path,
-           PodcastFolder.overlappingLibrary(podcastPath, [url.path(percentEncoded: false)]) != nil {
-            overlappedPodcastFolder = podcastPath
+        if let message = overlapWarning(for: url) {
+            overlapMessage = message
         } else if replacesScannedLibrary(with: url) {
             pendingURL = url
         } else {
             onChoose(url)
         }
+    }
+
+    private func overlapWarning(for url: URL) -> String? {
+        let path = url.path(percentEncoded: false)
+        if let podcastPath = podcastFolder?.path, FolderOverlap.first(path, in: [podcastPath]) != nil {
+            return "Your music folder can't be inside or around your podcast folder “\(podcastPath)”, or scanning it "
+                + "would add every episode to your music library. Choose a folder outside it."
+        }
+        if let audiobookPath = audiobookFolder?.path, FolderOverlap.first(path, in: [audiobookPath]) != nil {
+            return "Your music folder can't be inside or around your audiobook folder “\(audiobookPath)”, or "
+                + "scanning it would add every book to your music library. Choose a folder outside it."
+        }
+        return nil
     }
 
     private func replacesScannedLibrary(with url: URL) -> Bool {

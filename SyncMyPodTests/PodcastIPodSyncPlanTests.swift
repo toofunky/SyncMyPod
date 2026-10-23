@@ -23,7 +23,7 @@ struct PodcastIPodSyncPlanTests {
     }
 
     private func plan(_ podcasts: [Podcast], selection: SyncSelection) async -> SyncPlan {
-        let library = SyncLibrarySnapshot(tracks: [], playlists: [], podcasts: podcasts, podcastsForIPod: true,
+        let library = SyncLibrarySnapshot(tracks: [], playlists: [], podcasts: podcasts, forIPod: true,
                                           preservingAlbumArtist: false)
         let empty = ITunesDatabase(version: 0x19, databaseID: 1, tracks: [], playlists: [])
         return await SyncPlanInput(library: library, selection: selection, onDevice: empty,
@@ -35,7 +35,7 @@ struct PodcastIPodSyncPlanTests {
         let episode = try #require(show.episodes.first)
         let forIPod = try #require(episode.syncRequest(show: "Show", author: "", forIPod: true))
         #expect(forIPod.source == SyncSource(fileSize: 2_048, modificationDate: Self.downloaded, artworkFingerprint: nil))
-        #expect(forIPod.draft.isPodcast && forIPod.draft.releaseDate == episode.publishedAt)
+        #expect(forIPod.draft.mediaKind == .podcast && forIPod.draft.releaseDate == episode.publishedAt)
         #expect(try #require(episode.syncRequest(show: "Show", author: "")).source == nil)
     }
 

@@ -42,7 +42,8 @@ nonisolated struct SyncPlan: Equatable, Sendable {
              strayDatabaseIDs: strayDatabaseIDs)
     }
 
-    /// `episodes` are podcast episodes chosen and not chosen, which aren't in any playlist but the Podcasts list.
+    /// `episodes` are podcast episodes and audiobook files chosen and not chosen, which aren't in any playlist but
+    /// the Podcasts list.
     static func make(snapshots tracks: [SyncTrackSnapshot], mode: SyncMode, selectedAlbums: Set<String>,
                      selectedGenres: Set<String>, playlists: [IPodPlaylistRequest], onDevice: [ITunesTrack],
                      devicePlaylists: [ITunesPlaylist], manifest: SyncManifest, strayDatabaseIDs: Set<UInt64>,

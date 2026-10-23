@@ -8,6 +8,9 @@ struct SettingsView: View {
             Tab("Podcasts", systemImage: "antenna.radiowaves.left.and.right") {
                 PodcastSettingsView()
             }
+            Tab("Audiobooks", systemImage: "book.closed") {
+                AudiobookSettingsView()
+            }
         }
         .frame(width: 500)
     }
@@ -17,6 +20,7 @@ struct SettingsView: View {
 #Preview {
     SettingsView()
         .environment(PodcastFolder.preview)
+        .environment(AudiobookFolder.preview)
         .modelContainer(.preview)
 }
 #endif

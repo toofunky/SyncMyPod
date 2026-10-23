@@ -29,11 +29,11 @@ struct IPodNanoPodcastSyncTests {
     private func episode(in volume: TemporaryIPodVolume) throws -> IPodSyncRequest {
         let source = try AudioFixtureWriter.writeSilence(to: volume.url.appending(path: "source/Episode.m4a"))
         var draft = ITunesTrackDraft(title: "Episode", album: "Show", fileSize: try Data(contentsOf: source).count)
-        draft.isPodcast = true
+        draft.mediaKind = .podcast
         draft.releaseDate = Self.released
         return IPodSyncRequest(sourceURL: source, draft: draft,
                                source: SyncSource(fileSize: draft.fileSize, modificationDate: .distantPast,
-                                                  artworkFingerprint: nil), isPodcast: true)
+                                                  artworkFingerprint: nil), kind: .podcast)
     }
 
     private func library(_ volume: TemporaryIPodVolume) throws -> SQLiteConnection {
@@ -58,6 +58,28 @@ struct IPodNanoPodcastSyncTests {
                 == [[.text("Podcasts"), .integer(4), .integer(0)]])
         #expect(try library.rows("SELECT count(*) FROM item_to_container JOIN container ON container.pid = container_pid "
                                  + "WHERE name = 'Podcasts'") == [[.integer(1)]])
+    }
+
+    @Test func audiobookPartsAreAudiobooksInTheNanosLibrary() async throws {
+        let volume = try nanoVolume()
+        let source = try AudioFixtureWriter.writeSilence(to: volume.url.appending(path: "source/01.m4a"))
+        var draft = ITunesTrackDraft(title: "Letters", album: "Frankenstein", fileSize: try Data(contentsOf: source).count)
+        draft.mediaKind = .audiobook
+        let part = IPodSyncRequest(sourceURL: source, draft: draft,
+                                   source: SyncSource(fileSize: draft.fileSize, modificationDate: .distantPast,
+                                                      artworkFingerprint: nil), kind: .audiobook)
+        let book = SyncAudiobookSnapshot(key: "book", title: "Frankenstein", author: "", files: [part],
+                                         playlistID: 42, createdAt: .now)
+        _ = try await IPodTrackSyncer(device: nano(on: volume)).sync(adding: [part], playlists: [book.playlist])
+
+        let library = try library(volume)
+        #expect(try library.rows("SELECT media_kind, is_audio_book, is_song, is_podcast, remember_bookmark, "
+                                 + "exclude_from_shuffle FROM item")
+                == [[.integer(8), .integer(1), .integer(0), .integer(0), .integer(1), .integer(1)]])
+        #expect(try library.rows("SELECT media_kinds, is_hidden FROM container WHERE name = 'Frankenstein'")
+                == [[.integer(8), .integer(0)]])
+        #expect(try library.rows("SELECT count(*) FROM item_to_container JOIN container ON container.pid = container_pid "
+                                 + "WHERE name = 'Frankenstein'") == [[.integer(1)]])
     }
 
     @Test func theNanosGroupedPodcastsListReadsAsItsEpisodes() async throws {
