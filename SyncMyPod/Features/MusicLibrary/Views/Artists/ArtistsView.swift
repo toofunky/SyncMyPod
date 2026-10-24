@@ -2,7 +2,7 @@ import SwiftData
 import SwiftUI
 
 struct ArtistsView: View {
-    private static let listWidth = 220.0
+    private static let listWidthRange = 160.0...320.0
     private static let detailMinWidth = 300.0
 
     let tracks: [LibraryTrack]
@@ -11,6 +11,7 @@ struct ArtistsView: View {
     var showPlaylist: ((LibraryPlaylist) -> Void)?
 
     @AppStorage("artistAlbumSortOrder") private var sortOrder = AlbumSortOrder.year
+    @AppStorage("artistListWidth") private var listWidth = 220.0
     @State private var artists: [LibraryArtist] = []
     @State private var sections: [ArtistAlbumSection] = []
 
@@ -19,8 +20,8 @@ struct ArtistsView: View {
         // minimum widths, and the window can then never satisfy them, which crashes AppKit's layout.
         HStack(spacing: 0) {
             ArtistListView(artists: visibleArtists, selection: $selection)
-                .frame(width: Self.listWidth)
-            Divider()
+                .frame(width: listWidth)
+            ResizableDivider(width: $listWidth, range: Self.listWidthRange)
             detail
                 .frame(minWidth: Self.detailMinWidth, maxWidth: .infinity, maxHeight: .infinity)
         }

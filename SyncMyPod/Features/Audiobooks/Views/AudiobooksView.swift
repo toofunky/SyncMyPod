@@ -3,7 +3,7 @@ import SwiftUI
 
 /// The books in the audiobook folder beside the selected one's files. Scans the folder the first time it's shown.
 struct AudiobooksView: View {
-    private static let listWidth = 240.0
+    private static let listWidthRange = 200.0...360.0
     private static let detailMinWidth = 360.0
 
     @Binding var selection: UUID?
@@ -13,6 +13,7 @@ struct AudiobooksView: View {
     @Environment(MusicPlayerModel.self) private var player: MusicPlayerModel?
     @Environment(\.modelContext) private var context
     @Query(sort: Audiobook.titleOrder) private var books: [Audiobook]
+    @AppStorage("audiobookListWidth") private var listWidth = 240.0
     @State private var isChoosingFolder = false
 
     var body: some View {
@@ -63,8 +64,8 @@ struct AudiobooksView: View {
             // Not an HSplitView, which adds the floating sidebar's width to its panes' minimum widths.
             HStack(spacing: 0) {
                 AudiobookListView(books: books, selection: $selection)
-                    .frame(width: Self.listWidth)
-                Divider()
+                    .frame(width: listWidth)
+                ResizableDivider(width: $listWidth, range: Self.listWidthRange)
                 detail
                     .frame(minWidth: Self.detailMinWidth, maxWidth: .infinity, maxHeight: .infinity)
             }
