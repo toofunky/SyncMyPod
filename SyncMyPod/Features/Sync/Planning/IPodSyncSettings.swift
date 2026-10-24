@@ -30,6 +30,9 @@ nonisolated final class IPodSyncSettings {
 
     init(deviceID: String) {
         self.deviceID = deviceID
+        playlistScopeValue = SyncScope.none.rawValue
+        podcastScopeValue = SyncScope.none.rawValue
+        audiobookScopeValue = SyncScope.none.rawValue
     }
 
     var songScope: SyncScope {
