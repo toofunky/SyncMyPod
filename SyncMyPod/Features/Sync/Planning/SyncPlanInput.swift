@@ -16,7 +16,7 @@ nonisolated struct SyncPlanInput: Equatable, Sendable {
         let books = selection.partition(library.audiobooks)
         let podcastsList = IPodPlaylistRequest.podcasts(podcasts.selected).map { [$0] } ?? []
         let bookPlaylists = makesAudiobookPlaylists ? books.selected.map(\.playlist) : []
-        return SyncPlan.make(snapshots: library.tracks, mode: selection.mode, selectedAlbums: selection.albums,
+        return SyncPlan.make(snapshots: library.tracks, songs: selection.songs, selectedAlbums: selection.albums,
                              selectedGenres: selection.genres,
                              playlists: selection.playlists(in: library.playlists) + podcastsList + bookPlaylists,
                              onDevice: onDevice.tracks, devicePlaylists: onDevice.playlists,

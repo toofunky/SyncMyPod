@@ -23,8 +23,8 @@ extension HelpTopic {
                         + "over, Control-click the book, then choose **Play from Beginning**. The player's skip "
                         + "buttons go back 15 seconds and forward 30 seconds."),
         HelpSection(heading: "Putting Audiobooks on Your Devices",
-                    body: "**Sync All Songs** copies every book. With **Custom Sync**, check the books you want in "
-                        + "the **Audiobooks** list; all of a book's files are copied. Books removed from your "
+                    body: "In the **Sync** tab's **Audiobooks** tab, **All Audiobooks** copies every book. With "
+                        + "**Selected**, check the books you want; all of a book's files are copied. Books removed from your "
                         + "audiobook folder are removed from your devices at the next sync. Only MP3 and AAC files, "
                         + "including .m4b, can be copied to an iPod."),
         HelpSection(heading: "Audiobooks on an iPod",

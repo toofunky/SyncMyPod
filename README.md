@@ -49,7 +49,7 @@ Download the latest `SyncMyPod-<version>.zip` from [Releases](https://github.com
 
 1. Open **Music Library** and choose the folder that contains your music. The app scans the folder and indexes it.
 2. Connect your iPod. It appears under **iPod** in the sidebar with its model and capacity.
-3. Choose **Sync All Songs**, or choose **Custom Sync** and select artists, albums, genres, playlists, podcasts or audiobooks. To sync podcasts, subscribe and download episodes in **Podcasts** first. To sync audiobooks, choose your audiobook folder in **Audiobooks** first.
+3. For songs (the **Albums** and **Genres** tabs), **Playlists**, **Podcasts** and **Audiobooks**, choose **All**, **Selected** or **None**. With **Selected**, check the artists, albums, genres, playlists, podcasts or audiobooks you want. To sync podcasts, subscribe and download episodes in **Podcasts** first. To sync audiobooks, choose your audiobook folder in **Audiobooks** first.
 4. Click **Sync** and wait for it to finish before ejecting the iPod.
 
 > [!TIP]

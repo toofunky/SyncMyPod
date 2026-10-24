@@ -28,9 +28,9 @@ extension HelpTopic {
                         + "stop following a podcast, Control-click it, then choose **Unsubscribe…**. Removed "
                         + "episodes are moved to the Trash, and they're removed from your devices at the next sync."),
         HelpSection(heading: "Putting Podcasts on Your Devices",
-                    body: "**Sync All Songs** copies every downloaded episode. With **Custom Sync**, check the "
-                        + "podcasts you want in the **Podcasts** list; all of a podcast's downloaded episodes are "
-                        + "copied. On an iPod, episodes appear in the Podcasts menu, grouped by podcast, oldest "
+                    body: "In the **Sync** tab's **Podcasts** tab, **All Podcasts** copies every downloaded episode. "
+                        + "With **Selected**, check the podcasts you want; all of a podcast's downloaded episodes "
+                        + "are copied. On an iPod, episodes appear in the Podcasts menu, grouped by podcast, oldest "
                         + "first. Only MP3 and AAC episodes can be copied to an iPod."),
         HelpSection(heading: "Audio Players",
                     body: "Episodes are copied into the player's **Podcast Folder**, set in its **Settings** tab, "

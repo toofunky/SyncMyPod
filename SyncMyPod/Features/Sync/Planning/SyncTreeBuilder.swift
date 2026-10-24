@@ -1,6 +1,6 @@
 import Foundation
 
-/// Groups library tracks into the artist → album tree and genres, and lists the playlists, shown for custom syncs.
+/// Groups library tracks into the artist → album tree and genres, and lists the playlists, shown for choosing what to sync.
 nonisolated enum SyncTreeBuilder {
     static func artists(from tracks: [SyncTrackSnapshot]) -> [SyncArtistNode] {
         Dictionary(grouping: tracks, by: \.artist)

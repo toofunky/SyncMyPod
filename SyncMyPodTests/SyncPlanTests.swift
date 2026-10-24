@@ -54,7 +54,7 @@ struct SyncPlanTests {
     @Test func allSongsPlansEveryTrackNotOnTheDevice() {
         let tracks = library
         let onDevice = [deviceTrack(for: tracks[0])]
-        let plan = SyncPlan.make(tracks: tracks, mode: .allSongs, selectedAlbums: [], onDevice: onDevice)
+        let plan = SyncPlan.make(tracks: tracks, songs: .all, selectedAlbums: [], onDevice: onDevice)
         #expect(plan.requests.count == 4)
         #expect(plan.alreadyOnDeviceCount == 1)
         #expect(!plan.requests.map(\.draft.title).contains("Clocks"))
@@ -63,7 +63,7 @@ struct SyncPlanTests {
     @Test func customPlansOnlySelectedAlbums() {
         let tracks = library
         let selected: Set = [tracks[0].syncAlbumKey, tracks[2].syncAlbumKey]
-        let plan = SyncPlan.make(tracks: tracks, mode: .custom, selectedAlbums: selected, onDevice: [])
+        let plan = SyncPlan.make(tracks: tracks, songs: .selected, selectedAlbums: selected, onDevice: [])
         #expect(plan.requests.map(\.draft.title) == ["Clocks", "Hey Ya!"])
         #expect(plan.byteCount == 13_000)
     }
@@ -76,13 +76,13 @@ struct SyncPlanTests {
 
     @Test func customPlansSelectedGenresAlongsideAlbums() {
         let tracks = library
-        let plan = SyncPlan.make(tracks: tracks, mode: .custom, selectedAlbums: [tracks[2].syncAlbumKey],
+        let plan = SyncPlan.make(tracks: tracks, songs: .selected, selectedAlbums: [tracks[2].syncAlbumKey],
                                  selectedGenres: ["Rock", "Hip-Hop"], onDevice: [])
         #expect(plan.requests.map(\.draft.title) == ["Clocks", "Yellow", "Hey Ya!"])
     }
 
     @Test func customPlanWithNothingSelectedIsEmpty() {
-        let plan = SyncPlan.make(tracks: library, mode: .custom, selectedAlbums: [], onDevice: [])
+        let plan = SyncPlan.make(tracks: library, songs: .selected, selectedAlbums: [], onDevice: [])
         #expect(plan.requests.isEmpty && plan.selectedCount == 0)
     }
 
@@ -90,7 +90,7 @@ struct SyncPlanTests {
         let tracks = library
         let stranger = ITunesTrack.preview(id: 9, title: "iTunes Song", artist: "Other", album: "Else", duration: 0)
         let onDevice = [deviceTrack(for: tracks[0], id: 1), deviceTrack(for: tracks[1], id: 2), stranger]
-        let plan = SyncPlan.make(tracks: tracks, mode: .custom, selectedAlbums: [tracks[0].syncAlbumKey],
+        let plan = SyncPlan.make(tracks: tracks, songs: .selected, selectedAlbums: [tracks[0].syncAlbumKey],
                                  onDevice: onDevice)
         #expect(plan.removals.map(\.title) == ["Yellow"])
         #expect(plan.removalIDs == [20])
@@ -99,7 +99,7 @@ struct SyncPlanTests {
 
     @Test func allSongsNeverRemoves() {
         let tracks = library
-        let plan = SyncPlan.make(tracks: tracks, mode: .allSongs, selectedAlbums: [],
+        let plan = SyncPlan.make(tracks: tracks, songs: .all, selectedAlbums: [],
                                  onDevice: [deviceTrack(for: tracks[1])])
         #expect(plan.removals.isEmpty)
     }
@@ -116,7 +116,7 @@ struct SyncPlanTests {
         let manifest = adoptedManifest([clocks], onDevice: onDevice)
         clocks.title = "Clocks (Remastered)"
         clocks.fileSize += 12
-        let plan = SyncPlan.make(tracks: [clocks], mode: .allSongs, selectedAlbums: [], onDevice: onDevice,
+        let plan = SyncPlan.make(tracks: [clocks], songs: .all, selectedAlbums: [], onDevice: onDevice,
                                  manifest: manifest)
         #expect(plan.requests.isEmpty)
         #expect(plan.updates.map(\.databaseID) == [10])
@@ -128,7 +128,7 @@ struct SyncPlanTests {
         let onDevice = [deviceTrack(for: clocks, id: 1)]
         let manifest = adoptedManifest([clocks], onDevice: onDevice)
         clocks.artworkFingerprint = "new cover"
-        let plan = SyncPlan.make(tracks: [clocks], mode: .allSongs, selectedAlbums: [], onDevice: onDevice,
+        let plan = SyncPlan.make(tracks: [clocks], songs: .all, selectedAlbums: [], onDevice: onDevice,
                                  manifest: manifest)
         #expect(plan.updates.first?.artworkChanged == true)
     }
@@ -139,7 +139,7 @@ struct SyncPlanTests {
         let manifest = adoptedManifest(tracks, onDevice: onDevice)
         tracks[1].scanVersion = 0
         tracks[1].fileSize += 1
-        let plan = SyncPlan.make(tracks: Array(tracks.prefix(2)), mode: .allSongs, selectedAlbums: [],
+        let plan = SyncPlan.make(tracks: Array(tracks.prefix(2)), songs: .all, selectedAlbums: [],
                                  onDevice: onDevice, manifest: manifest)
         #expect(plan.isEmpty && plan.updates.isEmpty)
     }
@@ -147,7 +147,7 @@ struct SyncPlanTests {
     @Test func entryForAMissingTrackFallsBackToTags() {
         let clocks = track("Clocks", artist: "Coldplay", album: "A Rush of Blood")
         let manifest = adoptedManifest([clocks], onDevice: [deviceTrack(for: clocks, id: 1)])
-        let plan = SyncPlan.make(tracks: [clocks], mode: .allSongs, selectedAlbums: [], onDevice: [],
+        let plan = SyncPlan.make(tracks: [clocks], songs: .all, selectedAlbums: [], onDevice: [],
                                  manifest: manifest)
         #expect(plan.requests.count == 1 && plan.updates.isEmpty)
     }
@@ -157,7 +157,7 @@ struct SyncPlanTests {
         let onDevice = [deviceTrack(for: tracks[0], id: 1), deviceTrack(for: tracks[1], id: 2)]
         let manifest = adoptedManifest(tracks, onDevice: onDevice)
         tracks[1].title = "Yellow (Live)"
-        let plan = SyncPlan.make(tracks: tracks, mode: .custom, selectedAlbums: [tracks[0].syncAlbumKey],
+        let plan = SyncPlan.make(tracks: tracks, songs: .selected, selectedAlbums: [tracks[0].syncAlbumKey],
                                  onDevice: onDevice, manifest: manifest)
         #expect(plan.removalIDs == [20])
     }
@@ -167,7 +167,7 @@ struct SyncPlanTests {
         let onDevice = [deviceTrack(for: clocks, id: 1)]
         let manifest = adoptedManifest([clocks], onDevice: onDevice)
         clocks.fileSize += 5
-        let plan = SyncPlan.make(tracks: [clocks], mode: .allSongs, selectedAlbums: [], onDevice: onDevice,
+        let plan = SyncPlan.make(tracks: [clocks], songs: .all, selectedAlbums: [], onDevice: onDevice,
                                  manifest: manifest)
         #expect(!plan.isEmpty)
         #expect(plan.alreadyOnDeviceCount == 0)
@@ -179,7 +179,7 @@ struct SyncPlanTests {
         let tracks = library
         let onDevice = [deviceTrack(for: tracks[0], id: 1), deviceTrack(for: tracks[1], id: 2)]
         let manifest = adoptedManifest(tracks, onDevice: onDevice)
-        let plan = SyncPlan.make(tracks: [tracks[0]], mode: .allSongs, selectedAlbums: [], onDevice: onDevice,
+        let plan = SyncPlan.make(tracks: [tracks[0]], songs: .all, selectedAlbums: [], onDevice: onDevice,
                                  manifest: manifest, strayDatabaseIDs: [20])
         #expect(plan.removalIDs == [20])
     }
@@ -190,7 +190,7 @@ struct SyncPlanTests {
         copy.filePath = "/Elsewhere/Clocks.m4a"
         let onDevice = [deviceTrack(for: original, id: 1)]
         let manifest = adoptedManifest([original], onDevice: onDevice)
-        let plan = SyncPlan.make(tracks: [original, copy], mode: .allSongs, selectedAlbums: [], onDevice: onDevice,
+        let plan = SyncPlan.make(tracks: [original, copy], songs: .all, selectedAlbums: [], onDevice: onDevice,
                                  manifest: manifest)
         #expect(plan.isEmpty)
     }
@@ -205,7 +205,7 @@ struct SyncPlanTests {
                                  playCount: 0, mediaType: 1, dateAdded: nil, lastPlayed: nil, lastModified: nil)
         var manifest = SyncManifest()
         _ = manifest.adoptLoosely([sign.syncRequest(preservingAlbumArtist: false)], onDevice: [device])
-        let plan = SyncPlan.make(tracks: [sign], mode: .allSongs, selectedAlbums: [], onDevice: [device],
+        let plan = SyncPlan.make(tracks: [sign], songs: .all, selectedAlbums: [], onDevice: [device],
                                  manifest: manifest)
         #expect(plan.requests.isEmpty)
         #expect(plan.updates.map(\.databaseID) == [10])
@@ -218,7 +218,7 @@ struct SyncPlanTests {
 
     @Test func customSyncIncludesPlaylistSongs() {
         let tracks = library
-        let plan = SyncPlan.make(tracks: tracks, mode: .custom, selectedAlbums: [], playlists: [playlist([tracks[2]])],
+        let plan = SyncPlan.make(tracks: tracks, songs: .selected, selectedAlbums: [], playlists: [playlist([tracks[2]])],
                                  onDevice: [])
         #expect(plan.requests.map(\.draft.title) == ["Hey Ya!"])
         #expect(plan.playlistChangeCount == 1)
@@ -228,7 +228,7 @@ struct SyncPlanTests {
         let clocks = track("Clocks", artist: "Coldplay", album: "A Rush of Blood")
         let onDevice = [deviceTrack(for: clocks, id: 1)]
         let copy = ITunesPlaylist(id: 77, name: "Mix", isMaster: false, createdAt: nil, trackIDs: [1])
-        let plan = SyncPlan.make(tracks: [clocks], mode: .allSongs, selectedAlbums: [], playlists: [playlist([clocks])],
+        let plan = SyncPlan.make(tracks: [clocks], songs: .all, selectedAlbums: [], playlists: [playlist([clocks])],
                                  onDevice: onDevice, devicePlaylists: [copy])
         #expect(plan.isEmpty)
     }
@@ -237,10 +237,10 @@ struct SyncPlanTests {
         let tracks = [track("Clocks", artist: "Coldplay", album: "A"), track("Yellow", artist: "Coldplay", album: "B")]
         let onDevice = [deviceTrack(for: tracks[0], id: 1), deviceTrack(for: tracks[1], id: 2)]
         let copy = ITunesPlaylist(id: 77, name: "Mix", isMaster: false, createdAt: nil, trackIDs: [1, 2])
-        let renamed = SyncPlan.make(tracks: tracks, mode: .allSongs, selectedAlbums: [],
+        let renamed = SyncPlan.make(tracks: tracks, songs: .all, selectedAlbums: [],
                                     playlists: [playlist(tracks, name: "Renamed")], onDevice: onDevice,
                                     devicePlaylists: [copy])
-        let reordered = SyncPlan.make(tracks: tracks, mode: .allSongs, selectedAlbums: [],
+        let reordered = SyncPlan.make(tracks: tracks, songs: .all, selectedAlbums: [],
                                       playlists: [playlist(tracks.reversed())], onDevice: onDevice,
                                       devicePlaylists: [copy])
         #expect(renamed.playlistChangeCount == 1)
@@ -251,7 +251,7 @@ struct SyncPlanTests {
         let copy = ITunesPlaylist(id: 77, name: "Mix", isMaster: false, createdAt: nil, trackIDs: [])
         let other = ITunesPlaylist(id: 88, name: "On-The-Go", isMaster: false, createdAt: nil, trackIDs: [])
         let manifest = SyncManifest().managingPlaylists([77])
-        let plan = SyncPlan.make(tracks: [], mode: .allSongs, selectedAlbums: [], onDevice: [],
+        let plan = SyncPlan.make(tracks: [], songs: .all, selectedAlbums: [], onDevice: [],
                                  devicePlaylists: [copy, other], manifest: manifest)
         #expect(plan.playlistChangeCount == 1)
     }

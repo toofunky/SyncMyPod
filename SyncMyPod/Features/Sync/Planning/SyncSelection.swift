@@ -2,7 +2,10 @@ import Foundation
 
 /// Which library songs and playlists a device should hold, whatever kind of device it is.
 nonisolated struct SyncSelection: Equatable, Sendable {
-    var mode: SyncMode
+    var songs = SyncScope.all
+    var playlistScope = SyncScope.all
+    var podcastScope = SyncScope.all
+    var audiobookScope = SyncScope.all
     var albums: Set<String> = []
     var genres: Set<String> = []
     var playlists: Set<String> = []
@@ -10,29 +13,29 @@ nonisolated struct SyncSelection: Equatable, Sendable {
     var audiobooks: Set<String> = []
 
     func playlists(in library: [SyncPlaylistSnapshot]) -> [IPodPlaylistRequest] {
-        library.filter { mode == .allSongs || playlists.contains($0.key) }.map(\.request)
+        library.filter { playlistScope.includes($0.key, in: playlists) }.map(\.request)
     }
 
-    /// Every downloaded episode of each chosen podcast, or of every podcast when syncing everything.
+    /// Every downloaded episode of each chosen podcast.
     func partition(_ library: [SyncPodcastSnapshot])
         -> (selected: [SyncPodcastSnapshot], unselected: [SyncPodcastSnapshot]) {
-        let isSelected = { (podcast: SyncPodcastSnapshot) in mode == .allSongs || podcasts.contains(podcast.key) }
+        let isSelected = { (podcast: SyncPodcastSnapshot) in podcastScope.includes(podcast.key, in: podcasts) }
         return (library.filter(isSelected), library.filter { !isSelected($0) })
     }
 
-    /// Every file of each chosen book, or of every book when syncing everything.
+    /// Every file of each chosen book.
     func partition(_ library: [SyncAudiobookSnapshot])
         -> (selected: [SyncAudiobookSnapshot], unselected: [SyncAudiobookSnapshot]) {
-        let isSelected = { (book: SyncAudiobookSnapshot) in mode == .allSongs || audiobooks.contains(book.key) }
+        let isSelected = { (book: SyncAudiobookSnapshot) in audiobookScope.includes(book.key, in: audiobooks) }
         return (library.filter(isSelected), library.filter { !isSelected($0) })
     }
 
-    /// Songs in `syncedPlaylists` are selected whatever the mode, album and genre selection.
+    /// Songs in `syncedPlaylists` are selected whatever the song scope, album and genre selection.
     func partition(_ tracks: [SyncTrackSnapshot], syncedPlaylists: [IPodPlaylistRequest])
         -> (selected: [SyncTrackSnapshot], unselected: [SyncTrackSnapshot]) {
         let playlistPaths = Set(syncedPlaylists.flatMap { $0.tracks.map(\.sourcePath) })
         let isSelected = { (track: SyncTrackSnapshot) in
-            mode == .allSongs || albums.contains(track.albumKey) || genres.contains(track.genre)
+            songs.includes(track.albumKey, in: albums) || songs.includes(track.genre, in: genres)
                 || playlistPaths.contains(track.filePath)
         }
         return (tracks.filter(isSelected), tracks.filter { !isSelected($0) })

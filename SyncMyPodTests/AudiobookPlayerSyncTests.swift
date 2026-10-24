@@ -62,13 +62,13 @@ struct AudiobookPlayerSyncTests {
     }
 
     @Test func booksGoInTheAudiobookFolderUnderAuthorAndTitle() async {
-        let plan = await plan([book("Frankenstein", paths: ["01.mp3"])], selection: SyncSelection(mode: .allSongs))
+        let plan = await plan([book("Frankenstein", paths: ["01.mp3"])], selection: SyncSelection())
         #expect(plan.copies.map(\.destination) == ["Audiobooks/Mary Shelley/Frankenstein/01.mp3"])
     }
 
     @Test func discFoldersAreKeptSoTheirFilesDontCollide() async {
         let plan = await plan([book("Dune", author: "Frank Herbert", paths: ["CD 1/01.mp3", "CD 2/01.mp3"])],
-                              selection: SyncSelection(mode: .allSongs))
+                              selection: SyncSelection())
         #expect(plan.copies.map(\.destination).sorted() == ["Audiobooks/Frank Herbert/Dune/CD 1/01.mp3",
                                                             "Audiobooks/Frank Herbert/Dune/CD 2/01.mp3"])
     }
@@ -76,13 +76,13 @@ struct AudiobookPlayerSyncTests {
     @Test func customSyncCopiesOnlyChosenBooks() async {
         let chosen = book("Chosen", paths: ["1.mp3"])
         let other = book("Other", paths: ["1.mp3"])
-        let plan = await plan([chosen, other], selection: SyncSelection(mode: .custom, audiobooks: [chosen.syncKey]))
+        let plan = await plan([chosen, other], selection: SyncSelection(audiobookScope: .selected, audiobooks: [chosen.syncKey]))
         #expect(plan.copies.map(\.destination) == ["Audiobooks/Mary Shelley/Chosen/1.mp3"])
     }
 
     @Test func eachBookGetsAPlaylistInListeningOrder() async throws {
         let plan = await plan([book("Frankenstein", paths: ["02.mp3", "01.mp3"])],
-                              selection: SyncSelection(mode: .allSongs))
+                              selection: SyncSelection())
         let playlist = try #require(plan.playlists?.first)
         #expect(playlist.path == "Playlists/Frankenstein.m3u8")
         let entries = playlist.contents.split(separator: "\n").filter { !$0.hasPrefix("#") }
@@ -93,7 +93,7 @@ struct AudiobookPlayerSyncTests {
     @Test func audiobookPlaylistsCanBeTurnedOff() async {
         var config = config
         config.makesAudiobookPlaylists = false
-        let plan = await plan([book("Frankenstein", paths: ["01.mp3"])], selection: SyncSelection(mode: .allSongs),
+        let plan = await plan([book("Frankenstein", paths: ["01.mp3"])], selection: SyncSelection(),
                               config: config)
         #expect(plan.playlists == [])
     }
