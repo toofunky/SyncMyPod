@@ -1,5 +1,6 @@
 SyncMyPod-1.13.2
 - Fix application crashing when using smaller window sizes.
+- Fix bug where a view would show outdated library files after a refresh.
 
 SyncMyPod-1.13.1
 - Default option for playlists/podcast/audiobooks is None.
