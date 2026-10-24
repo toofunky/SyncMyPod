@@ -1,3 +1,6 @@
+SyncMyPod-1.13.2
+- Fix application crashing when using smaller window sizes.
+
 SyncMyPod-1.13.1
 - Default option for playlists/podcast/audiobooks is None.
 - Move Library tab (iPod-only) into a sheet available from Manage Storage.
