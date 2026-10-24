@@ -20,11 +20,13 @@ struct IPodSyncView: View {
     @State private var manifest = LoadedSyncManifest()
     @State private var freeBytes: Int64?
     @State private var loadError: String?
+    @State private var isManagingStorage = false
 
     var body: some View {
         content
             .task(id: "\(device.id)#\(syncModel.completedSyncCount)") { await reload() }
-            .syncProgressSheet()
+            .sheet(isPresented: $isManagingStorage) { ManageStorageSheet(device: device) }
+            .syncProgressSheet(isEnabled: !isManagingStorage)
     }
 
     @ViewBuilder
@@ -41,6 +43,8 @@ struct IPodSyncView: View {
                              manifest: manifest, freeBytes: freeBytes ?? device.availableBytes,
                              isSyncing: syncModel.isSyncing) {
                 syncModel.sync($0.syncRequests, removing: $0.removalIDs, playlists: $0.playlists, to: .iPod(device))
+            } onManageStorage: {
+                isManagingStorage = true
             }
         } else {
             ProgressView("Reading iPod…")
