@@ -1,63 +1,95 @@
 import SwiftData
 import SwiftUI
 
-/// Chooses between syncing everything and a custom selection of albums, genres, playlists and, when the device
-/// takes them, podcasts and audiobooks.
+/// A tab for each kind of content, each choosing to sync all, the selected or none of it. Albums and genres share
+/// one scope over songs, and a song syncs when either of them, or a synced playlist, selects it.
 struct SyncSelectionEditor: View {
     @Bindable var settings: IPodSyncSettings
     let library: SyncLibrarySnapshot
     var deviceKind = "iPod"
     var includesSpokenWord = false
 
+    @State private var category = SyncCategory.albums
+
     var body: some View {
         VStack(spacing: 0) {
-            Picker("Sync", selection: $settings.mode) {
-                ForEach(SyncMode.allCases) { Text($0.title).tag($0) }
+            Picker("Show", selection: $category) {
+                ForEach(categories) { Text(title(for: $0)).tag($0) }
             }
-            .pickerStyle(.radioGroup)
-            .horizontalRadioGroupLayout()
+            .pickerStyle(.segmented)
             .labelsHidden()
-            .frame(maxWidth: .infinity, alignment: .leading)
             .padding()
+            SyncScopePicker(category: category, scope: scope(for: category))
+                .padding([.horizontal, .bottom])
             Divider()
-            selection
+            content
+        }
+    }
+
+    private var categories: [SyncCategory] {
+        includesSpokenWord ? SyncCategory.allCases : SyncCategory.musicCategories
+    }
+
+    @ViewBuilder
+    private var content: some View {
+        let scope = scope(for: category).wrappedValue
+        if scope == .selected {
+            list
+        } else {
+            SyncScopeNotice(category: category, scope: scope, deviceKind: deviceKind)
         }
     }
 
     @ViewBuilder
-    private var selection: some View {
-        switch settings.mode {
-        case .allSongs:
-            ContentUnavailableView("All Songs", systemImage: "music.note.list",
-                                   description: Text(allSongsDescription))
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-        case .custom:
-            SyncCustomSelectionView(artists: library.artists, genres: library.genres,
-                                    playlists: library.playlistNodes, podcasts: library.podcasts,
-                                    audiobooks: library.audiobooks,
-                                    categories: includesSpokenWord ? SyncCategory.allCases
-                                        : SyncCategory.musicCategories,
-                                    albumSelection: $settings.selectedAlbums,
-                                    genreSelection: $settings.selectedGenres,
-                                    playlistSelection: $settings.selectedPlaylists,
-                                    podcastSelection: $settings.selectedPodcasts,
-                                    audiobookSelection: $settings.selectedAudiobooks)
-                .padding(.top)
+    private var list: some View {
+        switch category {
+        case .albums: SyncAlbumTreeView(artists: library.artists, selection: $settings.selectedAlbums)
+        case .genres: SyncGenreListView(genres: library.genres, selection: $settings.selectedGenres)
+        case .playlists: SyncPlaylistListView(playlists: library.playlistNodes, selection: $settings.selectedPlaylists)
+        case .podcasts: SyncPodcastListView(podcasts: library.podcasts, selection: $settings.selectedPodcasts)
+        case .audiobooks: SyncAudiobookListView(audiobooks: library.audiobooks,
+                                                selection: $settings.selectedAudiobooks)
         }
     }
 
-    private var allSongsDescription: String {
-        let contents = includesSpokenWord ? "song, playlist, downloaded podcast episode and audiobook"
-            : "song and playlist in your music library"
-        return "Every \(contents) will be copied to the \(deviceKind)."
+    private func scope(for category: SyncCategory) -> Binding<SyncScope> {
+        switch category {
+        case .albums, .genres: $settings.songScope
+        case .playlists: $settings.playlistScope
+        case .podcasts: $settings.podcastScope
+        case .audiobooks: $settings.audiobookScope
+        }
+    }
+
+    private func title(for category: SyncCategory) -> String {
+        switch scope(for: category).wrappedValue {
+        case .all: "\(category.title) (All)"
+        case .none: category.title
+        case .selected:
+            selectedCount(in: category) == 0 ? category.title : "\(category.title) (\(selectedCount(in: category)))"
+        }
+    }
+
+    private func selectedCount(in category: SyncCategory) -> Int {
+        switch category {
+        case .albums: settings.selectedAlbums.count
+        case .genres: settings.selectedGenres.count
+        case .playlists: settings.selectedPlaylists.count
+        case .podcasts: settings.selectedPodcasts.count
+        case .audiobooks: settings.selectedAudiobooks.count
+        }
     }
 }
 
 #if DEBUG
 #Preview {
-    SyncSelectionEditor(settings: IPodSyncSettings(deviceID: "preview"),
-                        library: SyncLibrarySnapshot(tracks: LibraryTrack.previewTracks, playlists: [.preview],
-                                                     preservingAlbumArtist: false))
+    let settings = IPodSyncSettings(deviceID: "preview")
+    settings.songScope = .selected
+    settings.podcastScope = .none
+    return SyncSelectionEditor(settings: settings,
+                               library: SyncLibrarySnapshot(tracks: LibraryTrack.previewTracks, playlists: [.preview],
+                                                            preservingAlbumArtist: false),
+                               includesSpokenWord: true)
         .modelContainer(.preview)
 }
 #endif

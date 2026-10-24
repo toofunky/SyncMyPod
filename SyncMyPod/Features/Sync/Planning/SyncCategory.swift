@@ -21,4 +21,20 @@ nonisolated enum SyncCategory: String, CaseIterable, Identifiable, Sendable {
         case .audiobooks: "Audiobooks"
         }
     }
+
+    /// What the category's scope covers. Albums and genres share one scope, over songs.
+    var contentTitle: String {
+        switch self {
+        case .albums, .genres: "Songs"
+        default: title
+        }
+    }
+
+    var systemImage: String {
+        switch self {
+        case .albums, .genres, .playlists: "music.note.list"
+        case .podcasts: "antenna.radiowaves.left.and.right"
+        case .audiobooks: "book.closed"
+        }
+    }
 }

@@ -41,8 +41,8 @@ extension HelpTopic {
                     body: "Plug in your iPod with a USB cable. Select **iPod** in the sidebar to see its songs, "
                         + "sync options and device details."),
         HelpSection(heading: "3. Choose What to Sync",
-                    body: "In the **Sync** tab, choose **Sync All Songs** to copy your whole library, or "
-                        + "**Custom Sync** to pick albums, genres and playlists."),
+                    body: "In the **Sync** tab, choose a tab such as **Albums** or **Podcasts**, then choose **All**, "
+                        + "**Selected** or **None** for it. With **Selected**, check the items you want."),
         HelpSection(heading: "4. Sync",
                     body: "Click **Sync Now**. Wait for the sync to finish before you eject the iPod."),
     ]
@@ -100,8 +100,8 @@ extension HelpTopic {
         HelpSection(heading: "Deleting a Playlist",
                     body: "Control-click the playlist in the sidebar, then choose **Delete Playlist**."),
         HelpSection(heading: "Putting Playlists on Your iPod",
-                    body: "**Sync All Songs** includes every playlist. With **Custom Sync**, choose the playlists "
-                        + "you want in the **Playlists** list."),
+                    body: "In the **Sync** tab's **Playlists** tab, choose **All Playlists**, or choose **Selected** "
+                        + "and check the playlists you want. A playlist's songs are copied with it."),
     ]
 
     private static let syncingSections = [
@@ -109,11 +109,11 @@ extension HelpTopic {
                     body: "**Library** shows the songs and playlists already on the iPod. **Sync** is where you "
                         + "choose what to copy. **Settings** holds options for how songs are copied. **Device** "
                         + "shows the model, capacity and other details."),
-        HelpSection(heading: "Sync All Songs or Custom Sync",
-                    body: "**Sync All Songs** copies every song and playlist in your music library, every "
-                        + "downloaded podcast episode and every audiobook. **Custom Sync** lets you check artists "
-                        + "and albums, genres, playlists, podcasts and audiobooks. SyncMyPod remembers your choices "
-                        + "for each iPod."),
+        HelpSection(heading: "Choosing What to Sync",
+                    body: "Songs, playlists, podcasts and audiobooks each have their own choice: **All**, "
+                        + "**Selected** or **None**. The **Albums** and **Genres** tabs share the songs choice; with "
+                        + "**Selected**, a song is copied if its album or genre is checked. Songs in a synced "
+                        + "playlist are always copied. SyncMyPod remembers your choices for each iPod."),
         HelpSection(heading: "Before You Sync",
                     body: "The bar at the bottom shows how many songs will be added, updated and removed, and how "
                         + "much free space the iPod has. **Sync Now** is unavailable if the songs won't fit."),
@@ -148,11 +148,10 @@ extension HelpTopic {
                         + "Sonos that only read .m3u playlists, change **Playlist Format** to .m3u (Windows "
                         + "Latin-1). Songs with names Latin-1 can't hold, such as Japanese or Cyrillic ones, are "
                         + "left out of .m3u playlists but still copied."),
-        HelpSection(heading: "Sync All Songs or Custom Sync",
-                    body: "In the **Sync** tab, **Sync All Songs** copies every song and playlist in your music "
-                        + "library, every downloaded podcast episode and every audiobook. **Custom Sync** lets you "
-                        + "check artists and albums, genres, playlists, podcasts and audiobooks. FLAC, AIFF and WAV "
-                        + "songs are copied too. "
+        HelpSection(heading: "Choosing What to Sync",
+                    body: "In the **Sync** tab, songs, playlists, podcasts and audiobooks each have their own "
+                        + "choice: **All**, **Selected** or **None**. The **Albums** and **Genres** tabs share the "
+                        + "songs choice. FLAC, AIFF and WAV songs are copied too. "
                         + "SyncMyPod remembers your choices for each player."),
         HelpSection(heading: "Before You Sync",
                     body: "The bar at the bottom shows how many songs will be added, updated and removed, and how "
@@ -184,7 +183,8 @@ extension HelpTopic {
                         + "Devices, turn on “Prevent iPods, iPhones, and iPads from syncing automatically”, then "
                         + "sync again."),
         HelpSection(heading: "Not Enough Space",
-                    body: "Use **Custom Sync** to choose fewer albums, genres or playlists until the selection fits."),
+                    body: "Choose **Selected** for songs, playlists, podcasts or audiobooks, or **None** for some of "
+                        + "them, and check fewer items until the selection fits."),
         HelpSection(heading: "Songs Are Missing From the Library",
                     body: "Check that the files are AAC, Apple Lossless, MP3, FLAC, AIFF or WAV and are inside your "
                         + "music folder, then click **Rescan**. FLAC, AIFF and WAV songs appear in your library "

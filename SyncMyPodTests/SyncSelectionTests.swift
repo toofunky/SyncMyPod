@@ -25,7 +25,7 @@ struct SyncSelectionTests {
 
     @Test func allSongsSelectsEverything() {
         let snapshots = library.map { $0.syncSnapshot(preservingAlbumArtist: false) }
-        let result = SyncSelection(mode: .allSongs).partition(snapshots, syncedPlaylists: [])
+        let result = SyncSelection().partition(snapshots, syncedPlaylists: [])
         #expect(titles(result.selected) == ["One", "Two", "Three"])
         #expect(result.unselected.isEmpty)
     }
@@ -33,27 +33,55 @@ struct SyncSelectionTests {
     @Test func customSelectsByAlbumAndGenre() {
         let tracks = library
         let snapshots = tracks.map { $0.syncSnapshot(preservingAlbumArtist: false) }
-        let selection = SyncSelection(mode: .custom, albums: [tracks[0].syncAlbumKey], genres: ["Soul"])
+        let selection = SyncSelection(songs: .selected, albums: [tracks[0].syncAlbumKey], genres: ["Soul"])
         let result = selection.partition(snapshots, syncedPlaylists: [])
         #expect(titles(result.selected) == ["One", "Three"])
         #expect(titles(result.unselected) == ["Two"])
     }
 
-    @Test func playlistSongsAreSelectedWhateverTheMode() {
+    @Test func playlistSongsAreSelectedWhateverTheSongScope() {
         let tracks = library
         let snapshots = tracks.map { $0.syncSnapshot(preservingAlbumArtist: false) }
         let playlist = IPodPlaylistRequest(id: 1, name: "Mix", createdAt: .now,
                                            tracks: [tracks[1].syncRequest(preservingAlbumArtist: false)])
-        let result = SyncSelection(mode: .custom).partition(snapshots, syncedPlaylists: [playlist])
+        let result = SyncSelection(songs: .none).partition(snapshots, syncedPlaylists: [playlist])
         #expect(titles(result.selected) == ["Two"])
     }
 
-    @Test func customSyncsOnlyChosenPlaylists() {
+    @Test func selectedSyncsOnlyChosenPlaylists() {
         let mix = SyncPlaylistSnapshot(key: "mix", request: IPodPlaylistRequest(id: 1, name: "Mix", createdAt: .now,
                                                                                 tracks: []))
         let chill = SyncPlaylistSnapshot(key: "chill", request: IPodPlaylistRequest(id: 2, name: "Chill",
                                                                                     createdAt: .now, tracks: []))
-        #expect(SyncSelection(mode: .custom, playlists: ["chill"]).playlists(in: [mix, chill]).map(\.name) == ["Chill"])
-        #expect(SyncSelection(mode: .allSongs).playlists(in: [mix, chill]).count == 2)
+        #expect(SyncSelection(playlistScope: .selected, playlists: ["chill"]).playlists(in: [mix, chill]).map(\.name) == ["Chill"])
+        #expect(SyncSelection().playlists(in: [mix, chill]).count == 2)
+    }
+
+    @Test func noPlaylistsSyncWhenTheirScopeIsNone() {
+        let mix = SyncPlaylistSnapshot(key: "mix", request: IPodPlaylistRequest(id: 1, name: "Mix", createdAt: .now,
+                                                                                tracks: []))
+        #expect(SyncSelection(playlistScope: .none, playlists: ["mix"]).playlists(in: [mix]).isEmpty)
+    }
+
+    @Test func noSongsSyncWhenTheirScopeIsNoneWhateverIsChosen() {
+        let tracks = library
+        let snapshots = tracks.map { $0.syncSnapshot(preservingAlbumArtist: false) }
+        let selection = SyncSelection(songs: .none, albums: [tracks[0].syncAlbumKey], genres: ["Soul"])
+        #expect(selection.partition(snapshots, syncedPlaylists: []).selected.isEmpty)
+    }
+
+    @Test func podcastsFollowTheirOwnScope() {
+        let shows = ["chosen", "other"].map { SyncPodcastSnapshot(key: $0, playlist: IPodPlaylistRequest(
+            id: 1, name: $0, createdAt: .now, tracks: [])) }
+        let chosen = SyncSelection(podcastScope: .selected, podcasts: ["chosen"]).partition(shows)
+        #expect(chosen.selected.map(\.key) == ["chosen"] && chosen.unselected.map(\.key) == ["other"])
+        let none = SyncSelection(podcastScope: .none, podcasts: ["chosen"]).partition(shows)
+        #expect(none.selected.isEmpty && none.unselected.count == 2)
+    }
+
+    @Test func allSongsWithSelectedPodcastsSyncsEverySong() {
+        let snapshots = library.map { $0.syncSnapshot(preservingAlbumArtist: false) }
+        let selection = SyncSelection(songs: .all, podcastScope: .selected)
+        #expect(selection.partition(snapshots, syncedPlaylists: []).selected.count == 3)
     }
 }

@@ -5,7 +5,13 @@ import SwiftData
 @Model
 nonisolated final class IPodSyncSettings {
     @Attribute(.unique) var deviceID: String
-    var modeRawValue = SyncMode.allSongs.rawValue
+    /// The single "allSongs" or "custom" choice made before each kind of content had its own scope.
+    var modeRawValue = "allSongs"
+    /// Optional, like the scopes below, because settings saved before per-tab scopes hold `NULL`.
+    var songScopeValue: String?
+    var playlistScopeValue: String?
+    var podcastScopeValue: String?
+    var audiobookScopeValue: String?
     var selectedAlbumKeys: [String] = []
     /// Optional because settings saved before playlists synced hold `NULL`.
     var selectedPlaylistKeys: [String]?
@@ -26,9 +32,29 @@ nonisolated final class IPodSyncSettings {
         self.deviceID = deviceID
     }
 
-    var mode: SyncMode {
-        get { SyncMode(rawValue: modeRawValue) ?? .allSongs }
-        set { modeRawValue = newValue.rawValue }
+    var songScope: SyncScope {
+        get { scope(songScopeValue) }
+        set { songScopeValue = newValue.rawValue }
+    }
+
+    var playlistScope: SyncScope {
+        get { scope(playlistScopeValue) }
+        set { playlistScopeValue = newValue.rawValue }
+    }
+
+    var podcastScope: SyncScope {
+        get { scope(podcastScopeValue) }
+        set { podcastScopeValue = newValue.rawValue }
+    }
+
+    var audiobookScope: SyncScope {
+        get { scope(audiobookScopeValue) }
+        set { audiobookScopeValue = newValue.rawValue }
+    }
+
+    /// A scope never chosen follows the old single choice, so a device syncs what it did before.
+    private func scope(_ rawValue: String?) -> SyncScope {
+        rawValue.flatMap(SyncScope.init(rawValue:)) ?? (modeRawValue == "custom" ? .selected : .all)
     }
 
     var preservesAlbumArtist: Bool {
@@ -73,8 +99,9 @@ nonisolated final class IPodSyncSettings {
     }
 
     var selection: SyncSelection {
-        SyncSelection(mode: mode, albums: selectedAlbums, genres: selectedGenres, playlists: selectedPlaylists,
-                      podcasts: selectedPodcasts, audiobooks: selectedAudiobooks)
+        SyncSelection(songs: songScope, playlistScope: playlistScope, podcastScope: podcastScope,
+                      audiobookScope: audiobookScope, albums: selectedAlbums, genres: selectedGenres,
+                      playlists: selectedPlaylists, podcasts: selectedPodcasts, audiobooks: selectedAudiobooks)
     }
 
     @MainActor

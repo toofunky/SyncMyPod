@@ -33,7 +33,7 @@ struct AudiobookIPodSyncPlanTests {
     @Test func eachChosenBookGetsAPlaylistOfItsPartsInOrder() async throws {
         let chosen = book("Frankenstein", paths: ["1.m4a", "2.m4a"])
         let other = book("Emma", paths: ["1.m4a"])
-        let plan = await plan([chosen, other], selection: SyncSelection(mode: .custom, audiobooks: [chosen.syncKey]))
+        let plan = await plan([chosen, other], selection: SyncSelection(audiobookScope: .selected, audiobooks: [chosen.syncKey]))
         #expect(plan.requests.map(\.sourcePath) == ["/Audiobooks/Frankenstein/1.m4a", "/Audiobooks/Frankenstein/2.m4a"])
         let playlist = try #require(plan.playlists.first)
         #expect(plan.playlists.count == 1)
@@ -42,7 +42,7 @@ struct AudiobookIPodSyncPlanTests {
     }
 
     @Test func playlistsCanBeTurnedOff() async {
-        let plan = await plan([book("Frankenstein", paths: ["1.m4a"])], selection: SyncSelection(mode: .allSongs),
+        let plan = await plan([book("Frankenstein", paths: ["1.m4a"])], selection: SyncSelection(),
                               playlists: false)
         #expect(plan.playlists.isEmpty && plan.requests.count == 1)
     }

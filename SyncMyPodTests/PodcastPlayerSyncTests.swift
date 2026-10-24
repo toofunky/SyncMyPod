@@ -44,14 +44,14 @@ struct PodcastPlayerSyncTests {
     }
 
     @Test func episodesGoInThePodcastFolderUnderTheirShow() async {
-        let plan = await plan([podcast("Show", episodes: ["Episode"])], selection: SyncSelection(mode: .allSongs))
+        let plan = await plan([podcast("Show", episodes: ["Episode"])], selection: SyncSelection())
         #expect(plan.copies.map(\.destination) == ["Podcasts/Show/Episode.mp3"])
     }
 
     @Test func aBlankPodcastFolderUsesTheRoot() async {
         var rooted = config
         rooted.podcastFolder = ""
-        let plan = await plan([podcast("Show", episodes: ["Episode"])], selection: SyncSelection(mode: .allSongs),
+        let plan = await plan([podcast("Show", episodes: ["Episode"])], selection: SyncSelection(),
                               config: rooted)
         #expect(plan.copies.map(\.destination) == ["Show/Episode.mp3"])
     }
@@ -62,7 +62,7 @@ struct PodcastPlayerSyncTests {
         let synced = PlayerManifestEntry(path: "Podcasts/Other/B.mp3", source: nil)
         let contents = PlayerDeviceContents(manifest: PlayerSyncManifest(entries: ["/Podcasts/Other/B.mp3": synced]),
                                             presentSizes: [synced.path: 1_000])
-        let plan = await plan([chosen, other], selection: SyncSelection(mode: .custom, podcasts: [chosen.syncKey]),
+        let plan = await plan([chosen, other], selection: SyncSelection(podcastScope: .selected, podcasts: [chosen.syncKey]),
                               contents: contents)
         #expect(plan.copies.map(\.destination) == ["Podcasts/Chosen/A.mp3"])
         #expect(plan.removals.map(\.path) == ["Podcasts/Other/B.mp3"])
@@ -73,7 +73,7 @@ struct PodcastPlayerSyncTests {
         let entry = PlayerManifestEntry(path: "Podcasts/Show/Episode.mp3", source: nil)
         let contents = PlayerDeviceContents(manifest: PlayerSyncManifest(entries: ["/Podcasts/Show/Episode.mp3": entry]),
                                             presentSizes: [entry.path: 1_000])
-        let plan = await plan([show], selection: SyncSelection(mode: .allSongs), contents: contents)
+        let plan = await plan([show], selection: SyncSelection(), contents: contents)
         #expect(plan.copies.isEmpty && plan.updates.isEmpty && plan.moves.isEmpty)
     }
 
@@ -81,14 +81,14 @@ struct PodcastPlayerSyncTests {
         let entry = PlayerManifestEntry(path: "Podcasts/Show/Gone.mp3", source: nil)
         let contents = PlayerDeviceContents(manifest: PlayerSyncManifest(entries: ["/Podcasts/Show/Gone.mp3": entry]),
                                             presentSizes: [entry.path: 1_000])
-        let plan = await plan([], selection: SyncSelection(mode: .allSongs), contents: contents,
+        let plan = await plan([], selection: SyncSelection(), contents: contents,
                               missing: ["/Podcasts/Show/Gone.mp3"])
         #expect(plan.removals.map(\.path) == ["Podcasts/Show/Gone.mp3"])
     }
 
     @Test func eachPodcastGetsAPlaylistOldestFirst() async throws {
         let show = podcast("Show", episodes: ["Older", "Newer"])
-        let plan = await plan([show], selection: SyncSelection(mode: .allSongs))
+        let plan = await plan([show], selection: SyncSelection())
         let playlist = try #require(plan.playlists?.first)
         #expect(playlist.path == "Playlists/Show.m3u8")
         let entries = playlist.contents.split(separator: "\n").filter { !$0.hasPrefix("#") }
@@ -98,7 +98,7 @@ struct PodcastPlayerSyncTests {
     @Test func podcastPlaylistsCanBeTurnedOff() async {
         var config = config
         config.makesPodcastPlaylists = false
-        let plan = await plan([podcast("Show", episodes: ["Episode"])], selection: SyncSelection(mode: .allSongs),
+        let plan = await plan([podcast("Show", episodes: ["Episode"])], selection: SyncSelection(),
                               config: config)
         #expect(plan.playlists == [])
     }

@@ -12,6 +12,7 @@
 - [x] Detect meta-data/artwork changes
 - [ ] Backup/restore database
 - [x] Sync by genre
+- [x] Choose all, selected or none separately for songs, playlists, podcasts and audiobooks
 - [x] Multithreaded library scan
 - [x] Light/dark mode
 - [x] Tag editor

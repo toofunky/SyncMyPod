@@ -48,14 +48,14 @@ struct PodcastIPodSyncPlanTests {
     @Test func chosenEpisodesAreAddedWithThePodcastsList() async throws {
         let chosen = podcast("Chosen", files: ["A.mp3", "B.mp3"])
         let other = podcast("Other", files: ["C.mp3"])
-        let plan = await plan([chosen, other], selection: SyncSelection(mode: .custom, podcasts: [chosen.syncKey]))
+        let plan = await plan([chosen, other], selection: SyncSelection(podcastScope: .selected, podcasts: [chosen.syncKey]))
         #expect(plan.requests.map(\.draft.title) == ["A.mp3", "B.mp3"])
         let list = try #require(plan.playlists.first { $0.isPodcasts })
         #expect(list.id == IPodPlaylistRequest.podcastsID && list.tracks.map(\.draft.title) == ["A.mp3", "B.mp3"])
     }
 
     @Test func noPodcastsListWithoutEpisodes() async {
-        let plan = await plan([podcast("Show", files: ["A.mp3"])], selection: SyncSelection(mode: .custom))
+        let plan = await plan([podcast("Show", files: ["A.mp3"])], selection: SyncSelection(podcastScope: .selected))
         #expect(plan.playlists.isEmpty && plan.requests.isEmpty)
     }
 }

@@ -30,13 +30,14 @@ nonisolated struct SyncPlan: Equatable, Sendable {
     var removedByteCount: Int64 { removals.reduce(0) { $0 + Int64($1.fileSize) } }
     var removalIDs: Set<UInt64> { Set(removals.map(\.databaseID)) }
 
-    /// Songs in `playlists` are synced whatever the mode, album and genre selection.
+    /// Songs in `playlists` are synced whatever the song scope, album and genre selection.
     @MainActor
-    static func make(tracks: [LibraryTrack], mode: SyncMode, selectedAlbums: Set<String>, selectedGenres: Set<String> = [],
-                     preservingAlbumArtist: Bool = false, playlists: [IPodPlaylistRequest] = [], onDevice: [ITunesTrack],
+    static func make(tracks: [LibraryTrack], songs: SyncScope, selectedAlbums: Set<String>,
+                     selectedGenres: Set<String> = [], preservingAlbumArtist: Bool = false,
+                     playlists: [IPodPlaylistRequest] = [], onDevice: [ITunesTrack],
                      devicePlaylists: [ITunesPlaylist] = [], manifest: SyncManifest = SyncManifest(),
                      strayDatabaseIDs: Set<UInt64> = []) -> SyncPlan {
-        make(snapshots: tracks.map { $0.syncSnapshot(preservingAlbumArtist: preservingAlbumArtist) }, mode: mode,
+        make(snapshots: tracks.map { $0.syncSnapshot(preservingAlbumArtist: preservingAlbumArtist) }, songs: songs,
              selectedAlbums: selectedAlbums, selectedGenres: selectedGenres, playlists: playlists,
              onDevice: onDevice, devicePlaylists: devicePlaylists, manifest: manifest,
              strayDatabaseIDs: strayDatabaseIDs)
@@ -44,11 +45,11 @@ nonisolated struct SyncPlan: Equatable, Sendable {
 
     /// `episodes` are podcast episodes and audiobook files chosen and not chosen, which aren't in any playlist but
     /// the Podcasts list.
-    static func make(snapshots tracks: [SyncTrackSnapshot], mode: SyncMode, selectedAlbums: Set<String>,
+    static func make(snapshots tracks: [SyncTrackSnapshot], songs: SyncScope, selectedAlbums: Set<String>,
                      selectedGenres: Set<String>, playlists: [IPodPlaylistRequest], onDevice: [ITunesTrack],
                      devicePlaylists: [ITunesPlaylist], manifest: SyncManifest, strayDatabaseIDs: Set<UInt64>,
                      episodes: (selected: [IPodSyncRequest], unselected: [IPodSyncRequest]) = ([], [])) -> SyncPlan {
-        let selection = SyncSelection(mode: mode, albums: selectedAlbums, genres: selectedGenres)
+        let selection = SyncSelection(songs: songs, albums: selectedAlbums, genres: selectedGenres)
             .partition(tracks, syncedPlaylists: playlists)
         let plan = SyncPlanner(manifest: manifest, onDevice: onDevice, strayDatabaseIDs: strayDatabaseIDs)
             .plan(selected: selection.selected.map(\.request) + episodes.selected,
