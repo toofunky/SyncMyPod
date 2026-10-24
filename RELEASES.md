@@ -1,3 +1,6 @@
+SyncMyPod-1.13
+- Add audiobook support.
+
 SyncMyPod-1.12.1
 - Add ability to play podcasts in app.
 

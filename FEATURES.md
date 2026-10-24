@@ -10,7 +10,6 @@
 - [x] Drag to reorder playlists in sidebar
 - [x] Append track artist to title
 - [x] Detect meta-data/artwork changes
-- [ ] Backup/restore database
 - [x] Sync by genre
 - [x] Choose all, selected or none separately for songs, playlists, podcasts and audiobooks
 - [x] Multithreaded library scan
@@ -38,5 +37,3 @@
 - [x] Audiobooks (scan a folder of books, sync to iPods and audio players, with a playlist for each book)
 - [x] Play audiobooks in the app, file after file, resuming where you left off
 - [x] Pick up podcast and audiobook positions from the iPod
-- [ ] Mark podcast episodes played from the device's play counts
-- [ ] Automatically download new podcast episodes
