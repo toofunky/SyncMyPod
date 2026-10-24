@@ -3,6 +3,9 @@ import SwiftUI
 
 /// Subscribed podcasts beside the selected one's episodes.
 struct PodcastsView: View {
+    private static let listWidth = 240.0
+    private static let detailMinWidth = 360.0
+
     @Binding var selection: UUID?
 
     @Environment(PodcastsModel.self) private var model
@@ -57,11 +60,13 @@ struct PodcastsView: View {
                 }
             }
         } else {
-            HSplitView {
+            // Not an HSplitView, which adds the floating sidebar's width to its panes' minimum widths.
+            HStack(spacing: 0) {
                 PodcastListView(podcasts: podcasts, selection: $selection)
-                    .frame(minWidth: 200, idealWidth: 240, maxWidth: 360)
+                    .frame(width: Self.listWidth)
+                Divider()
                 detail
-                    .frame(minWidth: 360, maxWidth: .infinity, maxHeight: .infinity)
+                    .frame(minWidth: Self.detailMinWidth, maxWidth: .infinity, maxHeight: .infinity)
             }
         }
     }

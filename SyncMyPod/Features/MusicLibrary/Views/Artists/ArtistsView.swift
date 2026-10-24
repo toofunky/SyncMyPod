@@ -2,9 +2,7 @@ import SwiftData
 import SwiftUI
 
 struct ArtistsView: View {
-    private static let listMinWidth = 160.0
-    private static let listIdealWidth = 220.0
-    private static let listMaxWidth = 320.0
+    private static let listWidth = 220.0
     private static let detailMinWidth = 300.0
 
     let tracks: [LibraryTrack]
@@ -17,9 +15,12 @@ struct ArtistsView: View {
     @State private var sections: [ArtistAlbumSection] = []
 
     var body: some View {
-        HSplitView {
+        // Not an HSplitView: inside the split view it adds the floating sidebar and inspector widths to its panes'
+        // minimum widths, and the window can then never satisfy them, which crashes AppKit's layout.
+        HStack(spacing: 0) {
             ArtistListView(artists: visibleArtists, selection: $selection)
-                .frame(minWidth: Self.listMinWidth, idealWidth: Self.listIdealWidth, maxWidth: Self.listMaxWidth)
+                .frame(width: Self.listWidth)
+            Divider()
             detail
                 .frame(minWidth: Self.detailMinWidth, maxWidth: .infinity, maxHeight: .infinity)
         }

@@ -2,12 +2,7 @@ import SwiftData
 import SwiftUI
 
 struct AlbumTracksInspector: View {
-    private static let minWidth = 260.0
-    private static let idealWidth = 300.0
-    private static let maxWidth = 420.0
-
     let albumID: LibraryAlbum.ID?
-    @Binding var isShowing: Bool
     var showPlaylist: ((LibraryPlaylist) -> Void)?
 
     @Environment(MusicPlayerModel.self) private var player: MusicPlayerModel?
@@ -21,12 +16,6 @@ struct AlbumTracksInspector: View {
 
     var body: some View {
         content
-            .inspectorColumnWidth(min: Self.minWidth, ideal: Self.idealWidth, max: Self.maxWidth)
-            .toolbar {
-                Spacer()
-                Button("Album Tracks", systemImage: "sidebar.trailing") { isShowing.toggle() }
-                    .disabled(albumID == nil)
-            }
             .modifier(TagEditingModifier(tracks: $tagsTracks))
             .modifier(LyricsEditingModifier(editing: $lyricsTrack, removing: $lyricsTrackToRemove))
             .modifier(NewPlaylistModifier(tracks: $newPlaylistTracks))
@@ -92,8 +81,7 @@ struct AlbumTracksInspector: View {
 
 #if DEBUG
 #Preview {
-    @Previewable @State var isShowing = true
-    AlbumTracksInspector(albumID: LibraryAlbum.preview.id, isShowing: $isShowing)
+    AlbumTracksInspector(albumID: LibraryAlbum.preview.id)
         .environment(DeviceMountWatcher.preview())
         .environment(DeviceSyncModel())
         .modelContainer(.preview)

@@ -32,9 +32,6 @@ struct ContentView: View {
                 libraryView(.artists)
             }
         }
-        .inspector(isPresented: inspectorPresented) {
-            AlbumTracksInspector(albumID: selectedAlbumID, isShowing: $isShowingAlbum, showPlaylist: show)
-        }
         .contentMargins(.bottom, showsPlayer ? MusicPlayerOverlay.clearance : 0, for: .scrollContent)
         .overlay(alignment: .bottom) {
             if let player, showsPlayer {
@@ -50,23 +47,11 @@ struct ContentView: View {
 
     private func libraryView(_ section: LibrarySection) -> some View {
         MusicLibraryView(model: libraryModel, section: section, selection: $librarySelection,
-                         albumSelection: $selectedAlbumID, artistSelection: $selectedArtistID, showPlaylist: show)
+                         albumSelection: $selectedAlbumID, artistSelection: $selectedArtistID,
+                         isShowingAlbumTracks: $isShowingAlbum, showPlaylist: show)
     }
 
     private var showsPlayer: Bool { player != nil && selection?.isDevice != true }
-
-    private var librarySection: LibrarySection? {
-        if case .library(let section) = selection { section } else { nil }
-    }
-
-    /// Only Albums has an inspector, showing the selected album's songs.
-    private var inspectorPresented: Binding<Bool> {
-        Binding(get: {
-            librarySection == .albums && isShowingAlbum && selectedAlbumID != nil
-        }, set: { isPresented in
-            if librarySection == .albums { isShowingAlbum = isPresented }
-        })
-    }
 
     private func show(_ playlist: LibraryPlaylist) {
         selectedPlaylistID = playlist.playlistID

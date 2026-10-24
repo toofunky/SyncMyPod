@@ -2,6 +2,9 @@ import SwiftData
 import SwiftUI
 
 struct PlaylistsView: View {
+    private static let listWidth = 200.0
+    private static let detailMinWidth = 300.0
+
     @Binding var selection: UUID?
     /// Each playlist's selected rows, kept here so they survive switching playlists or sections.
     @Binding var trackSelections: [UUID: Set<PlaylistEntry.ID>]
@@ -39,11 +42,13 @@ struct PlaylistsView: View {
     }
 
     private var splitView: some View {
-        HSplitView {
+        // Not an HSplitView, which adds the floating sidebar's width to its panes' minimum widths.
+        HStack(spacing: 0) {
             PlaylistListView(selection: $selection) { exportTarget = $0 }
-                .frame(minWidth: 160, idealWidth: 200, maxWidth: 320)
+                .frame(width: Self.listWidth)
+            Divider()
             detail
-                .frame(minWidth: 300, maxWidth: .infinity, maxHeight: .infinity)
+                .frame(minWidth: Self.detailMinWidth, maxWidth: .infinity, maxHeight: .infinity)
         }
     }
 
