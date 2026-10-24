@@ -8,6 +8,8 @@ struct SyncSummaryBar: View {
     let freeBytes: Int64?
     let isSyncing: Bool
     let onSync: () -> Void
+    /// Shows a Manage Storage button when set.
+    var onManageStorage: (() -> Void)?
 
     private var fits: Bool { totals?.fits(in: freeBytes) ?? true }
 
@@ -23,6 +25,10 @@ struct SyncSummaryBar: View {
             if isCalculating || isSyncing {
                 ProgressView()
                     .controlSize(.small)
+            }
+            if let onManageStorage {
+                Button("Manage Storage", systemImage: "internaldrive", action: onManageStorage)
+                    .disabled(isSyncing)
             }
             Button("Sync Now", systemImage: "arrow.triangle.2.circlepath", action: onSync)
                 .buttonStyle(.borderedProminent)
@@ -71,7 +77,8 @@ struct SyncSummaryBar: View {
 #Preview("Adding and removing") {
     SyncSummaryBar(totals: SyncPlanTotals(addCount: 1, addBytes: 8_000_000, moveCount: 2, removeCount: 1,
                                           removeBytes: 6_000_000, selectedCount: 3),
-                   isCalculating: false, freeBytes: 38_000_000_000, isSyncing: false, onSync: {})
+                   isCalculating: false, freeBytes: 38_000_000_000, isSyncing: false, onSync: {},
+                   onManageStorage: {})
 }
 
 #Preview("Up to date") {

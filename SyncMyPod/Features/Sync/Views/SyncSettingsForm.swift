@@ -11,6 +11,7 @@ struct SyncSettingsForm: View {
     let freeBytes: Int64?
     let isSyncing: Bool
     let onSync: (SyncPlan) -> Void
+    var onManageStorage: (() -> Void)?
 
     @State private var plan: SyncPlan?
     @State private var plannedInput: SyncPlanInput?
@@ -27,7 +28,7 @@ struct SyncSettingsForm: View {
             Divider()
             let input = planInput
             SyncSummaryBar(totals: plan?.totals, isCalculating: plannedInput != input, freeBytes: freeBytes,
-                           isSyncing: isSyncing) { plan.map(start) }
+                           isSyncing: isSyncing, onSync: { plan.map(start) }, onManageStorage: onManageStorage)
                 .task(id: input) { await replan(input) }
         }
         .confirmationDialog(removalTitle, isPresented: isConfirmingRemoval, presenting: pendingRemoval) { plan in
@@ -53,20 +54,14 @@ struct SyncSettingsForm: View {
     }
 
     private var removalTitle: String {
-        let removals = pendingRemoval?.removals ?? []
-        let episodes = removals.count { ($0.mediaType ?? 0) & TrackRecordBuilder.podcastMediaType != 0 }
-        let books = removals.count { ($0.mediaType ?? 0) & TrackRecordBuilder.audiobookMediaType != 0 }
-        return SyncRemovalWording.title(songs: removals.count - episodes - books, episodes: episodes,
-                                        audiobookFiles: books, deviceKind: "iPod")
+        SyncRemovalWording.title(removing: pendingRemoval?.removals ?? [], deviceKind: "iPod")
     }
 
     private func removalMessage(_ plan: SyncPlan) -> String {
-        let listed = plan.removals.prefix(Self.listedRemovalLimit).map { "\($0.title) — \($0.artist)" }
-        let remainder = plan.removals.count - listed.count
-        let more = remainder > 0 ? ["and \(remainder) more"] : []
         let reason = "They're no longer selected, their file or download was removed, or they duplicate another song "
             + "on the iPod. Your music library and downloads aren't affected."
-        return (listed + more + [reason]).joined(separator: "\n")
+        return (SyncRemovalWording.listing(plan.removals, limit: Self.listedRemovalLimit) + [reason])
+            .joined(separator: "\n")
     }
 }
 
