@@ -8,9 +8,8 @@ struct IPodAudiobookSyncTests {
                                                  includesAlbumSection: true, includesPodcastSection: true).build()
 
     private func part(_ name: String, in volume: TemporaryIPodVolume) throws -> SyncRequest {
-        var draft = ITunesTrackDraft(title: name, artist: "Mary Shelley", album: "Frankenstein", fileSize: 1_024)
-        draft.mediaKind = .audiobook
-        return SyncRequest(sourceURL: try volume.makeSourceFile(named: name), draft: draft,
+        let draft = TrackTags(title: name, artist: "Mary Shelley", album: "Frankenstein", fileSize: 1_024)
+        return SyncRequest(sourceURL: try volume.makeSourceFile(named: name), tags: draft,
                                source: SyncSource(fileSize: 1_024, modificationDate: .distantPast,
                                                   artworkFingerprint: nil), kind: .audiobook)
     }

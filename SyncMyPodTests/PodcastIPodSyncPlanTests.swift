@@ -35,13 +35,13 @@ struct PodcastIPodSyncPlanTests {
         let episode = try #require(show.episodes.first)
         let forIPod = try #require(episode.syncRequest(show: "Show", author: "", forIPod: true))
         #expect(forIPod.source == SyncSource(fileSize: 2_048, modificationDate: Self.downloaded, artworkFingerprint: nil))
-        #expect(forIPod.draft.mediaKind == .podcast && forIPod.draft.releaseDate == episode.publishedAt)
+        #expect(forIPod.kind == .podcast && forIPod.tags.releaseDate == episode.publishedAt)
         #expect(try #require(episode.syncRequest(show: "Show", author: "")).source == nil)
     }
 
     @Test func iPodsLeaveOutEpisodesTheyCantPlay() {
         let show = podcast("Show", files: ["One.ogg", "Two.mp3"])
-        #expect(show.syncSnapshot(forIPod: true)?.episodes.map(\.draft.title) == ["Two.mp3"])
+        #expect(show.syncSnapshot(forIPod: true)?.episodes.map(\.tags.title) == ["Two.mp3"])
         #expect(show.syncSnapshot()?.episodes.count == 2)
     }
 
@@ -49,9 +49,9 @@ struct PodcastIPodSyncPlanTests {
         let chosen = podcast("Chosen", files: ["A.mp3", "B.mp3"])
         let other = podcast("Other", files: ["C.mp3"])
         let plan = await plan([chosen, other], selection: SyncSelection(podcastScope: .selected, podcasts: [chosen.syncKey]))
-        #expect(plan.requests.map(\.draft.title) == ["A.mp3", "B.mp3"])
+        #expect(plan.requests.map(\.tags.title) == ["A.mp3", "B.mp3"])
         let list = try #require(plan.playlists.first { $0.isPodcasts })
-        #expect(list.id == SyncPlaylistRequest.podcastsID && list.tracks.map(\.draft.title) == ["A.mp3", "B.mp3"])
+        #expect(list.id == SyncPlaylistRequest.podcastsID && list.tracks.map(\.tags.title) == ["A.mp3", "B.mp3"])
     }
 
     @Test func noPodcastsListWithoutEpisodes() async {

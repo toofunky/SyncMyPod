@@ -31,7 +31,7 @@ nonisolated struct PlayerSongPreparer {
                 try manager.copyItem(at: request.sourceURL, to: prepared)
             }
             try await TagWriter(maximumPadding: Self.maximumPadding)
-                .write(changes, to: prepared, codec: request.draft.codec)
+                .write(changes, to: prepared, codec: request.tags.codec)
         } catch {
             try? manager.removeItem(at: folder)
             throw error

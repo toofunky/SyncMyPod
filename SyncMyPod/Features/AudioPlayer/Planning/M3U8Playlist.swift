@@ -3,11 +3,11 @@ import Foundation
 /// An extended M3U playlist, with paths relative to the playlist's own folder.
 nonisolated enum M3U8Playlist {
     /// `folder` and each entry's `path` are relative to the volume.
-    static func contents(_ entries: [(draft: ITunesTrackDraft, path: String)], inFolder folder: String) -> String {
+    static func contents(_ entries: [(tags: TrackTags, path: String)], inFolder folder: String) -> String {
         var lines = ["#EXTM3U"]
         for entry in entries {
-            let artist = entry.draft.artist.isEmpty ? "" : "\(entry.draft.artist) - "
-            lines.append("#EXTINF:\(Int(entry.draft.duration.rounded())),\(artist)\(entry.draft.title)")
+            let artist = entry.tags.artist.isEmpty ? "" : "\(entry.tags.artist) - "
+            lines.append("#EXTINF:\(Int(entry.tags.duration.rounded())),\(artist)\(entry.tags.title)")
             lines.append(relativePath(from: folder, to: entry.path))
         }
         return lines.joined(separator: "\n") + "\n"

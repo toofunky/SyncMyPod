@@ -28,10 +28,9 @@ struct IPodNanoPodcastSyncTests {
 
     private func episode(in volume: TemporaryIPodVolume) throws -> SyncRequest {
         let source = try AudioFixtureWriter.writeSilence(to: volume.url.appending(path: "source/Episode.m4a"))
-        var draft = ITunesTrackDraft(title: "Episode", album: "Show", fileSize: try Data(contentsOf: source).count)
-        draft.mediaKind = .podcast
+        var draft = TrackTags(title: "Episode", album: "Show", fileSize: try Data(contentsOf: source).count)
         draft.releaseDate = Self.released
-        return SyncRequest(sourceURL: source, draft: draft,
+        return SyncRequest(sourceURL: source, tags: draft,
                                source: SyncSource(fileSize: draft.fileSize, modificationDate: .distantPast,
                                                   artworkFingerprint: nil), kind: .podcast)
     }
@@ -63,9 +62,8 @@ struct IPodNanoPodcastSyncTests {
     @Test func audiobookPartsAreAudiobooksInTheNanosLibrary() async throws {
         let volume = try nanoVolume()
         let source = try AudioFixtureWriter.writeSilence(to: volume.url.appending(path: "source/01.m4a"))
-        var draft = ITunesTrackDraft(title: "Letters", album: "Frankenstein", fileSize: try Data(contentsOf: source).count)
-        draft.mediaKind = .audiobook
-        let part = SyncRequest(sourceURL: source, draft: draft,
+        let draft = TrackTags(title: "Letters", album: "Frankenstein", fileSize: try Data(contentsOf: source).count)
+        let part = SyncRequest(sourceURL: source, tags: draft,
                                    source: SyncSource(fileSize: draft.fileSize, modificationDate: .distantPast,
                                                       artworkFingerprint: nil), kind: .audiobook)
         let book = SyncAudiobookSnapshot(key: "book", title: "Frankenstein", author: "", files: [part],

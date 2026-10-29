@@ -6,10 +6,11 @@ struct ITunesDBEditorTests {
     private let vertigo = FixtureTrack(id: 101, title: "Vertigo", artist: "U2",
                                        album: "How to Dismantle an Atomic Bomb",
                                        location: ":iPod_Control:Music:F07:ABCD.m4a")
-    private let clocks = ITunesTrackDraft(title: "Clocks", artist: "Coldplay", album: "A Rush of Blood to the Head",
-                                          genre: "Rock", location: ":iPod_Control:Music:F01:WXYZ.m4a",
-                                          fileSize: 7_000_000, duration: 307.2, trackNumber: 5, trackCount: 11,
-                                          discNumber: 1, discCount: 1, year: 2002, bitrate: 256, sampleRate: 44_100)
+    private let clocks = ITunesTrackDraft(
+        tags: TrackTags(title: "Clocks", artist: "Coldplay", album: "A Rush of Blood to the Head", genre: "Rock",
+                        fileSize: 7_000_000, duration: 307.2, trackNumber: 5, trackCount: 11, discNumber: 1,
+                        discCount: 1, year: 2002, bitrate: 256, sampleRate: 44_100),
+        location: ":iPod_Control:Music:F01:WXYZ.m4a")
 
     private var fixture: Data {
         ITunesDBFixtureBuilder(tracks: [vertigo], playlists: [

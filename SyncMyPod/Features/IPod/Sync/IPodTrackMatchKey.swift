@@ -14,8 +14,8 @@ nonisolated struct IPodTrackMatchKey: Hashable, Sendable {
         self.fileSize = fileSize
     }
 
-    init(_ draft: ITunesTrackDraft) {
-        self.init(title: draft.title, artist: draft.artist, album: draft.album, fileSize: draft.fileSize)
+    init(_ tags: TrackTags) {
+        self.init(title: tags.title, artist: tags.artist, album: tags.album, fileSize: tags.fileSize)
     }
 
     init(_ track: ITunesTrack) {

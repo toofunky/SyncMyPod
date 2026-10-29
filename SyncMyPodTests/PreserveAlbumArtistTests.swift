@@ -16,7 +16,7 @@ struct PreserveAlbumArtistTests {
     }
 
     @Test func movesTrackArtistIntoTitleWhenArtistsDisagree() {
-        let draft = track(artist: "Bruno Mars", albumArtist: "Lady Gaga").syncRequest(preservingAlbumArtist: true).draft
+        let draft = track(artist: "Bruno Mars", albumArtist: "Lady Gaga").syncRequest(preservingAlbumArtist: true).tags
         #expect(draft.title == "Die With A Smile — Bruno Mars")
         #expect(draft.artist == "Lady Gaga")
         #expect(draft.albumArtist == "Lady Gaga")
@@ -26,7 +26,7 @@ struct PreserveAlbumArtistTests {
         let library = track(artist: "The Weeknd", albumArtist: "The Chainsmokers")
         library.title = "The Song"
         library.sortAlbumArtistTag = "Chainsmokers, The"
-        let draft = library.syncRequest(preservingAlbumArtist: true).draft
+        let draft = library.syncRequest(preservingAlbumArtist: true).tags
         #expect(draft.title == "The Song — The Weeknd")
         #expect(draft.sortTitle == "Song — The Weeknd")
         #expect(draft.sortArtist == "Chainsmokers, The")
@@ -35,7 +35,7 @@ struct PreserveAlbumArtistTests {
 
     @Test func leavesTagsAloneWhenOff() {
         let library = track(artist: "Bruno Mars", albumArtist: "Lady Gaga")
-        let draft = library.syncRequest(preservingAlbumArtist: false).draft
+        let draft = library.syncRequest(preservingAlbumArtist: false).tags
         #expect(draft.title == "Die With A Smile" && draft.artist == "Bruno Mars")
         #expect(library.title == "Die With A Smile" && library.artist == "Bruno Mars")
     }
@@ -43,7 +43,7 @@ struct PreserveAlbumArtistTests {
     @Test(arguments: [("Lady Gaga", "lady gaga "), ("Lady Gaga", ""), ("", "Lady Gaga")])
     func leavesTagsAloneWhenArtistsAgreeOrAreMissing(artist: String, albumArtist: String) {
         let request = track(artist: artist, albumArtist: albumArtist).syncRequest(preservingAlbumArtist: true)
-        #expect(request.draft.title == "Die With A Smile" && request.draft.artist == artist)
+        #expect(request.tags.title == "Die With A Smile" && request.tags.artist == artist)
         #expect(request.source?.preservedAlbumArtist == nil)
     }
 

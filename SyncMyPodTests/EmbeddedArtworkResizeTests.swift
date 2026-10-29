@@ -20,8 +20,8 @@ struct EmbeddedArtworkResizeTests {
         try FileManager.default.createDirectory(at: volume.libraryURL, withIntermediateDirectories: true)
         let cover = TestImage.pngData(TestImage.make(width: width, height: height, top: red))
         try await AudioFixtureWriter.embedCoverArt(cover, from: plain, to: source)
-        let draft = ITunesTrackDraft(title: "Song", artist: "Artist", album: "Album", fileSize: 1, codec: .aac)
-        return SyncRequest(sourceURL: source, draft: draft,
+        let draft = TrackTags(title: "Song", artist: "Artist", album: "Album", fileSize: 1, codec: .aac)
+        return SyncRequest(sourceURL: source, tags: draft,
                                source: SyncSource(fileSize: 1, modificationDate: .now, artworkFingerprint: "cover"))
     }
 

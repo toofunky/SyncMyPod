@@ -8,7 +8,7 @@ struct IPodTrackSyncerTests {
     ], includesAlbumSection: true).build()
 
     private func request(_ source: URL, title: String = "Song") -> SyncRequest {
-        SyncRequest(sourceURL: source, draft: ITunesTrackDraft(title: title, fileSize: 1_024))
+        SyncRequest(sourceURL: source, tags: TrackTags(title: title, fileSize: 1_024))
     }
 
     private func tracks(on volume: TemporaryIPodVolume) throws -> [ITunesTrack] {
@@ -48,7 +48,7 @@ struct IPodTrackSyncerTests {
         let volume = try TemporaryIPodVolume(database: fixture)
         let source = try volume.makeSourceFile()
         let details = SyncSource(fileSize: 1_024, modificationDate: .now, artworkFingerprint: nil)
-        let request = SyncRequest(sourceURL: source, draft: ITunesTrackDraft(title: "Song", fileSize: 1_024),
+        let request = SyncRequest(sourceURL: source, tags: TrackTags(title: "Song", fileSize: 1_024),
                                       source: details)
         let outcome = try await IPodTrackSyncer(volumeURL: volume.url).sync(adding: [request])
 
@@ -62,9 +62,9 @@ struct IPodTrackSyncerTests {
         let source = try volume.makeSourceFile()
         let details = SyncSource(fileSize: 1_024, modificationDate: .now, artworkFingerprint: nil)
         let syncer = IPodTrackSyncer(volumeURL: volume.url)
-        _ = try await syncer.sync(adding: [SyncRequest(sourceURL: source, draft: ITunesTrackDraft(title: "Song",
+        _ = try await syncer.sync(adding: [SyncRequest(sourceURL: source, tags: TrackTags(title: "Song",
                                                            fileSize: 1_024), source: details)])
-        let retagged = SyncRequest(sourceURL: source, draft: ITunesTrackDraft(title: "Renamed", fileSize: 1_100),
+        let retagged = SyncRequest(sourceURL: source, tags: TrackTags(title: "Renamed", fileSize: 1_100),
                                        source: details)
         let second = try await syncer.sync(adding: [retagged])
         #expect(second.addedCount == 0 && second.skipped == 1)

@@ -9,7 +9,7 @@ struct IPodPlaylistSyncTests {
     ], includesAlbumSection: true, includesPodcastSection: true).build()
 
     private func request(_ source: URL, title: String) -> SyncRequest {
-        SyncRequest(sourceURL: source, draft: ITunesTrackDraft(title: title, fileSize: 1_024),
+        SyncRequest(sourceURL: source, tags: TrackTags(title: title, fileSize: 1_024),
                         source: SyncSource(fileSize: 1_024, modificationDate: .now, artworkFingerprint: nil))
     }
 

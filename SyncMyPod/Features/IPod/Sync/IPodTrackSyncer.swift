@@ -96,7 +96,7 @@ nonisolated struct IPodTrackSyncer {
     private func write(_ batch: SyncBatch, with writer: inout IPodBatchWriter) async throws {
         for (index, item) in batch.items.enumerated() {
             await batch.progress(SyncProgress(completed: index, total: batch.items.count,
-                                                  currentTitle: item.request.draft.title))
+                                                  currentTitle: item.request.tags.title))
             guard !Task.isCancelled else {
                 writer.outcome.wasCancelled = true
                 return
@@ -135,7 +135,7 @@ nonisolated struct IPodTrackSyncer {
     /// Replaced files are only deleted after copying, so updates need room for their whole new file.
     private func ensureFreeSpace(for items: [SyncBatchItem], freeing freedBytes: Int64) throws {
         let artworkBytes = formats.reduce(0) { $0 + $1.byteCount }
-        let required = items.reduce(Int64(0)) { $0 + Int64($1.request.draft.fileSize + artworkBytes) }
+        let required = items.reduce(Int64(0)) { $0 + Int64($1.request.tags.fileSize + artworkBytes) }
         let values = try volumeURL.resourceValues(forKeys: [.volumeAvailableCapacityKey])
         let available = Int64(values.volumeAvailableCapacity ?? 0) + freedBytes
         guard required < available else {

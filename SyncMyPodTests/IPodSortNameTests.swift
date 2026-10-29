@@ -14,11 +14,11 @@ struct IPodSortNameTests {
     }
 
     private func strings(for track: LibraryTrack) throws -> [ITunesStringField: String] {
-        let draft = track.syncRequest(preservingAlbumArtist: false).draft
+        let draft = track.syncRequest(preservingAlbumArtist: false).tags
         var editor = try ITunesDBEditor(root: ITunesDBRecordParser(data: ITunesDBFixtureBuilder(tracks: [], playlists: [
             FixturePlaylist(id: 1, name: "iPod", isMaster: true, trackIDs: [])
         ]).build()).parse())
-        _ = editor.addTrack(draft)
+        _ = editor.addTrack(ITunesTrackDraft(tags: draft))
         return try #require(try ITunesDBParser(data: editor.serialized()).parse().tracks.first).strings
     }
 

@@ -88,7 +88,7 @@ nonisolated struct PlayerSyncPlanner {
                               destinations: [String: String]) -> PlayerPlaylistFile {
         let format = config.playlistFormat
         let entries = playlist.tracks.compactMap { track in
-            destinations[track.sourcePath].flatMap { format.canEncode($0) ? (track.draft, $0) : nil }
+            destinations[track.sourcePath].flatMap { format.canEncode($0) ? (track.tags, $0) : nil }
         }
         let contents = M3U8Playlist.contents(entries, inFolder: config.playlistPath)
         return PlayerPlaylistFile(path: path, contents: format.representable(contents), format: format)

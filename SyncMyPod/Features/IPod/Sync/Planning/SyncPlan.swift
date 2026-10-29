@@ -25,8 +25,8 @@ nonisolated struct SyncPlan: Equatable, Sendable {
     var alreadyOnDeviceCount: Int { selectedCount - requests.count - updates.count }
     /// What the syncer is handed: it works out again which of these are additions and which are updates.
     var syncRequests: [SyncRequest] { requests + updates.map(\.request) }
-    var byteCount: Int64 { requests.reduce(0) { $0 + Int64($1.draft.fileSize) } }
-    var updatedByteCount: Int64 { updates.reduce(0) { $0 + Int64($1.request.draft.fileSize) } }
+    var byteCount: Int64 { requests.reduce(0) { $0 + Int64($1.tags.fileSize) } }
+    var updatedByteCount: Int64 { updates.reduce(0) { $0 + Int64($1.request.tags.fileSize) } }
     var removedByteCount: Int64 { removals.reduce(0) { $0 + Int64($1.fileSize) } }
     var removalIDs: Set<UInt64> { Set(removals.map(\.databaseID)) }
 

@@ -8,5 +8,5 @@ nonisolated struct PlayerFileCopy: Equatable, Sendable {
     /// An earlier copy at another path, deleted once the new one is in place.
     var replacing: String?
 
-    var byteCount: Int64 { Int64(request.draft.fileSize) }
+    var byteCount: Int64 { Int64(request.tags.fileSize) }
 }

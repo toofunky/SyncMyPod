@@ -22,7 +22,7 @@ struct IPodClassicSyncTests {
         let source = volume.url.appending(path: "source/song.m4a")
         let cover = TestImage.make(width: 500, height: 500, top: TestImage.color(1, 0, 0))
         try await AudioFixtureWriter.embedCoverArt(TestImage.pngData(cover), from: silence, to: source)
-        return SyncRequest(sourceURL: source, draft: ITunesTrackDraft(title: "Song", album: "Album",
+        return SyncRequest(sourceURL: source, tags: TrackTags(title: "Song", album: "Album",
                                                                           fileSize: try Data(contentsOf: source).count))
     }
 

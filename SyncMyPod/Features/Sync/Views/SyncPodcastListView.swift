@@ -30,7 +30,7 @@ struct SyncPodcastListView: View {
 #Preview {
     @Previewable @State var selection: Set<String> = []
     let episode = SyncRequest(sourceURL: URL(filePath: "/Podcasts/Show/2026-10-15 Episode.mp3"),
-                                  draft: ITunesTrackDraft(title: "Episode", album: "I've Had It", fileSize: 53_000_000),
+                                  tags: TrackTags(title: "Episode", album: "I've Had It", fileSize: 53_000_000),
                                   kind: .podcast)
     SyncPodcastListView(podcasts: [
         SyncPodcastSnapshot(key: "show", playlist: SyncPlaylistRequest(id: 1, name: "I've Had It", createdAt: .now,

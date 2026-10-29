@@ -8,24 +8,23 @@ extension PodcastEpisode {
         guard let url = downloadedFileURL else { return nil }
         let fileCodec = codec ?? Self.codec(forExtension: url.pathExtension)
         guard !forIPod || fileCodec?.syncsToIPod == true else { return nil }
-        var draft = self.draft(show: show, author: author)
-        draft.codec = fileCodec ?? .mp3
-        draft.mediaKind = forIPod ? .podcast : .music
-        let source = forIPod ? SyncSource(fileSize: draft.fileSize, modificationDate: downloadedAt ?? .distantPast,
+        var tags = self.tags(show: show, author: author)
+        tags.codec = fileCodec ?? .mp3
+        let source = forIPod ? SyncSource(fileSize: tags.fileSize, modificationDate: downloadedAt ?? .distantPast,
                                           artworkFingerprint: nil) : nil
-        return SyncRequest(sourceURL: url, draft: draft, source: source, kind: .podcast)
+        return SyncRequest(sourceURL: url, tags: tags, source: source, kind: .podcast)
     }
 
-    private func draft(show: String, author: String) -> ITunesTrackDraft {
+    private func tags(show: String, author: String) -> TrackTags {
         let artist = author.isEmpty ? show : author
         let year = publishedAt.map { Calendar(identifier: .gregorian).component(.year, from: $0) } ?? 0
-        var draft = ITunesTrackDraft(title: title, artist: artist, album: show, albumArtist: artist,
+        var tags = TrackTags(title: title, artist: artist, album: show, albumArtist: artist,
                                      genre: PodcastEpisodeTags.genre, fileSize: Int(clamping: byteCount ?? 0),
                                      duration: duration ?? 0, trackNumber: episodeNumber ?? 0, year: year,
                                      bitrate: bitrate ?? 0, sampleRate: sampleRate ?? 0,
                                      dateAdded: downloadedAt ?? .now, lastModified: downloadedAt ?? .now)
-        draft.releaseDate = publishedAt
-        return draft
+        tags.releaseDate = publishedAt
+        return tags
     }
 
     /// MP4 audio is AAC to the iPod and MP3 is MP3; anything else is unknown until the file has been read.

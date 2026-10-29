@@ -6,8 +6,8 @@ nonisolated enum LooseTrackMatch {
     private static let durationTolerance: TimeInterval = 0.005
 
     static func matches(_ request: SyncRequest, _ track: ITunesTrack) -> Bool {
-        guard request.draft.duration > 0,
-              abs(request.draft.duration - track.duration) <= durationTolerance else { return false }
+        guard request.tags.duration > 0,
+              abs(request.tags.duration - track.duration) <= durationTolerance else { return false }
         let file = request.matchKey
         let copy = IPodTrackMatchKey(track)
         return [file.title == copy.title, file.artist == copy.artist, file.album == copy.album]
