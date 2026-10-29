@@ -212,8 +212,8 @@ struct SyncPlanTests {
         #expect(plan.updates.first?.artworkChanged == true)
     }
 
-    private func playlist(_ tracks: [LibraryTrack], id: UInt64 = 77, name: String = "Mix") -> IPodPlaylistRequest {
-        IPodPlaylistRequest(id: id, name: name, createdAt: .now, tracks: tracks.map { $0.syncRequest(preservingAlbumArtist: false) })
+    private func playlist(_ tracks: [LibraryTrack], id: UInt64 = 77, name: String = "Mix") -> SyncPlaylistRequest {
+        SyncPlaylistRequest(id: id, name: name, createdAt: .now, tracks: tracks.map { $0.syncRequest(preservingAlbumArtist: false) })
     }
 
     @Test func customSyncIncludesPlaylistSongs() {

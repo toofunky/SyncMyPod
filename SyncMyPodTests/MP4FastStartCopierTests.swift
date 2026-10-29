@@ -55,7 +55,7 @@ struct MP4FastStartCopierTests {
         let volume = try TemporaryPlayerVolume(config: config)
         let source = try lateMovieFixture(format: kAudioFormatAppleLossless)
         let draft = ITunesTrackDraft(title: "Song", artist: "Artist", album: "Album", fileSize: 1, codec: .alac)
-        let request = IPodSyncRequest(sourceURL: source, draft: draft,
+        let request = SyncRequest(sourceURL: source, draft: draft,
                                       source: SyncSource(fileSize: 1, modificationDate: .now, artworkFingerprint: nil))
         let plan = await PlayerDeviceContents.load(from: try volume.device).planner(for: config)
             .plan(selected: [request], playlists: nil)

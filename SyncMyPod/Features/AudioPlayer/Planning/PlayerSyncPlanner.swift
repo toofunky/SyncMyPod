@@ -17,8 +17,8 @@ nonisolated struct PlayerSyncPlanner {
 
     /// `nil` `playlists` leaves the player's playlists alone, and leaves covers and lyrics copied for songs
     /// that aren't in `selected`, as when adding a few songs.
-    func plan(selected: [IPodSyncRequest], unselected: [IPodSyncRequest] = [],
-              playlists: [IPodPlaylistRequest]?) -> PlayerSyncPlan {
+    func plan(selected: [SyncRequest], unselected: [SyncRequest] = [],
+              playlists: [SyncPlaylistRequest]?) -> PlayerSyncPlan {
         let selected = Self.unique(selected).map { $0.resizingArtwork(to: config.coverPixelLimit) }
         var plan = PlayerSyncPlan(selectedCount: selected.count)
         plan.removals = removals(unselected, keeping: Set(selected.map(\.sourcePath)))
@@ -33,7 +33,7 @@ nonisolated struct PlayerSyncPlanner {
         return plan
     }
 
-    private func classify(_ request: IPodSyncRequest, destination: String, into plan: inout PlayerSyncPlan) {
+    private func classify(_ request: SyncRequest, destination: String, into plan: inout PlayerSyncPlan) {
         guard let entry = manifest.entries[request.sourcePath], presentSizes[entry.path] != nil else {
             plan.copies.append(PlayerFileCopy(request: request, destination: destination))
             return
@@ -46,7 +46,7 @@ nonisolated struct PlayerSyncPlanner {
         }
     }
 
-    private func removals(_ unselected: [IPodSyncRequest], keeping kept: Set<String>) -> [PlayerFileRemoval] {
+    private func removals(_ unselected: [SyncRequest], keeping kept: Set<String>) -> [PlayerFileRemoval] {
         let removed = Set(unselected.map(\.sourcePath)).union(missingSources).subtracting(kept)
         return removed.compactMap { sourcePath in
             manifest.entries[sourcePath].map {
@@ -57,7 +57,7 @@ nonisolated struct PlayerSyncPlanner {
     }
 
     /// One path per file, compared case-insensitively as FAT and exFAT do, avoiding copies the sync keeps.
-    private func destinations(for requests: [IPodSyncRequest], removing removed: Set<String>) -> [String: String] {
+    private func destinations(for requests: [SyncRequest], removing removed: Set<String>) -> [String: String] {
         let moving = Set(requests.map(\.sourcePath)).union(removed)
         var taken = Set(manifest.entries.filter { !moving.contains($0.key) }.map { $0.value.path.lowercased() })
         var destinations: [String: String] = [:]
@@ -67,7 +67,7 @@ nonisolated struct PlayerSyncPlanner {
         return destinations
     }
 
-    private func add(_ playlists: [IPodPlaylistRequest], destinations: [String: String],
+    private func add(_ playlists: [SyncPlaylistRequest], destinations: [String: String],
                      to plan: inout PlayerSyncPlan) {
         let others = Set(existingPlaylists.keys).subtracting(manifest.playlistPaths)
         var taken = Set(others.map { $0.lowercased() })
@@ -84,7 +84,7 @@ nonisolated struct PlayerSyncPlanner {
     }
 
     /// Leaves out songs whose path the format can't encode, since a garbled line would never match the file.
-    private func playlistFile(_ playlist: IPodPlaylistRequest, at path: String,
+    private func playlistFile(_ playlist: SyncPlaylistRequest, at path: String,
                               destinations: [String: String]) -> PlayerPlaylistFile {
         let format = config.playlistFormat
         let entries = playlist.tracks.compactMap { track in
@@ -105,7 +105,7 @@ nonisolated struct PlayerSyncPlanner {
         return path
     }
 
-    private static func unique(_ requests: [IPodSyncRequest]) -> [IPodSyncRequest] {
+    private static func unique(_ requests: [SyncRequest]) -> [SyncRequest] {
         var seen: Set<String> = []
         return requests.filter { seen.insert($0.sourcePath).inserted }
     }

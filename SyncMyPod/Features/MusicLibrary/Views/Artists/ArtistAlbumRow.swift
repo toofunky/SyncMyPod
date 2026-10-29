@@ -44,7 +44,7 @@ struct ArtistAlbumRow: View {
                 .contentShape(.rect)
                 .onTapGesture(count: 2) { onPlay?(track) }
                 .contextMenu {
-                    LibrarySongContextMenu(tracks: [track], playlists: playlists, actions: actions)
+                    LibraryTrackContextMenu(tracks: [track], playlists: playlists, actions: actions)
                 }
         }
     }

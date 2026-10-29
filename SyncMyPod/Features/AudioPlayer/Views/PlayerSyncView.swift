@@ -13,7 +13,7 @@ struct PlayerSyncView: View {
     @Query(sort: \LibraryPlaylist.createdAt) private var playlists: [LibraryPlaylist]
     @Query private var podcasts: [Podcast]
     @Query private var audiobooks: [Audiobook]
-    @State private var settings: IPodSyncSettings?
+    @State private var settings: DeviceSyncSettings?
     @State private var contents: PlayerDeviceContents?
     @State private var missingSources: Set<String> = []
     @State private var sidecars = LibrarySidecars()
@@ -59,7 +59,7 @@ struct PlayerSyncView: View {
     /// Copies whose library file, download or audiobook file is gone for good are removed; ones on an unplugged
     /// drive are kept.
     private func reload() async {
-        settings = IPodSyncSettings.settings(for: device.id, in: context)
+        settings = DeviceSyncSettings.settings(for: device.id, in: context)
         let loaded = await PlayerDeviceContents.load(from: device)
         let libraryPaths = tracks.map(\.filePath)
         let synced = loaded.manifest.entries.keys

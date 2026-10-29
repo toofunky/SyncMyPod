@@ -71,7 +71,5 @@ struct ArtistsView: View {
     @Previewable @State var selection: LibraryArtist.ID?
     ArtistsView(tracks: LibraryTrack.previewTracks, selection: $selection)
         .frame(width: 800, height: 500)
-        .environment(DeviceMountWatcher.preview())
-        .environment(DeviceSyncModel())
 }
 #endif

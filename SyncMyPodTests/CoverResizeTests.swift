@@ -15,7 +15,7 @@ struct CoverResizeTests {
     }
 
     private func plan(on volume: TemporaryPlayerVolume, _ config: AudioPlayerConfig,
-                      song: IPodSyncRequest) async throws -> PlayerSyncPlan {
+                      song: SyncRequest) async throws -> PlayerSyncPlan {
         let contents = await PlayerDeviceContents.load(from: try volume.device)
         let sidecars = await LibrarySidecarFinder.find(besideSongsAt: [song.sourcePath], covers: true, lyrics: false)
         return contents.planner(for: config, sidecars: sidecars).plan(selected: [song], playlists: [])

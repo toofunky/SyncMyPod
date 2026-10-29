@@ -2,18 +2,18 @@ import SwiftUI
 
 /// A button for a single connected device, or a menu of them when there are several.
 struct AddToDeviceMenu: View {
-    let devices: [ConnectedDevice]
-    let onAdd: (ConnectedDevice) -> Void
+    let targets: [LibraryAddTarget]
+    let onAdd: (LibraryAddTarget) -> Void
 
     var body: some View {
-        if devices.count > 1 {
+        if targets.count > 1 {
             Menu("Add to Device", systemImage: "ipod") {
-                ForEach(devices) { device in
-                    Button(device.displayName, systemImage: device.systemImage) { onAdd(device) }
+                ForEach(targets) { target in
+                    Button(target.name, systemImage: target.systemImage) { onAdd(target) }
                 }
             }
-        } else if let device = devices.first {
-            Button("Add to \(device.displayName)", systemImage: device.systemImage) { onAdd(device) }
+        } else if let target = targets.first {
+            Button("Add to \(target.name)", systemImage: target.systemImage) { onAdd(target) }
         } else {
             Button("Add to iPod", systemImage: "ipod") {}
                 .disabled(true)
@@ -23,12 +23,12 @@ struct AddToDeviceMenu: View {
 
 #if DEBUG
 #Preview("Several") {
-    AddToDeviceMenu(devices: [.iPod(.preview), .iPod(.previewNano)], onAdd: { _ in })
+    AddToDeviceMenu(targets: LibraryAddTarget.previews, onAdd: { _ in })
         .padding()
 }
 
 #Preview("One") {
-    AddToDeviceMenu(devices: [.iPod(.preview)], onAdd: { _ in })
+    AddToDeviceMenu(targets: [LibraryAddTarget.previews[0]], onAdd: { _ in })
         .padding()
 }
 #endif

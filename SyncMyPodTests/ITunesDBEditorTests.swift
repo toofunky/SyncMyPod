@@ -126,7 +126,7 @@ struct ITunesDBEditorTests {
 
     @Test func rejectsDatabaseWithoutMasterPlaylist() throws {
         let data = ITunesDBFixtureBuilder(tracks: [vertigo]).build()
-        #expect(throws: IPodSyncError.missingMasterPlaylist) {
+        #expect(throws: ITunesDBError.missingMasterPlaylist) {
             try ITunesDBEditor(root: ITunesDBRecordParser(data: data).parse())
         }
     }

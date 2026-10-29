@@ -26,13 +26,13 @@ final class TemporaryPlayerVolume {
 
     func request(_ title: String, album: String = "Album", artist: String = "Artist", file: String? = nil,
                  track: Int = 1, disc: Int = 0, discCount: Int = 0, bytes: Int = 512,
-                 modified: Date = Date(timeIntervalSince1970: 1_000)) throws -> IPodSyncRequest {
+                 modified: Date = Date(timeIntervalSince1970: 1_000)) throws -> SyncRequest {
         let source = libraryURL.appending(path: file ?? "\(title).m4a")
         try FileManager.default.createDirectory(at: source.deletingLastPathComponent(), withIntermediateDirectories: true)
         try Data(repeating: UInt8(title.count % 256), count: bytes).write(to: source)
         let draft = ITunesTrackDraft(title: title, artist: artist, album: album, fileSize: bytes, trackNumber: track,
                                      discNumber: disc, discCount: discCount)
-        return IPodSyncRequest(sourceURL: source, draft: draft,
+        return SyncRequest(sourceURL: source, draft: draft,
                                source: SyncSource(fileSize: bytes, modificationDate: modified, artworkFingerprint: nil))
     }
 

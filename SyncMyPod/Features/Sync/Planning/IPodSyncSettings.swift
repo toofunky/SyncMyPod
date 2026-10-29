@@ -1,7 +1,7 @@
 import Foundation
 import SwiftData
 
-/// What to sync to one iPod, remembered per device.
+/// What to sync to one iPod or player, remembered per device. Referred to as `DeviceSyncSettings`.
 @Model
 nonisolated final class IPodSyncSettings {
     @Attribute(.unique) var deviceID: String

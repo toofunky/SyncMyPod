@@ -9,7 +9,7 @@ struct IPodHousekeepingSyncTests {
     ], includesAlbumSection: true).build()
 
     private func song(_ name: String, album: String, in volume: TemporaryIPodVolume,
-                      cover: CGColor? = nil) async throws -> IPodSyncRequest {
+                      cover: CGColor? = nil) async throws -> SyncRequest {
         let silence = try AudioFixtureWriter.writeSilence(to: volume.url.appending(path: "source/\(name)-plain.m4a"))
         var source = silence
         if let cover {
@@ -19,7 +19,7 @@ struct IPodHousekeepingSyncTests {
         }
         let draft = ITunesTrackDraft(title: name, artist: "Band", album: album,
                                      fileSize: try Data(contentsOf: source).count)
-        return IPodSyncRequest(sourceURL: source, draft: draft)
+        return SyncRequest(sourceURL: source, draft: draft)
     }
 
     private func tracks(on volume: TemporaryIPodVolume) throws -> [ITunesTrack] {

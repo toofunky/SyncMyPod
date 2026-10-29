@@ -9,16 +9,16 @@ struct IPodTrackUpdateSyncTests {
     ], includesAlbumSection: true).build()
 
     private func request(_ source: URL, title: String, version: Int,
-                         fingerprint: String? = nil) throws -> IPodSyncRequest {
+                         fingerprint: String? = nil) throws -> SyncRequest {
         let size = try Data(contentsOf: source).count
         let details = SyncSource(fileSize: size, modificationDate: Date(timeIntervalSinceReferenceDate: Double(version)),
                                  artworkFingerprint: fingerprint)
-        return IPodSyncRequest(sourceURL: source, draft: ITunesTrackDraft(title: title, album: "Album", fileSize: size),
+        return SyncRequest(sourceURL: source, draft: ITunesTrackDraft(title: title, album: "Album", fileSize: size),
                                source: details)
     }
 
     /// Writes real audio at the same path each time, with the cover (if any) embedded.
-    private func song(in volume: TemporaryIPodVolume, cover: CGColor?, version: Int) async throws -> IPodSyncRequest {
+    private func song(in volume: TemporaryIPodVolume, cover: CGColor?, version: Int) async throws -> SyncRequest {
         let plain = try AudioFixtureWriter.writeSilence(to: volume.url.appending(path: "source/plain-\(version).m4a"))
         let destination = volume.url.appending(path: "source/song.m4a")
         try? FileManager.default.removeItem(at: destination)
@@ -108,10 +108,10 @@ struct IPodTrackUpdateSyncTests {
         let source = try volume.makeSourceFile()
         let original = ITunesTrackDraft(title: "The Sign", artist: "Ace of Base", album: "The Sign",
                                         fileSize: 1_024, duration: 192.445)
-        _ = try await syncer.sync(adding: [IPodSyncRequest(sourceURL: source, draft: original)])
+        _ = try await syncer.sync(adding: [SyncRequest(sourceURL: source, draft: original)])
         var retagged = original
         retagged.artist = "Ace of Base Test"
-        let edited = IPodSyncRequest(sourceURL: source, draft: retagged,
+        let edited = SyncRequest(sourceURL: source, draft: retagged,
                                      source: SyncSource(fileSize: 1_024, modificationDate: .now, artworkFingerprint: nil))
         let files = IPodControlFiles(volumeURL: volume.url)
         var manifest = files.manifest()

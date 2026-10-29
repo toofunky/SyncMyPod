@@ -92,7 +92,7 @@ struct PlayerSyncPlannerTests {
     @Test func playlistsPointAtTheSongsRelativeToThePlaylistFolder() throws {
         let volume = try TemporaryPlayerVolume(config: config)
         let song = try volume.request("Clocks", artist: "Coldplay")
-        let playlist = IPodPlaylistRequest(id: 1, name: "Road/Trip", createdAt: .now, tracks: [song])
+        let playlist = SyncPlaylistRequest(id: 1, name: "Road/Trip", createdAt: .now, tracks: [song])
         let plan = planner().plan(selected: [song], playlists: [playlist])
         #expect(plan.playlists?.map(\.path) == ["Playlists/Road_Trip.m3u8"])
         #expect(plan.playlists?.first?.contents
@@ -103,7 +103,7 @@ struct PlayerSyncPlannerTests {
     @Test func playlistsCountOnlyRealChangesAndNeverReplaceOtherPlaylists() throws {
         let volume = try TemporaryPlayerVolume(config: config)
         let song = try volume.request("Song")
-        let mix = IPodPlaylistRequest(id: 1, name: "Mix", createdAt: .now, tracks: [song])
+        let mix = SyncPlaylistRequest(id: 1, name: "Mix", createdAt: .now, tracks: [song])
         let ours = planner().plan(selected: [song], playlists: [mix]).playlists?.first?.contents
         let existing = ["Playlists/Mix.m3u8": "#EXTM3U\n", "Playlists/Old.m3u8": ours ?? ""]
         let plan = planner(playlists: existing, playlistPaths: ["Playlists/Old.m3u8"])
@@ -119,7 +119,7 @@ struct PlayerSyncPlannerTests {
         let volume = try TemporaryPlayerVolume(config: latin1)
         let accented = try volume.request("Hoppípolla", artist: "Sigur Rós")
         let japanese = try volume.request("Song", artist: "ビートルズ")
-        let playlist = IPodPlaylistRequest(id: 1, name: "Mix", createdAt: .now, tracks: [accented, japanese])
+        let playlist = SyncPlaylistRequest(id: 1, name: "Mix", createdAt: .now, tracks: [accented, japanese])
         let plan = planner(latin1).plan(selected: [accented, japanese], playlists: [playlist])
         let file = try #require(plan.playlists?.first)
         #expect(file.path == "Playlists/Mix.m3u")
@@ -134,7 +134,7 @@ struct PlayerSyncPlannerTests {
         latin1.playlistFormat = .m3u
         let volume = try TemporaryPlayerVolume(config: latin1)
         let song = try volume.request("ビ", file: "Song.m4a")
-        let playlist = IPodPlaylistRequest(id: 1, name: "Mix", createdAt: .now, tracks: [song])
+        let playlist = SyncPlaylistRequest(id: 1, name: "Mix", createdAt: .now, tracks: [song])
         let contents = planner(latin1).plan(selected: [song], playlists: [playlist]).playlists?.first?.contents
         #expect(contents == "#EXTM3U\n#EXTINF:0,Artist - ?\n../Music/Artist/Album/Song.m4a\n")
     }
@@ -144,7 +144,7 @@ struct PlayerSyncPlannerTests {
         latin1.playlistFormat = .m3u
         let volume = try TemporaryPlayerVolume(config: latin1)
         let song = try volume.request("Song")
-        let mix = IPodPlaylistRequest(id: 1, name: "Mix", createdAt: .now, tracks: [song])
+        let mix = SyncPlaylistRequest(id: 1, name: "Mix", createdAt: .now, tracks: [song])
         let plan = planner(latin1, playlists: ["Playlists/Mix.m3u8": "#EXTM3U\n"], playlistPaths: ["Playlists/Mix.m3u8"])
             .plan(selected: [song], playlists: [mix])
         #expect(plan.playlists?.map(\.path) == ["Playlists/Mix.m3u"])

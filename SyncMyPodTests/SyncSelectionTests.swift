@@ -42,23 +42,23 @@ struct SyncSelectionTests {
     @Test func playlistSongsAreSelectedWhateverTheSongScope() {
         let tracks = library
         let snapshots = tracks.map { $0.syncSnapshot(preservingAlbumArtist: false) }
-        let playlist = IPodPlaylistRequest(id: 1, name: "Mix", createdAt: .now,
+        let playlist = SyncPlaylistRequest(id: 1, name: "Mix", createdAt: .now,
                                            tracks: [tracks[1].syncRequest(preservingAlbumArtist: false)])
         let result = SyncSelection(songs: .none).partition(snapshots, syncedPlaylists: [playlist])
         #expect(titles(result.selected) == ["Two"])
     }
 
     @Test func selectedSyncsOnlyChosenPlaylists() {
-        let mix = SyncPlaylistSnapshot(key: "mix", request: IPodPlaylistRequest(id: 1, name: "Mix", createdAt: .now,
+        let mix = SyncPlaylistSnapshot(key: "mix", request: SyncPlaylistRequest(id: 1, name: "Mix", createdAt: .now,
                                                                                 tracks: []))
-        let chill = SyncPlaylistSnapshot(key: "chill", request: IPodPlaylistRequest(id: 2, name: "Chill",
+        let chill = SyncPlaylistSnapshot(key: "chill", request: SyncPlaylistRequest(id: 2, name: "Chill",
                                                                                     createdAt: .now, tracks: []))
         #expect(SyncSelection(playlistScope: .selected, playlists: ["chill"]).playlists(in: [mix, chill]).map(\.name) == ["Chill"])
         #expect(SyncSelection().playlists(in: [mix, chill]).count == 2)
     }
 
     @Test func noPlaylistsSyncWhenTheirScopeIsNone() {
-        let mix = SyncPlaylistSnapshot(key: "mix", request: IPodPlaylistRequest(id: 1, name: "Mix", createdAt: .now,
+        let mix = SyncPlaylistSnapshot(key: "mix", request: SyncPlaylistRequest(id: 1, name: "Mix", createdAt: .now,
                                                                                 tracks: []))
         #expect(SyncSelection(playlistScope: .none, playlists: ["mix"]).playlists(in: [mix]).isEmpty)
     }
@@ -71,7 +71,7 @@ struct SyncSelectionTests {
     }
 
     @Test func podcastsFollowTheirOwnScope() {
-        let shows = ["chosen", "other"].map { SyncPodcastSnapshot(key: $0, playlist: IPodPlaylistRequest(
+        let shows = ["chosen", "other"].map { SyncPodcastSnapshot(key: $0, playlist: SyncPlaylistRequest(
             id: 1, name: $0, createdAt: .now, tracks: [])) }
         let chosen = SyncSelection(podcastScope: .selected, podcasts: ["chosen"]).partition(shows)
         #expect(chosen.selected.map(\.key) == ["chosen"] && chosen.unselected.map(\.key) == ["other"])

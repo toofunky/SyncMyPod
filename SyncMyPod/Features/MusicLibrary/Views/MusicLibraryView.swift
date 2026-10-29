@@ -12,10 +12,9 @@ struct MusicLibraryView: View {
     var showPlaylist: ((LibraryPlaylist) -> Void)?
 
     @Environment(\.modelContext) private var context
-    @Environment(DeviceMountWatcher.self) private var watcher
+    @Environment(\.isSyncingDevice) private var isSyncingDevice
     @Query private var folders: [LibraryFolder]
     @Query private var tracks: [LibraryTrack]
-    @Environment(DeviceSyncModel.self) private var syncModel
     @State private var isChoosingFolder = false
     @State private var searchText = ""
     @AppStorage(AppAppearance.storageKey) private var appearance = AppAppearance.system
@@ -27,18 +26,6 @@ struct MusicLibraryView: View {
             .modifier(LibraryFolderChoiceModifier(isChoosingFolder: $isChoosingFolder, currentFolder: folders.first) {
                 model.chooseFolder($0, in: context)
             })
-            .syncProgressSheet()
-    }
-
-    private var addTargets: [ConnectedDevice] {
-        syncModel.isSyncing ? [] : watcher.connectedDevices
-    }
-
-    private var addToDevice: ((ConnectedDevice, [LibraryTrack]) -> Void)? {
-        guard !addTargets.isEmpty else { return nil }
-        return { device, tracks in
-            syncModel.add(tracks, to: device, in: context)
-        }
     }
 
     @ViewBuilder
@@ -66,7 +53,7 @@ struct MusicLibraryView: View {
         switch section {
         case .songs:
             LibraryTrackTableView(tracks: tracks, selection: $selection, searchText: searchText,
-                                  addTargets: addTargets, addToDevice: addToDevice, showPlaylist: showPlaylist)
+                                  showPlaylist: showPlaylist)
         case .albums:
             AlbumBrowserView(tracks: tracks, searchText: searchText, selection: $albumSelection,
                              isShowingTracks: $isShowingAlbumTracks, showPlaylist: showPlaylist)
@@ -92,7 +79,7 @@ struct MusicLibraryView: View {
                    systemImage: AppAppearance.toggleSymbolName(for: colorScheme)) {
                 appearance = AppAppearance.toggled(from: colorScheme)
             }
-            if syncModel.isSyncing {
+            if isSyncingDevice {
                 ProgressView()
                     .controlSize(.small)
             }
@@ -111,8 +98,7 @@ struct MusicLibraryView: View {
     @Previewable @State var selection = Set<LibraryTrack.ID>()
     MusicLibraryView(model: MusicLibraryModel(), selection: $selection, albumSelection: .constant(nil),
                      artistSelection: .constant(nil), isShowingAlbumTracks: .constant(false))
-        .environment(DeviceMountWatcher.preview(connectedDevices: [.iPod(.preview)]))
-        .environment(DeviceSyncModel())
+        .environment(\.libraryAddTargets, LibraryAddTarget.previews)
         .modelContainer(.preview)
 }
 
@@ -122,8 +108,7 @@ struct MusicLibraryView: View {
     MusicLibraryView(model: MusicLibraryModel(), section: .albums, selection: .constant([]),
                      albumSelection: $albumSelection, artistSelection: .constant(nil),
                      isShowingAlbumTracks: $isShowingAlbumTracks)
-        .environment(DeviceMountWatcher.preview(connectedDevices: [.iPod(.preview)]))
-        .environment(DeviceSyncModel())
+        .environment(\.libraryAddTargets, LibraryAddTarget.previews)
         .modelContainer(.preview)
 }
 
@@ -131,8 +116,6 @@ struct MusicLibraryView: View {
     @Previewable @State var selection = Set<LibraryTrack.ID>()
     MusicLibraryView(model: MusicLibraryModel(), selection: $selection, albumSelection: .constant(nil),
                      artistSelection: .constant(nil), isShowingAlbumTracks: .constant(false))
-        .environment(DeviceMountWatcher.preview())
-        .environment(DeviceSyncModel())
         .modelContainer(.emptyPreview)
 }
 #endif

@@ -38,8 +38,6 @@ struct AlbumBrowserView: View {
     @Previewable @State var isShowingTracks = true
     AlbumBrowserView(tracks: LibraryTrack.previewTracks, selection: $selection, isShowingTracks: $isShowingTracks)
         .frame(width: 900, height: 500)
-        .environment(DeviceMountWatcher.preview())
-        .environment(DeviceSyncModel())
         .modelContainer(.preview)
 }
 #endif

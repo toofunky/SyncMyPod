@@ -11,14 +11,14 @@ struct PlayerSidecarTests {
         return config
     }
 
-    private func sidecars(for requests: [IPodSyncRequest], _ config: AudioPlayerConfig) async -> LibrarySidecars {
+    private func sidecars(for requests: [SyncRequest], _ config: AudioPlayerConfig) async -> LibrarySidecars {
         await LibrarySidecarFinder.find(besideSongsAt: requests.map(\.sourcePath), covers: config.copyCovers,
                                         lyrics: config.copyLyricFiles)
     }
 
-    private func plan(on volume: TemporaryPlayerVolume, _ config: AudioPlayerConfig, selected: [IPodSyncRequest],
-                      unselected: [IPodSyncRequest] = [],
-                      playlists: [IPodPlaylistRequest]? = []) async throws -> PlayerSyncPlan {
+    private func plan(on volume: TemporaryPlayerVolume, _ config: AudioPlayerConfig, selected: [SyncRequest],
+                      unselected: [SyncRequest] = [],
+                      playlists: [SyncPlaylistRequest]? = []) async throws -> PlayerSyncPlan {
         let contents = await PlayerDeviceContents.load(from: try volume.device)
         let found = await sidecars(for: selected + unselected, config)
         return contents.planner(for: config, sidecars: found)

@@ -2,7 +2,7 @@ import Foundation
 
 /// A library file to copy onto the player.
 nonisolated struct PlayerFileCopy: Equatable, Sendable {
-    let request: IPodSyncRequest
+    let request: SyncRequest
     /// Relative to the volume.
     let destination: String
     /// An earlier copy at another path, deleted once the new one is in place.

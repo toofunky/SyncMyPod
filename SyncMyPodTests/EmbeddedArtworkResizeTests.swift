@@ -14,19 +14,19 @@ struct EmbeddedArtworkResizeTests {
     }
 
     /// A song whose embedded cover is `width` × `height`, as the library scan would describe it.
-    private func song(in volume: TemporaryPlayerVolume, width: Int, height: Int) async throws -> IPodSyncRequest {
+    private func song(in volume: TemporaryPlayerVolume, width: Int, height: Int) async throws -> SyncRequest {
         let plain = try AudioFixtureWriter.writeSilence(to: volume.root.appending(path: "plain-\(UUID()).m4a"))
         let source = volume.libraryURL.appending(path: "Song.m4a")
         try FileManager.default.createDirectory(at: volume.libraryURL, withIntermediateDirectories: true)
         let cover = TestImage.pngData(TestImage.make(width: width, height: height, top: red))
         try await AudioFixtureWriter.embedCoverArt(cover, from: plain, to: source)
         let draft = ITunesTrackDraft(title: "Song", artist: "Artist", album: "Album", fileSize: 1, codec: .aac)
-        return IPodSyncRequest(sourceURL: source, draft: draft,
+        return SyncRequest(sourceURL: source, draft: draft,
                                source: SyncSource(fileSize: 1, modificationDate: .now, artworkFingerprint: "cover"))
     }
 
     private func plan(on volume: TemporaryPlayerVolume, _ config: AudioPlayerConfig,
-                      songs: [IPodSyncRequest]) async throws -> PlayerSyncPlan {
+                      songs: [SyncRequest]) async throws -> PlayerSyncPlan {
         await PlayerDeviceContents.load(from: try volume.device).planner(for: config)
             .plan(selected: songs, playlists: nil)
     }
