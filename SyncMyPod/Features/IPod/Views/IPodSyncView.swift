@@ -42,7 +42,7 @@ struct IPodSyncView: View {
             SyncSettingsForm(settings: settings, library: library(settings), onDevice: onDevice,
                              manifest: manifest, freeBytes: freeBytes ?? device.availableBytes,
                              isSyncing: syncModel.isSyncing) {
-                syncModel.sync($0.syncRequests, removing: $0.removalIDs, playlists: $0.playlists, to: .iPod(device))
+                syncModel.sync($0.syncRequests, removing: $0.removalIDs, playlists: $0.playlists, to: device)
             } onManageStorage: {
                 isManagingStorage = true
             }

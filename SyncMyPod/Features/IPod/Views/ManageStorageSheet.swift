@@ -38,7 +38,7 @@ struct ManageStorageSheet: View {
 
     /// The list reloads once the removal finishes, so more songs can be removed.
     private func remove() {
-        syncModel.sync([], removing: Set(pendingRemoval.map(\.databaseID)), to: .iPod(device))
+        syncModel.sync([], removing: Set(pendingRemoval.map(\.databaseID)), to: device)
         pendingRemoval = []
     }
 }

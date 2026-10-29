@@ -16,80 +16,34 @@ final class DeviceSyncModel {
     @ObservationIgnored private var syncTask: Task<Void, Never>?
     @ObservationIgnored private var verificationTask: Task<Void, Never>?
 
-    /// Non-`nil` `playlists` replace every playlist earlier syncs wrote.
-    func sync(_ requests: [SyncRequest], removing removals: Set<UInt64> = [],
-              playlists: [SyncPlaylistRequest]? = nil, to device: ConnectedDevice) {
-        guard !isSyncing, !requests.isEmpty || !removals.isEmpty || playlists != nil else { return }
-        switch device {
-        case .iPod(let iPod):
-            syncIPod(iPod, adding: requests, removing: removals, playlists: playlists, as: device)
-        case .audioPlayer(let player):
-            addToPlayer(requests, player: player, as: device)
+    /// Shows progress, runs the job and records its result.
+    func run(_ job: some DeviceSyncJob) {
+        guard !isSyncing else { return }
+        verificationTask?.cancel()
+        progress = SyncProgress(completed: 0, total: job.total, currentTitle: nil)
+        isSyncing = true
+        syncingDeviceID = job.deviceID
+        syncingDeviceKind = job.deviceKind
+        syncTask = Task {
+            do {
+                let completion = try await job.run { update in await self.report(update) }
+                result = .finished(completion.summary)
+                if let wasOverwritten = completion.wasOverwritten { verify(wasOverwritten) }
+            } catch {
+                result = .failed(error.localizedDescription, deviceKind: job.deviceKind)
+            }
+            finish()
         }
     }
 
-    /// Carries out a plan made on the player's Sync tab.
-    func sync(_ plan: PlayerSyncPlan, to player: AudioPlayerDevice) {
-        guard !isSyncing, !plan.isEmpty else { return }
-        let syncer = PlayerTrackSyncer(device: player)
-        start(on: .audioPlayer(player), total: plan.writes.count) { report in
-            try await syncer.sync(plan, progress: report)
-        }
-    }
-
-    /// Copies songs chosen in the library, with their covers and lyrics, without removing anything or
-    /// touching playlists.
-    private func addToPlayer(_ requests: [SyncRequest], player: AudioPlayerDevice, as device: ConnectedDevice) {
-        let syncer = PlayerTrackSyncer(device: player)
-        let config = player.config
-        start(on: device, total: requests.count) { report in
-            let contents = await PlayerDeviceContents.load(from: player)
-            let sidecars = await LibrarySidecarFinder.find(besideSongsAt: requests.map(\.sourcePath),
-                                                           covers: config.copyCovers, lyrics: config.copyLyricFiles)
-            let plan = contents.planner(for: config, sidecars: sidecars).plan(selected: requests, playlists: nil)
-            return try await syncer.sync(plan, progress: report)
-        }
+    /// For a sync that couldn't be set up, so never started.
+    func recordFailure(_ error: any Error, deviceKind: String) {
+        result = .failed(error.localizedDescription, deviceKind: deviceKind)
     }
 
     func cancel() {
         isCancelling = true
         syncTask?.cancel()
-    }
-
-    private func syncIPod(_ iPod: IPodDevice, adding requests: [SyncRequest], removing removals: Set<UInt64>,
-                          playlists: [SyncPlaylistRequest]?, as device: ConnectedDevice) {
-        let syncer: IPodTrackSyncer
-        do {
-            syncer = try IPodTrackSyncer(device: iPod)
-        } catch {
-            result = .failed(error.localizedDescription, deviceKind: device.kindName)
-            return
-        }
-        verificationTask?.cancel()
-        start(on: device, total: requests.count) { [weak self] report in
-            let outcome = try await syncer.sync(adding: requests, removing: removals, playlists: playlists,
-                                                progress: report)
-            self?.verify(IPodSyncExpectation(outcome: outcome, removals: removals, playlists: playlists),
-                         onVolume: syncer.volumeURL)
-            return SyncSummary(outcome, deviceKind: device.kindName)
-        }
-    }
-
-    /// Shows progress, runs `work` off the main actor and records its result.
-    private func start(on device: ConnectedDevice, total: Int,
-                       _ work: @escaping (@escaping @Sendable (SyncProgress) async -> Void) async throws -> SyncSummary) {
-        progress = SyncProgress(completed: 0, total: total, currentTitle: nil)
-        isSyncing = true
-        syncingDeviceID = device.id
-        syncingDeviceKind = device.kindName
-        syncTask = Task {
-            do {
-                result = .finished(try await work { update in await self.report(update) })
-            } catch {
-                result = .failed(error.localizedDescription, deviceKind: device.kindName)
-            }
-            finish()
-        }
     }
 
     private func finish() {
@@ -102,10 +56,9 @@ final class DeviceSyncModel {
     }
 
     /// Reloads the Sync tab and says so if another app undid the sync.
-    private func verify(_ expectation: IPodSyncExpectation, onVolume volumeURL: URL) {
-        guard !expectation.isEmpty else { return }
+    private func verify(_ wasOverwritten: @escaping @Sendable () async -> Bool) {
         verificationTask = Task {
-            let overwritten = await IPodSyncVerifier.wasOverwritten(expectation, onVolume: volumeURL)
+            let overwritten = await wasOverwritten()
             guard overwritten, !Task.isCancelled, !isSyncing else { return }
             result = .overwritten
             completedSyncCount += 1
