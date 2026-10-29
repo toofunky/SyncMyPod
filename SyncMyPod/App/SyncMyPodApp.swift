@@ -9,8 +9,7 @@ struct SyncMyPodApp: App {
     @State private var updater = AppUpdater()
     @State private var podcasts = PodcastsModel()
     @State private var podcastDownloads = PodcastDownloads()
-    @State private var podcastFolder = PodcastFolder()
-    @State private var audiobookFolder = AudiobookFolder()
+    @State private var mediaFolders = MediaFolders()
     @State private var audiobooks = AudiobooksModel()
     private let modelContainer = LibraryStore.makeContainer()
     @AppStorage(AppAppearance.storageKey) private var appearance = AppAppearance.system
@@ -28,8 +27,7 @@ struct SyncMyPodApp: App {
                 .environment(player)
                 .environment(podcasts)
                 .environment(podcastDownloads)
-                .environment(podcastFolder)
-                .environment(audiobookFolder)
+                .environment(mediaFolders)
                 .environment(audiobooks)
                 .preferredColorScheme(appearance.colorScheme)
         }
@@ -42,8 +40,7 @@ struct SyncMyPodApp: App {
 
         Settings {
             SettingsView()
-                .environment(podcastFolder)
-                .environment(audiobookFolder)
+                .environment(mediaFolders)
                 .preferredColorScheme(appearance.colorScheme)
         }
         .modelContainer(modelContainer)

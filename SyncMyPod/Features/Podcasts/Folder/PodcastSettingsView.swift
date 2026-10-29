@@ -4,8 +4,11 @@ import SwiftUI
 
 /// Chooses the folder podcast episodes are downloaded into.
 struct PodcastSettingsView: View {
-    @Environment(PodcastFolder.self) private var folder
+    @Environment(MediaFolders.self) private var mediaFolders
+    @Query private var libraryFolders: [LibraryFolder]
     @State private var isChoosing = false
+
+    private var folder: ManagedFolder { mediaFolders.podcasts }
 
     var body: some View {
         Form {
@@ -20,7 +23,7 @@ struct PodcastSettingsView: View {
             }
         }
         .formStyle(.grouped)
-        .podcastFolderChooser(isPresented: $isChoosing)
+        .mediaFolderChooser(.podcasts, isPresented: $isChoosing, musicFolderPath: libraryFolders.first?.path)
     }
 
     private var folderControls: some View {
@@ -43,7 +46,7 @@ struct PodcastSettingsView: View {
 #if DEBUG
 #Preview {
     PodcastSettingsView()
-        .environment(PodcastFolder.preview)
+        .environment(MediaFolders.preview)
         .modelContainer(.preview)
 }
 #endif

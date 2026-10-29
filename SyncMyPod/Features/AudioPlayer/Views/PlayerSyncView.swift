@@ -6,8 +6,7 @@ struct PlayerSyncView: View {
 
     @Environment(\.modelContext) private var context
     @Environment(DeviceSyncModel.self) private var syncModel
-    @Environment(PodcastFolder.self) private var podcastFolder: PodcastFolder?
-    @Environment(AudiobookFolder.self) private var audiobookFolder: AudiobookFolder?
+    @Environment(MediaFolders.self) private var mediaFolders: MediaFolders?
     @Query private var tracks: [LibraryTrack]
     @Query private var folders: [LibraryFolder]
     @Query(sort: \LibraryPlaylist.createdAt) private var playlists: [LibraryPlaylist]
@@ -67,9 +66,9 @@ struct PlayerSyncView: View {
             MissingSourceFinder(folderPath: $0.path).missing(synced, notIn: Set(libraryPaths))
         } ?? []
         let bookFiles = Set(audiobooks.flatMap(\.files).map(\.filePath))
-        let removedEpisodes = RemovedSourceFinder(folderPath: podcastFolder?.path)
+        let removedEpisodes = RemovedSourceFinder(folderPath: mediaFolders?.podcasts.path)
             .missing(synced, known: downloadedPaths)
-        let removedBookFiles = RemovedSourceFinder(folderPath: audiobookFolder?.path)
+        let removedBookFiles = RemovedSourceFinder(folderPath: mediaFolders?.audiobooks.path)
             .missing(synced, known: bookFiles)
         missingSources = missingSongs.union(removedEpisodes).union(removedBookFiles)
         sidecars = await LibrarySidecarFinder.find(besideSongsAt: libraryPaths + bookFiles.sorted(),

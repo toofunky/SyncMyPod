@@ -69,9 +69,8 @@ struct ContentView: View {
         .environment(MusicPlayerModel())
         .environment(PodcastsModel())
         .environment(PodcastDownloads())
-        .environment(PodcastFolder.preview)
+        .environment(MediaFolders.preview)
         .environment(AudiobooksModel())
-        .environment(AudiobookFolder.preview)
         .environment(\.iTunesDBLoader, .preview)
         .modelContainer(.preview)
 }

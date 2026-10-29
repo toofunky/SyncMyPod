@@ -6,10 +6,13 @@ struct PodcastDetailView: View {
     let podcast: Podcast
 
     @Environment(PodcastDownloads.self) private var downloads
-    @Environment(PodcastFolder.self) private var folder
+    @Environment(MediaFolders.self) private var mediaFolders
+    @Query private var libraryFolders: [LibraryFolder]
     @Environment(\.modelContext) private var context
     @State private var episodesAwaitingFolder: [PodcastEpisode] = []
     @State private var isChoosingFolder = false
+
+    private var folder: ManagedFolder { mediaFolders.podcasts }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -23,7 +26,7 @@ struct PodcastDetailView: View {
                 PodcastEpisodeTable(episodes: podcast.sortedEpisodes, download: download)
             }
         }
-        .podcastFolderChooser(isPresented: $isChoosingFolder) { _ in
+        .mediaFolderChooser(.podcasts, isPresented: $isChoosingFolder, musicFolderPath: libraryFolders.first?.path) { _ in
             download(episodesAwaitingFolder)
             episodesAwaitingFolder = []
         }
@@ -46,7 +49,7 @@ struct PodcastDetailView: View {
     PodcastDetailView(podcast: .preview)
         .environment(PodcastsModel())
         .environment(PodcastDownloads())
-        .environment(PodcastFolder.preview)
+        .environment(MediaFolders.preview)
         .modelContainer(.preview)
         .frame(width: 720, height: 400)
 }
