@@ -5,14 +5,14 @@ import SwiftUI
 /// The right-click menu for library songs, given in the order shown.
 struct LibraryTrackContextMenu: View {
     let tracks: [LibraryTrack]
-    let devices: [ConnectedDevice]
-    var addToDevice: ((ConnectedDevice, [LibraryTrack]) -> Void)?
     let playlists: [LibraryPlaylist]
     let actions: SongMenuActions
 
+    @Environment(\.libraryAddTargets) private var addTargets
+
     var body: some View {
-        AddToDeviceMenu(devices: devices) { addToDevice?($0, tracks) }
-            .disabled(addToDevice == nil || tracks.isEmpty)
+        AddToDeviceMenu(targets: addTargets) { $0.add(tracks) }
+            .disabled(addTargets.isEmpty || tracks.isEmpty)
         AddToPlaylistMenu(playlists: playlists.filter { !$0.isFavorites }, onAdd: addToPlaylist)
             .disabled(tracks.isEmpty)
         SongMenuItems(tracks: tracks, favorites: playlists.first(where: \.isFavorites), actions: actions)
@@ -45,10 +45,10 @@ struct LibraryTrackContextMenu: View {
 #if DEBUG
 #Preview {
     Menu("Song") {
-        LibraryTrackContextMenu(tracks: [LibraryTrack.previewTracks[0]], devices: [.iPod(.preview)],
-                                addToDevice: { _, _ in }, playlists: [.preview], actions: SongMenuActions())
+        LibraryTrackContextMenu(tracks: [LibraryTrack.previewTracks[0]], playlists: [.preview], actions: SongMenuActions())
     }
     .padding()
+    .environment(\.libraryAddTargets, LibraryAddTarget.previews)
     .modelContainer(.emptyPreview)
 }
 #endif

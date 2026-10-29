@@ -7,8 +7,6 @@ struct LibraryTrackTableView: View {
     let tracks: [LibraryTrack]
     @Binding var selection: Set<LibraryTrack.ID>
     var searchText = ""
-    var addTargets: [ConnectedDevice] = []
-    var addToDevice: ((ConnectedDevice, [LibraryTrack]) -> Void)?
     var showPlaylist: ((LibraryPlaylist) -> Void)?
 
     @Environment(MusicPlayerModel.self) private var player: MusicPlayerModel?
@@ -56,8 +54,7 @@ struct LibraryTrackTableView: View {
         .id(sortedBy)
         .id(filteredBy)
         .contextMenu(forSelectionType: LibraryTrack.ID.self) { ids in
-            LibraryTrackContextMenu(tracks: shownTracks(ids), devices: addTargets, addToDevice: addToDevice,
-                                    playlists: playlists, actions: songActions)
+            LibraryTrackContextMenu(tracks: shownTracks(ids), playlists: playlists, actions: songActions)
         } primaryAction: { ids in
             play(ids)
         }
@@ -176,8 +173,8 @@ struct LibraryTrackTableView: View {
 
 #if DEBUG
 #Preview {
-    LibraryTrackTableView(tracks: LibraryTrack.previewTracks, selection: .constant([]),
-                          addTargets: [.iPod(.preview)], addToDevice: { _, _ in })
+    LibraryTrackTableView(tracks: LibraryTrack.previewTracks, selection: .constant([]))
+        .environment(\.libraryAddTargets, LibraryAddTarget.previews)
         .modelContainer(.emptyPreview)
 }
 #endif

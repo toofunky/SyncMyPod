@@ -47,7 +47,7 @@ struct AlbumTracksInspector: View {
                 .contentShape(.rect)
                 .onTapGesture(count: 2) { play(track) }
                 .contextMenu {
-                    LibrarySongContextMenu(tracks: [track], playlists: playlists, actions: songActions)
+                    LibraryTrackContextMenu(tracks: [track], playlists: playlists, actions: songActions)
                 }
         }
         if discNumbers.count > 1 {
@@ -82,8 +82,6 @@ struct AlbumTracksInspector: View {
 #if DEBUG
 #Preview {
     AlbumTracksInspector(albumID: LibraryAlbum.preview.id)
-        .environment(DeviceMountWatcher.preview())
-        .environment(DeviceSyncModel())
         .modelContainer(.preview)
 }
 #endif

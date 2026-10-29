@@ -75,8 +75,6 @@ struct ArtistAlbumsView: View {
     ArtistAlbumsView(artistName: "OutKast", sections: ArtistAlbumSection.sections(from: LibraryTrack.previewTracks),
                      sortOrder: .constant(.year))
         .frame(width: 500, height: 600)
-        .environment(DeviceMountWatcher.preview())
-        .environment(DeviceSyncModel())
         .modelContainer(.preview)
 }
 #endif

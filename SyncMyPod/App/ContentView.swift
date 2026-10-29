@@ -43,12 +43,14 @@ struct ContentView: View {
         .frame(minWidth: 420, minHeight: 320)
         .environment(\.favoriteTrackPaths, Set(favorites.first?.trackPaths ?? []))
         .environment(\.isTagEditingLocked, libraryModel.isScanning || syncModel.isSyncing)
+        .modifier(LibraryAddTargetsModifier())
     }
 
     private func libraryView(_ section: LibrarySection) -> some View {
         MusicLibraryView(model: libraryModel, section: section, selection: $librarySelection,
                          albumSelection: $selectedAlbumID, artistSelection: $selectedArtistID,
                          isShowingAlbumTracks: $isShowingAlbum, showPlaylist: show)
+            .syncProgressSheet()
     }
 
     private var showsPlayer: Bool { player != nil && selection?.isDevice != true }
