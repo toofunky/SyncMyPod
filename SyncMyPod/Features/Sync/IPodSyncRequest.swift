@@ -22,6 +22,5 @@ nonisolated struct IPodSyncRequest: Equatable, Sendable {
         self.coverImageURL = coverImageURL
     }
 
-    var matchKey: IPodTrackMatchKey { IPodTrackMatchKey(draft) }
     var sourcePath: String { sourceURL.path(percentEncoded: false) }
 }
