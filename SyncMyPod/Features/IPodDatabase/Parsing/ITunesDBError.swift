@@ -5,6 +5,9 @@ nonisolated enum ITunesDBError: Error, Equatable, LocalizedError {
     case truncated(offset: Int)
     case unexpectedTag(expected: String, found: String, offset: Int)
     case invalidLength(offset: Int)
+    case missingTrackList
+    case missingMasterPlaylist
+    case verificationFailed
 
     var errorDescription: String? {
         switch self {
@@ -16,6 +19,12 @@ nonisolated enum ITunesDBError: Error, Equatable, LocalizedError {
             "Expected a \(expected) record at byte \(offset) but found \"\(found)\"."
         case .invalidLength(let offset):
             "The record at byte \(offset) has an invalid length."
+        case .missingTrackList:
+            "The iPod's iTunesDB has no track list."
+        case .missingMasterPlaylist:
+            "The iPod's iTunesDB has no master playlist."
+        case .verificationFailed:
+            "The iTunesDB written to the iPod didn't read back correctly, so the previous one was restored."
         }
     }
 }

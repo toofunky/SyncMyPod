@@ -52,7 +52,7 @@ nonisolated struct DatabaseFileStore: Sendable {
         guard (try? Data(contentsOf: fileURL)) == data else {
             try restore(FileManager.default.fileExists(atPath: backupURL.path(percentEncoded: false))
                         ? Data(contentsOf: backupURL) : nil)
-            throw IPodSyncError.verificationFailed
+            throw ITunesDBError.verificationFailed
         }
     }
 

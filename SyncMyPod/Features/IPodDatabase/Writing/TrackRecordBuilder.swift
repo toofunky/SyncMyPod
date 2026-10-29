@@ -49,7 +49,7 @@ nonisolated struct TrackRecordBuilder {
 
     /// Lists the track under Podcasts or Audiobooks, where it resumes where it was left and isn't shuffled into
     /// music. Music keeps the media type set when the track was created.
-    private func writeMediaKind(into mhit: inout ITunesDBRecord, _ kind: SyncMediaKind) {
+    private func writeMediaKind(into mhit: inout ITunesDBRecord, _ kind: ITunesMediaKind) {
         let mediaType: UInt32
         let flagOffsets: [Int]
         switch kind {

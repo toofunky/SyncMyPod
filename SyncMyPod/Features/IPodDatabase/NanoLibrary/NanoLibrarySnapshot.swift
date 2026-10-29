@@ -14,7 +14,7 @@ nonisolated struct NanoLibrarySnapshot: Sendable {
 
     init(database: Data) throws {
         let root = try ITunesDBRecordParser(data: database).parse()
-        guard root.children.contains(where: { $0.isSection(.tracks) }) else { throw IPodSyncError.missingTrackList }
+        guard root.children.contains(where: { $0.isSection(.tracks) }) else { throw ITunesDBError.missingTrackList }
         let tracks = Self.list(.tracks, in: root)
         libraryPID = root.uint64(at: Self.libraryPIDOffset)
         databaseVersion = Int(root.uint32(at: Self.versionOffset))

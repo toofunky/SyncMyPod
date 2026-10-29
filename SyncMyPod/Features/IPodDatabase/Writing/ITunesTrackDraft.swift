@@ -31,7 +31,7 @@ nonisolated struct ITunesTrackDraft: Equatable, Sendable {
     var hasLyrics = false
     /// Podcast episodes and audiobooks are listed in the iPod's Podcasts and Audiobooks menus instead of with the
     /// music, resume where they were left and aren't shuffled.
-    var mediaKind = SyncMediaKind.music
+    var mediaKind = ITunesMediaKind.music
     var releaseDate: Date?
 
     var albumListArtist: String { albumArtist.isEmpty ? artist : albumArtist }

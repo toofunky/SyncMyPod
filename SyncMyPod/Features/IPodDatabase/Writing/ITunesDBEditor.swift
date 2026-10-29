@@ -13,11 +13,11 @@ nonisolated struct ITunesDBEditor {
     private var hasChanges = false
 
     init(root: ITunesDBRecord) throws {
-        guard let tracks = Self.list(in: root, section: .tracks) else { throw IPodSyncError.missingTrackList }
+        guard let tracks = Self.list(in: root, section: .tracks) else { throw ITunesDBError.missingTrackList }
         guard Self.playlistSections.contains(where: {
             Self.list(in: root, section: $0)?.children.contains(where: \.isMasterPlaylist) == true
         }) else {
-            throw IPodSyncError.missingMasterPlaylist
+            throw ITunesDBError.missingMasterPlaylist
         }
         self.root = root
         ids = ITunesDBIDAllocator(root: root)
@@ -88,7 +88,7 @@ nonisolated struct ITunesDBEditor {
     func serialized() throws -> Data {
         guard hasChanges else { return root.serialized() }
         let database = try ITunesDBParser(data: root.serialized()).parse()
-        guard let master = database.masterPlaylist else { throw IPodSyncError.missingMasterPlaylist }
+        guard let master = database.masterPlaylist else { throw ITunesDBError.missingMasterPlaylist }
         let tracksByID = Dictionary(database.tracks.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
         let index = LibraryIndexRecordBuilder(tracks: master.trackIDs.compactMap { tracksByID[$0] }).records()
         var indexed = self
