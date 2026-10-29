@@ -1,6 +1,6 @@
 import Foundation
 
-nonisolated struct IPodSyncRequest: Equatable, Sendable {
+nonisolated struct SyncRequest: Equatable, Sendable {
     let sourceURL: URL
     let draft: ITunesTrackDraft
     /// `nil` until the library file has been scanned with artwork fingerprints.

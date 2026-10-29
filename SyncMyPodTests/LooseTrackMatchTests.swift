@@ -4,9 +4,9 @@ import Testing
 
 struct LooseTrackMatchTests {
     private func request(_ title: String, artist: String, album: String = "The Sign", duration: TimeInterval = 192.445,
-                         path: String = "/Music/Main/04 The Sign.m4a") -> IPodSyncRequest {
+                         path: String = "/Music/Main/04 The Sign.m4a") -> SyncRequest {
         let source = SyncSource(fileSize: 6_088_211, modificationDate: .distantPast, artworkFingerprint: "cover")
-        return IPodSyncRequest(sourceURL: URL(filePath: path),
+        return SyncRequest(sourceURL: URL(filePath: path),
                                draft: ITunesTrackDraft(title: title, artist: artist, album: album,
                                                        fileSize: 6_088_211, duration: duration),
                                source: source)

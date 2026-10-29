@@ -29,7 +29,7 @@ struct SyncAudiobookListView: View {
 
 #Preview {
     @Previewable @State var selection: Set<String> = []
-    let part = IPodSyncRequest(sourceURL: URL(filePath: "/Audiobooks/Mary Shelley/Frankenstein/01.m4a"),
+    let part = SyncRequest(sourceURL: URL(filePath: "/Audiobooks/Mary Shelley/Frankenstein/01.m4a"),
                                draft: ITunesTrackDraft(title: "Letters 1–4", album: "Frankenstein",
                                                        fileSize: 38_000_000),
                                kind: .audiobook)

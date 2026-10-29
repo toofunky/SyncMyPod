@@ -9,7 +9,7 @@ nonisolated struct SyncTrackSnapshot: Equatable, Sendable {
     let albumSortName: String
     let albumKey: String
     let genre: String
-    let request: IPodSyncRequest
+    let request: SyncRequest
 
     var byteCount: Int64 { Int64(request.draft.fileSize) }
 }

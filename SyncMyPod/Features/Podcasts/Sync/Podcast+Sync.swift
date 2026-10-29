@@ -14,7 +14,7 @@ extension Podcast {
             .sorted { ($0.publishedAt ?? .distantPast) < ($1.publishedAt ?? .distantPast) }
             .compactMap { $0.syncRequest(show: title, author: author, forIPod: forIPod) }
         guard !episodes.isEmpty else { return nil }
-        let playlist = IPodPlaylistRequest(id: syncPlaylistID, name: title, createdAt: dateAdded, tracks: episodes)
+        let playlist = SyncPlaylistRequest(id: syncPlaylistID, name: title, createdAt: dateAdded, tracks: episodes)
         return SyncPodcastSnapshot(key: syncKey, playlist: playlist)
     }
 }

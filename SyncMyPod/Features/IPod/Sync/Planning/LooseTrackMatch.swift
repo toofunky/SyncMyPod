@@ -5,7 +5,7 @@ import Foundation
 nonisolated enum LooseTrackMatch {
     private static let durationTolerance: TimeInterval = 0.005
 
-    static func matches(_ request: IPodSyncRequest, _ track: ITunesTrack) -> Bool {
+    static func matches(_ request: SyncRequest, _ track: ITunesTrack) -> Bool {
         guard request.draft.duration > 0,
               abs(request.draft.duration - track.duration) <= durationTolerance else { return false }
         let file = request.matchKey

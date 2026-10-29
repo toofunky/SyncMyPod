@@ -4,7 +4,7 @@ extension PodcastEpisode {
     /// A player's request has no `SyncSource`, so a copy already on it is never replaced and the player can't
     /// forget where it was. An iPod's has one, which its manifest needs to record the track; the iPod keeps its
     /// place in the database, which an update rewrites in place. `nil` for audio an iPod can't play.
-    func syncRequest(show: String, author: String, forIPod: Bool = false) -> IPodSyncRequest? {
+    func syncRequest(show: String, author: String, forIPod: Bool = false) -> SyncRequest? {
         guard let url = downloadedFileURL else { return nil }
         let fileCodec = codec ?? Self.codec(forExtension: url.pathExtension)
         guard !forIPod || fileCodec?.syncsToIPod == true else { return nil }
@@ -13,7 +13,7 @@ extension PodcastEpisode {
         draft.mediaKind = forIPod ? .podcast : .music
         let source = forIPod ? SyncSource(fileSize: draft.fileSize, modificationDate: downloadedAt ?? .distantPast,
                                           artworkFingerprint: nil) : nil
-        return IPodSyncRequest(sourceURL: url, draft: draft, source: source, kind: .podcast)
+        return SyncRequest(sourceURL: url, draft: draft, source: source, kind: .podcast)
     }
 
     private func draft(show: String, author: String) -> ITunesTrackDraft {

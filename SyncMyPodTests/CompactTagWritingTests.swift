@@ -48,7 +48,7 @@ struct CompactTagWritingTests {
         try await TagWriter().write(TagChanges(artwork: .replace(try Self.noisePNG(side: 1_500))), to: source,
                                     codec: codec)
         let draft = ITunesTrackDraft(title: "Song", artist: "Artist", album: "Album", fileSize: 1, codec: codec)
-        let request = IPodSyncRequest(sourceURL: source, draft: draft,
+        let request = SyncRequest(sourceURL: source, draft: draft,
                                       source: SyncSource(fileSize: 1, modificationDate: .now, artworkFingerprint: "cover"))
         let plan = await PlayerDeviceContents.load(from: try volume.device).planner(for: config)
             .plan(selected: [request], playlists: nil)

@@ -4,7 +4,7 @@ import SwiftUI
 struct PlayerSyncForm: View {
     private static let listedRemovalLimit = 8
 
-    @Bindable var settings: IPodSyncSettings
+    @Bindable var settings: DeviceSyncSettings
     let library: SyncLibrarySnapshot
     let contents: PlayerDeviceContents
     let config: AudioPlayerConfig
@@ -81,7 +81,7 @@ struct PlayerSyncForm: View {
 
 #if DEBUG
 #Preview {
-    PlayerSyncForm(settings: IPodSyncSettings(deviceID: "preview"),
+    PlayerSyncForm(settings: DeviceSyncSettings(deviceID: "preview"),
                    library: SyncLibrarySnapshot(tracks: LibraryTrack.previewTracks, playlists: [.preview],
                                                 preservingAlbumArtist: false),
                    contents: PlayerDeviceContents(), config: AudioPlayerDevice.preview.config, missingSources: [],

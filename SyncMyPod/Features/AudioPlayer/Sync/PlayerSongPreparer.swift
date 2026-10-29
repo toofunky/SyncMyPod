@@ -9,7 +9,7 @@ nonisolated struct PlayerSongPreparer {
     static let maximumPadding = 64 * 1_024
 
     /// Empty when the copy is the library file as it is.
-    static func changes(for request: IPodSyncRequest) async -> TagChanges {
+    static func changes(for request: SyncRequest) async -> TagChanges {
         var changes = request.playerTagChanges ?? TagChanges()
         if let limit = request.source?.artworkPixelLimit,
            let artwork = await EmbeddedArtworkResizer().resizedArtwork(of: request.sourceURL, within: limit) {
@@ -20,7 +20,7 @@ nonisolated struct PlayerSongPreparer {
 
     /// The prepared file is alone in its own temporary folder, which the caller removes. An .m4a also gets
     /// its `moov` box first.
-    func prepare(_ request: IPodSyncRequest, with changes: TagChanges) async throws -> URL {
+    func prepare(_ request: SyncRequest, with changes: TagChanges) async throws -> URL {
         let manager = FileManager.default
         let folder = manager.temporaryDirectory.appending(path: "SyncMyPod-\(UUID().uuidString)",
                                                           directoryHint: .isDirectory)

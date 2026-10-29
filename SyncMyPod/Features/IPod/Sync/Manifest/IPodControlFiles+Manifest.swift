@@ -17,7 +17,7 @@ nonisolated extension IPodControlFiles {
     /// The manifest for `onDevice` after relinking renamed files and adopting library files already on the iPod,
     /// saved if that changed it. Pass `libraryFolder` to find entries whose file was deleted.
     @concurrent
-    func manifest(adopting requests: [IPodSyncRequest], onDevice: [ITunesTrack],
+    func manifest(adopting requests: [SyncRequest], onDevice: [ITunesTrack],
                   libraryFolder: String?) async -> LoadedSyncManifest {
         var manifest = manifest().valid(for: Set(onDevice.map(\.databaseID)))
         let libraryPaths = Set(requests.map(\.sourcePath))

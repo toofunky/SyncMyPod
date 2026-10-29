@@ -3,16 +3,16 @@ import Foundation
 /// What a sync would change: tracks to add or update, and library tracks on the iPod that are no longer
 /// selected, whose file is gone, or that duplicate a library song's copy; and the playlists to write.
 nonisolated struct SyncPlan: Equatable, Sendable {
-    let requests: [IPodSyncRequest]
+    let requests: [SyncRequest]
     let updates: [IPodTrackUpdate]
     let removals: [ITunesTrack]
     let selectedCount: Int
-    let playlists: [IPodPlaylistRequest]
+    let playlists: [SyncPlaylistRequest]
     /// Playlists the iPod lacks or has out of date, plus ones it has that are no longer synced.
     let playlistChangeCount: Int
 
-    init(requests: [IPodSyncRequest], updates: [IPodTrackUpdate] = [], removals: [ITunesTrack],
-         selectedCount: Int, playlists: [IPodPlaylistRequest] = [], playlistChangeCount: Int = 0) {
+    init(requests: [SyncRequest], updates: [IPodTrackUpdate] = [], removals: [ITunesTrack],
+         selectedCount: Int, playlists: [SyncPlaylistRequest] = [], playlistChangeCount: Int = 0) {
         self.requests = requests
         self.updates = updates
         self.removals = removals
@@ -24,7 +24,7 @@ nonisolated struct SyncPlan: Equatable, Sendable {
     var isEmpty: Bool { requests.isEmpty && updates.isEmpty && removals.isEmpty && playlistChangeCount == 0 }
     var alreadyOnDeviceCount: Int { selectedCount - requests.count - updates.count }
     /// What the syncer is handed: it works out again which of these are additions and which are updates.
-    var syncRequests: [IPodSyncRequest] { requests + updates.map(\.request) }
+    var syncRequests: [SyncRequest] { requests + updates.map(\.request) }
     var byteCount: Int64 { requests.reduce(0) { $0 + Int64($1.draft.fileSize) } }
     var updatedByteCount: Int64 { updates.reduce(0) { $0 + Int64($1.request.draft.fileSize) } }
     var removedByteCount: Int64 { removals.reduce(0) { $0 + Int64($1.fileSize) } }
@@ -34,7 +34,7 @@ nonisolated struct SyncPlan: Equatable, Sendable {
     @MainActor
     static func make(tracks: [LibraryTrack], songs: SyncScope, selectedAlbums: Set<String>,
                      selectedGenres: Set<String> = [], preservingAlbumArtist: Bool = false,
-                     playlists: [IPodPlaylistRequest] = [], onDevice: [ITunesTrack],
+                     playlists: [SyncPlaylistRequest] = [], onDevice: [ITunesTrack],
                      devicePlaylists: [ITunesPlaylist] = [], manifest: SyncManifest = SyncManifest(),
                      strayDatabaseIDs: Set<UInt64> = []) -> SyncPlan {
         make(snapshots: tracks.map { $0.syncSnapshot(preservingAlbumArtist: preservingAlbumArtist) }, songs: songs,
@@ -46,9 +46,9 @@ nonisolated struct SyncPlan: Equatable, Sendable {
     /// `episodes` are podcast episodes and audiobook files chosen and not chosen, which aren't in any playlist but
     /// the Podcasts list.
     static func make(snapshots tracks: [SyncTrackSnapshot], songs: SyncScope, selectedAlbums: Set<String>,
-                     selectedGenres: Set<String>, playlists: [IPodPlaylistRequest], onDevice: [ITunesTrack],
+                     selectedGenres: Set<String>, playlists: [SyncPlaylistRequest], onDevice: [ITunesTrack],
                      devicePlaylists: [ITunesPlaylist], manifest: SyncManifest, strayDatabaseIDs: Set<UInt64>,
-                     episodes: (selected: [IPodSyncRequest], unselected: [IPodSyncRequest]) = ([], [])) -> SyncPlan {
+                     episodes: (selected: [SyncRequest], unselected: [SyncRequest]) = ([], [])) -> SyncPlan {
         let selection = SyncSelection(songs: songs, albums: selectedAlbums, genres: selectedGenres)
             .partition(tracks, syncedPlaylists: playlists)
         let plan = SyncPlanner(manifest: manifest, onDevice: onDevice, strayDatabaseIDs: strayDatabaseIDs)

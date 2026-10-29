@@ -7,10 +7,10 @@ extension DeviceSyncModel {
     }
 
     private func syncRequests(for tracks: [LibraryTrack], to device: ConnectedDevice,
-                              in context: ModelContext) -> [IPodSyncRequest] {
+                              in context: ModelContext) -> [SyncRequest] {
         switch device {
         case .iPod(let iPod):
-            let settings = IPodSyncSettings.settings(for: device.id, in: context)
+            let settings = DeviceSyncSettings.settings(for: device.id, in: context)
             let embedsLyrics = settings.syncsLyricsSidecars && iPod.showsLyrics
             return tracks.filter(\.codec.syncsToIPod).map {
                 $0.syncRequest(preservingAlbumArtist: settings.preservesAlbumArtist,

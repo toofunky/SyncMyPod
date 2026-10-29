@@ -60,7 +60,7 @@ struct LyricsSidecarSyncTests {
     }
 
     private func sidecarRequest(on volume: TemporaryIPodVolume, name: String,
-                                lyrics: String) async throws -> IPodSyncRequest {
+                                lyrics: String) async throws -> SyncRequest {
         let source = volume.url.appending(path: "Library/\(name)")
         if name.hasSuffix(".mp3") {
             try MP3FixtureWriter.write(to: source, tags: ["TIT2": "Clocks"])
@@ -71,7 +71,7 @@ struct LyricsSidecarSyncTests {
         let size = try #require(try source.resourceValues(forKeys: [.fileSizeKey]).fileSize)
         let draft = ITunesTrackDraft(title: "Clocks", fileSize: size, codec: name.hasSuffix(".mp3") ? .mp3 : .aac,
                                      hasLyrics: true)
-        return IPodSyncRequest(sourceURL: source, draft: draft, embedsLyricsSidecar: true)
+        return SyncRequest(sourceURL: source, draft: draft, embedsLyricsSidecar: true)
     }
 
     private func trackRecords(on volume: TemporaryIPodVolume) throws -> [ITunesDBRecord] {

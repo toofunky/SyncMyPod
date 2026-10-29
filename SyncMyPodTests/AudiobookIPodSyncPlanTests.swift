@@ -50,6 +50,6 @@ struct AudiobookIPodSyncPlanTests {
     @Test func eachBookKeepsItsPlaylistIDAcrossSyncs() {
         let book = book("Frankenstein", paths: ["1.m4a"])
         #expect(book.syncSnapshot(forIPod: true)?.playlist.id == book.syncPlaylistID)
-        #expect(IPodSyncSettings(deviceID: "new").makesAudiobookPlaylists)
+        #expect(DeviceSyncSettings(deviceID: "new").makesAudiobookPlaylists)
     }
 }

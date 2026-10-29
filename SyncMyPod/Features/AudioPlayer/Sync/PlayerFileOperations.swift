@@ -9,7 +9,7 @@ nonisolated struct PlayerFileOperations {
 
     /// A copy that's retagged, when its album artist is preserved, or gets smaller artwork, when covers are
     /// resized, is finished locally first, so the player is written only once.
-    func copy(_ request: IPodSyncRequest, to path: String) async throws {
+    func copy(_ request: SyncRequest, to path: String) async throws {
         let changes = await PlayerSongPreparer.changes(for: request)
         guard !changes.isEmpty else { return try await copy(request.sourceURL, to: path) }
         guard manager.fileExists(atPath: request.sourcePath) else {

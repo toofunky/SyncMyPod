@@ -8,8 +8,8 @@ struct IPodPlaylistSyncTests {
         FixturePlaylist(id: 2, name: "On-Device", trackIDs: [])
     ], includesAlbumSection: true, includesPodcastSection: true).build()
 
-    private func request(_ source: URL, title: String) -> IPodSyncRequest {
-        IPodSyncRequest(sourceURL: source, draft: ITunesTrackDraft(title: title, fileSize: 1_024),
+    private func request(_ source: URL, title: String) -> SyncRequest {
+        SyncRequest(sourceURL: source, draft: ITunesTrackDraft(title: title, fileSize: 1_024),
                         source: SyncSource(fileSize: 1_024, modificationDate: .now, artworkFingerprint: nil))
     }
 
@@ -25,7 +25,7 @@ struct IPodPlaylistSyncTests {
         let volume = try TemporaryIPodVolume(database: fixture)
         let one = request(try volume.makeSourceFile(named: "one.m4a"), title: "One")
         let two = request(try volume.makeSourceFile(named: "two.m4a"), title: "Two")
-        let playlist = IPodPlaylistRequest(id: 77, name: "Mix", createdAt: .now, tracks: [two, one])
+        let playlist = SyncPlaylistRequest(id: 77, name: "Mix", createdAt: .now, tracks: [two, one])
         let outcome = try await IPodTrackSyncer(volumeURL: volume.url)
             .sync(adding: [one, two], playlists: [playlist])
 
@@ -41,7 +41,7 @@ struct IPodPlaylistSyncTests {
         let syncer = IPodTrackSyncer(volumeURL: volume.url)
         let one = request(try volume.makeSourceFile(named: "one.m4a"), title: "One")
         _ = try await syncer.sync(adding: [one])
-        _ = try await syncer.sync(adding: [], playlists: [IPodPlaylistRequest(id: 77, name: "Mix", createdAt: .now,
+        _ = try await syncer.sync(adding: [], playlists: [SyncPlaylistRequest(id: 77, name: "Mix", createdAt: .now,
                                                                               tracks: [one])])
         let database = try database(on: volume)
         let written = try #require(database.playlists.first { $0.id == 77 })
@@ -52,7 +52,7 @@ struct IPodPlaylistSyncTests {
         let volume = try TemporaryIPodVolume(database: fixture)
         let syncer = IPodTrackSyncer(volumeURL: volume.url)
         let one = request(try volume.makeSourceFile(named: "one.m4a"), title: "One")
-        _ = try await syncer.sync(adding: [one], playlists: [IPodPlaylistRequest(id: 77, name: "Mix", createdAt: .now,
+        _ = try await syncer.sync(adding: [one], playlists: [SyncPlaylistRequest(id: 77, name: "Mix", createdAt: .now,
                                                                                   tracks: [one])])
         _ = try await syncer.sync(adding: [], playlists: [])
         #expect(try database(on: volume).playlists.map(\.name) == ["iPod", "On-Device"])
@@ -63,7 +63,7 @@ struct IPodPlaylistSyncTests {
         let volume = try TemporaryIPodVolume(database: fixture)
         let syncer = IPodTrackSyncer(volumeURL: volume.url)
         let one = request(try volume.makeSourceFile(named: "one.m4a"), title: "One")
-        _ = try await syncer.sync(adding: [one], playlists: [IPodPlaylistRequest(id: 77, name: "Mix", createdAt: .now,
+        _ = try await syncer.sync(adding: [one], playlists: [SyncPlaylistRequest(id: 77, name: "Mix", createdAt: .now,
                                                                                   tracks: [one])])
         let two = request(try volume.makeSourceFile(named: "two.m4a"), title: "Two")
         _ = try await syncer.sync(adding: [two])

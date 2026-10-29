@@ -12,7 +12,7 @@ nonisolated struct SyncSelection: Equatable, Sendable {
     var podcasts: Set<String> = []
     var audiobooks: Set<String> = []
 
-    func playlists(in library: [SyncPlaylistSnapshot]) -> [IPodPlaylistRequest] {
+    func playlists(in library: [SyncPlaylistSnapshot]) -> [SyncPlaylistRequest] {
         library.filter { playlistScope.includes($0.key, in: playlists) }.map(\.request)
     }
 
@@ -31,7 +31,7 @@ nonisolated struct SyncSelection: Equatable, Sendable {
     }
 
     /// Songs in `syncedPlaylists` are selected whatever the song scope, album and genre selection.
-    func partition(_ tracks: [SyncTrackSnapshot], syncedPlaylists: [IPodPlaylistRequest])
+    func partition(_ tracks: [SyncTrackSnapshot], syncedPlaylists: [SyncPlaylistRequest])
         -> (selected: [SyncTrackSnapshot], unselected: [SyncTrackSnapshot]) {
         let playlistPaths = Set(syncedPlaylists.flatMap { $0.tracks.map(\.sourcePath) })
         let isSelected = { (track: SyncTrackSnapshot) in

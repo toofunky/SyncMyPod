@@ -8,7 +8,7 @@ struct IPodArtworkSyncTests {
         FixturePlaylist(id: 1, name: "iPod", isMaster: true, trackIDs: [])
     ], includesAlbumSection: true).build()
 
-    private func song(_ name: String, in volume: TemporaryIPodVolume, cover: CGColor?) async throws -> IPodSyncRequest {
+    private func song(_ name: String, in volume: TemporaryIPodVolume, cover: CGColor?) async throws -> SyncRequest {
         let silence = try AudioFixtureWriter.writeSilence(to: volume.url.appending(path: "source/\(name)-plain.m4a"))
         var source = silence
         if let cover {
@@ -17,7 +17,7 @@ struct IPodArtworkSyncTests {
             try await AudioFixtureWriter.embedCoverArt(TestImage.pngData(image), from: silence, to: source)
         }
         let size = try Data(contentsOf: source).count
-        return IPodSyncRequest(sourceURL: source, draft: ITunesTrackDraft(title: name, fileSize: size))
+        return SyncRequest(sourceURL: source, draft: ITunesTrackDraft(title: name, fileSize: size))
     }
 
     private func artworkImages(on volume: TemporaryIPodVolume) throws -> [ITunesDBRecord] {

@@ -8,17 +8,17 @@ struct IPodPodcastSyncTests {
                                                                              trackIDs: [])],
                                                  includesAlbumSection: true, includesPodcastSection: true).build()
 
-    private func episode(_ title: String, show: String, in volume: TemporaryIPodVolume) throws -> IPodSyncRequest {
+    private func episode(_ title: String, show: String, in volume: TemporaryIPodVolume) throws -> SyncRequest {
         var draft = ITunesTrackDraft(title: title, artist: "Host", album: show, fileSize: 1_024)
         draft.mediaKind = .podcast
         draft.releaseDate = Self.released
-        return IPodSyncRequest(sourceURL: try volume.makeSourceFile(named: "\(title).mp3"), draft: draft,
+        return SyncRequest(sourceURL: try volume.makeSourceFile(named: "\(title).mp3"), draft: draft,
                                source: SyncSource(fileSize: 1_024, modificationDate: .distantPast,
                                                   artworkFingerprint: nil), kind: .podcast)
     }
 
-    private func podcastsList(_ episodes: [IPodSyncRequest]) -> IPodPlaylistRequest {
-        IPodPlaylistRequest(id: IPodPlaylistRequest.podcastsID, name: "Podcasts", createdAt: .now, tracks: episodes,
+    private func podcastsList(_ episodes: [SyncRequest]) -> SyncPlaylistRequest {
+        SyncPlaylistRequest(id: SyncPlaylistRequest.podcastsID, name: "Podcasts", createdAt: .now, tracks: episodes,
                             isPodcasts: true)
     }
 
@@ -39,7 +39,7 @@ struct IPodPodcastSyncTests {
 
     @Test func songsKeepTheirMusicMediaType() async throws {
         let volume = try TemporaryIPodVolume(database: fixture)
-        let song = IPodSyncRequest(sourceURL: try volume.makeSourceFile(named: "song.m4a"),
+        let song = SyncRequest(sourceURL: try volume.makeSourceFile(named: "song.m4a"),
                                    draft: ITunesTrackDraft(title: "Song", fileSize: 1_024))
         _ = try await IPodTrackSyncer(volumeURL: volume.url).sync(adding: [song])
         let mhit = try #require(try list(.tracks, on: volume).first)
@@ -74,7 +74,7 @@ struct IPodPodcastSyncTests {
             #expect(try list(section, on: volume).filter(ITunesDBPlaylistWriter.isPodcastList).count == 1)
         }
         let database = try ITunesDBParser(data: Data(contentsOf: volume.databaseURL)).parse()
-        let podcasts = try #require(database.playlists.first { $0.id == IPodPlaylistRequest.podcastsID })
+        let podcasts = try #require(database.playlists.first { $0.id == SyncPlaylistRequest.podcastsID })
         #expect(podcasts.trackIDs.compactMap { id in database.tracks.first { $0.id == id }?.title } == ["One", "Two"])
     }
 

@@ -17,8 +17,8 @@ nonisolated struct IPodTrackSyncer {
     /// it; the rest are skipped. Cancelling stops copying but still saves the removals and the songs already copied.
     /// Non-`nil` `playlists` replace the playlists earlier syncs wrote.
     @concurrent
-    func sync(adding requests: [IPodSyncRequest], removing removals: Set<UInt64> = [],
-              playlists: [IPodPlaylistRequest]? = nil,
+    func sync(adding requests: [SyncRequest], removing removals: Set<UInt64> = [],
+              playlists: [SyncPlaylistRequest]? = nil,
               progress: @escaping @Sendable (SyncProgress) async -> Void = { _ in }) async throws -> IPodSyncOutcome {
         let files = IPodControlFiles(volumeURL: volumeURL)
         var editor = try openEditor(store)
@@ -106,7 +106,7 @@ nonisolated struct IPodTrackSyncer {
     }
 
     /// Updates first, then additions, each file and each iPod track at most once.
-    private static func batch(for requests: [IPodSyncRequest], playlists: [IPodPlaylistRequest]?,
+    private static func batch(for requests: [SyncRequest], playlists: [SyncPlaylistRequest]?,
                               device: ITunesDatabase, manifest: SyncManifest,
                               progress: @escaping @Sendable (SyncProgress) async -> Void) -> SyncBatch {
         let plan = SyncPlanner(manifest: manifest, onDevice: device.tracks).plan(selected: requests, unselected: [])

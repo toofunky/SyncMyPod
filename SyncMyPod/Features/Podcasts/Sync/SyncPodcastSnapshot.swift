@@ -4,9 +4,9 @@ import Foundation
 nonisolated struct SyncPodcastSnapshot: Equatable, Sendable {
     let key: String
     /// Oldest first, so the podcast's playlist plays in the order the episodes came out.
-    let playlist: IPodPlaylistRequest
+    let playlist: SyncPlaylistRequest
 
     var name: String { playlist.name }
-    var episodes: [IPodSyncRequest] { playlist.tracks }
+    var episodes: [SyncRequest] { playlist.tracks }
     var byteCount: Int64 { episodes.reduce(0) { $0 + Int64($1.draft.fileSize) } }
 }

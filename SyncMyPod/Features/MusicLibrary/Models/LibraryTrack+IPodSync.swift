@@ -3,12 +3,12 @@ import Foundation
 extension LibraryTrack {
     /// `preservingAlbumArtist` and `embeddingLyricsSidecar` change only the copy on the iPod, never the file.
     /// A lyric file is embedded only in songs without lyrics of their own.
-    func syncRequest(preservingAlbumArtist: Bool, embeddingLyricsSidecar: Bool = false) -> IPodSyncRequest {
+    func syncRequest(preservingAlbumArtist: Bool, embeddingLyricsSidecar: Bool = false) -> SyncRequest {
         let preserves = preservingAlbumArtist && draft.artistDiffersFromAlbumArtist
         let embeds = embeddingLyricsSidecar && hasLyrics && !hasEmbeddedLyrics
         var draft = preserves ? draft.preservingAlbumArtist() : draft
         draft.hasLyrics = hasEmbeddedLyrics || embeds
-        return IPodSyncRequest(sourceURL: URL(filePath: filePath), draft: draft,
+        return SyncRequest(sourceURL: URL(filePath: filePath), draft: draft,
                                source: syncSource(preservedAlbumArtist: preserves, embeddedLyricsSidecar: embeds),
                                embedsLyricsSidecar: embeds)
     }

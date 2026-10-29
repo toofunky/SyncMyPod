@@ -7,13 +7,13 @@ struct IPodSyncVerifierTests {
         FixturePlaylist(id: 1, name: "iPod", isMaster: true, trackIDs: [])
     ], includesAlbumSection: true).build()
 
-    private func request(_ source: URL) -> IPodSyncRequest {
-        IPodSyncRequest(sourceURL: source, draft: ITunesTrackDraft(title: "One", fileSize: 1_024),
+    private func request(_ source: URL) -> SyncRequest {
+        SyncRequest(sourceURL: source, draft: ITunesTrackDraft(title: "One", fileSize: 1_024),
                         source: SyncSource(fileSize: 1_024, modificationDate: .now, artworkFingerprint: nil))
     }
 
     private func sync(on volume: TemporaryIPodVolume,
-                      playlists: [IPodPlaylistRequest]? = nil) async throws -> IPodSyncExpectation {
+                      playlists: [SyncPlaylistRequest]? = nil) async throws -> IPodSyncExpectation {
         let song = request(try volume.makeSourceFile())
         let outcome = try await IPodTrackSyncer(volumeURL: volume.url).sync(adding: [song], playlists: playlists)
         return IPodSyncExpectation(outcome: outcome, removals: [], playlists: playlists)
@@ -42,7 +42,7 @@ struct IPodSyncVerifierTests {
 
     @Test func missingPlaylistIsOverwritten() {
         let expectation = IPodSyncExpectation(outcome: IPodSyncOutcome(), removals: [], playlists: [
-            IPodPlaylistRequest(id: 77, name: "Mix", createdAt: .now, tracks: [])
+            SyncPlaylistRequest(id: 77, name: "Mix", createdAt: .now, tracks: [])
         ])
         #expect(!expectation.isMet(by: ITunesDatabase.preview))
     }

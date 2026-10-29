@@ -9,8 +9,8 @@ extension LibraryPlaylist {
     var syncKey: String { playlistID.uuidString }
 
     /// Songs whose file is no longer in the library are left out.
-    func syncSnapshot(requestsByPath: [String: IPodSyncRequest]) -> SyncPlaylistSnapshot {
-        let request = IPodPlaylistRequest(id: iPodPlaylistID, name: name, createdAt: createdAt,
+    func syncSnapshot(requestsByPath: [String: SyncRequest]) -> SyncPlaylistSnapshot {
+        let request = SyncPlaylistRequest(id: iPodPlaylistID, name: name, createdAt: createdAt,
                                           tracks: trackPaths.compactMap { requestsByPath[$0] })
         return SyncPlaylistSnapshot(key: syncKey, request: request)
     }

@@ -6,8 +6,8 @@ struct PlayerTrackSyncerTests {
     private let config = AudioPlayerConfig(name: "Player", rootPath: "", musicFolder: "Music",
                                            playlistFolder: "Playlists")
 
-    private func plan(on volume: TemporaryPlayerVolume, selected: [IPodSyncRequest],
-                      unselected: [IPodSyncRequest] = [], playlists: [IPodPlaylistRequest]? = nil,
+    private func plan(on volume: TemporaryPlayerVolume, selected: [SyncRequest],
+                      unselected: [SyncRequest] = [], playlists: [SyncPlaylistRequest]? = nil,
                       config: AudioPlayerConfig? = nil) async throws -> PlayerSyncPlan {
         let contents = await PlayerDeviceContents.load(from: try volume.device)
         return contents.planner(for: config ?? self.config).plan(selected: selected, unselected: unselected,
@@ -17,7 +17,7 @@ struct PlayerTrackSyncerTests {
     @Test func copiesSongsAndPlaylistsAndRecordsThem() async throws {
         let volume = try TemporaryPlayerVolume(config: config)
         let song = try volume.request("Clocks")
-        let mix = IPodPlaylistRequest(id: 1, name: "Mix", createdAt: .now, tracks: [song])
+        let mix = SyncPlaylistRequest(id: 1, name: "Mix", createdAt: .now, tracks: [song])
         let summary = try await PlayerTrackSyncer(device: volume.device)
             .sync(try await plan(on: volume, selected: [song], playlists: [mix]))
         #expect(summary.added == 1 && summary.syncedPlaylistCount == 1)
@@ -33,7 +33,7 @@ struct PlayerTrackSyncerTests {
         latin1.playlistFormat = .m3u
         let volume = try TemporaryPlayerVolume(config: latin1)
         let song = try volume.request("Hoppípolla", artist: "Sigur Rós")
-        let mix = IPodPlaylistRequest(id: 1, name: "Mix", createdAt: .now, tracks: [song])
+        let mix = SyncPlaylistRequest(id: 1, name: "Mix", createdAt: .now, tracks: [song])
         _ = try await PlayerTrackSyncer(device: volume.device)
             .sync(try await plan(on: volume, selected: [song], playlists: [mix], config: latin1))
         let data = try Data(contentsOf: volume.volumeURL.appending(path: "Playlists/Mix.m3u"))
@@ -82,7 +82,7 @@ struct PlayerTrackSyncerTests {
         try MP4TagWriter().write(TagChanges(title: "Song", artist: "Guest", albumArtist: "Main"), to: source)
         let draft = ITunesTrackDraft(title: "Song", artist: "Guest", album: "Album", albumArtist: "Main",
                                      fileSize: 1, codec: .aac)
-        let request = IPodSyncRequest(sourceURL: source, draft: draft.preservingAlbumArtist(),
+        let request = SyncRequest(sourceURL: source, draft: draft.preservingAlbumArtist(),
                                       source: SyncSource(fileSize: 1, modificationDate: .now, artworkFingerprint: nil,
                                                          preservedAlbumArtist: true))
         _ = try await PlayerTrackSyncer(device: volume.device).sync(try await plan(on: volume, selected: [request]))

@@ -9,7 +9,7 @@ nonisolated struct SyncManifest: Codable, Equatable, Sendable {
 
     var claimedDatabaseIDs: Set<UInt64> { Set(entries.values.map(\.databaseID)) }
 
-    func entry(for request: IPodSyncRequest) -> SyncManifestEntry? {
+    func entry(for request: SyncRequest) -> SyncManifestEntry? {
         entries[request.sourcePath]
     }
 
@@ -27,7 +27,7 @@ nonisolated struct SyncManifest: Codable, Equatable, Sendable {
     }
 
     /// Adds entries for tracks just copied to the iPod, keyed like `IPodSyncOutcome.addedDatabaseIDs`.
-    func recording(_ requests: [IPodSyncRequest], as databaseIDs: [String: UInt64]) -> SyncManifest {
+    func recording(_ requests: [SyncRequest], as databaseIDs: [String: UInt64]) -> SyncManifest {
         var updated = self
         for request in requests {
             guard let source = request.source, let databaseID = databaseIDs[request.sourcePath] else { continue }
@@ -37,13 +37,13 @@ nonisolated struct SyncManifest: Codable, Equatable, Sendable {
     }
 
     /// Links the file to a track whose file state is unknown, so the next sync rewrites it.
-    mutating func link(_ request: IPodSyncRequest, to databaseID: UInt64) {
+    mutating func link(_ request: SyncRequest, to databaseID: UInt64) {
         entries[request.sourcePath] = SyncManifestEntry(databaseID: databaseID, source: nil)
     }
 
     /// Moves entries whose file is `missing` to library files without an entry whose tags match their track,
     /// one each, so a renamed or moved file keeps its iPod copy. Returns whether anything moved.
-    mutating func relink(_ requests: [IPodSyncRequest], onDevice: [ITunesTrack], missing: Set<String>) -> Bool {
+    mutating func relink(_ requests: [SyncRequest], onDevice: [ITunesTrack], missing: Set<String>) -> Bool {
         let keys = Dictionary(onDevice.map { ($0.databaseID, IPodTrackMatchKey($0)) },
                               uniquingKeysWith: { first, _ in first })
         var movable: [IPodTrackMatchKey: [String]] = [:]
@@ -62,7 +62,7 @@ nonisolated struct SyncManifest: Codable, Equatable, Sendable {
 
     /// Links library files without an entry to unclaimed iPod tracks with the same tags, one each.
     /// Returns whether anything was added.
-    mutating func adopt(_ requests: [IPodSyncRequest], onDevice: [ITunesTrack]) -> Bool {
+    mutating func adopt(_ requests: [SyncRequest], onDevice: [ITunesTrack]) -> Bool {
         let claimed = claimedDatabaseIDs
         var unclaimed = Dictionary(grouping: onDevice.filter { !claimed.contains($0.databaseID) },
                                    by: IPodTrackMatchKey.init)

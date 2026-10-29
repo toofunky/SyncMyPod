@@ -42,7 +42,7 @@ struct IPodPositionImportTests {
                         sampleRate: 0, rating: 0, playCount: 0, mediaType: 4, dateAdded: nil, lastPlayed: nil,
                         lastModified: nil, bookmark: positions[path] ?? 0)
         }
-        let requests = paths.map { IPodSyncRequest(sourceURL: URL(filePath: $0), draft: ITunesTrackDraft(title: $0),
+        let requests = paths.map { SyncRequest(sourceURL: URL(filePath: $0), draft: ITunesTrackDraft(title: $0),
                                                    source: source) }
         return (tracks, SyncManifest().recording(requests, as: ids))
     }

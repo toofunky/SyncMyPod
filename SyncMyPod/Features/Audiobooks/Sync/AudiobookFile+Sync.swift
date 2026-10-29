@@ -6,7 +6,7 @@ extension AudiobookFile {
     /// Numbered by its place in the book, so the parts list in listening order whatever their own tags say.
     /// Like a podcast episode, a player's request has no `SyncSource`, so a copy already on it is never replaced
     /// and the player can't forget where it was. `nil` for audio an iPod can't play.
-    func syncRequest(book: Audiobook, part: Int, of partCount: Int, forIPod: Bool) -> IPodSyncRequest? {
+    func syncRequest(book: Audiobook, part: Int, of partCount: Int, forIPod: Bool) -> SyncRequest? {
         guard !forIPod || codec?.syncsToIPod == true else { return nil }
         var draft = ITunesTrackDraft(title: title, artist: book.author, album: book.title, albumArtist: book.author,
                                      genre: Self.syncGenre, fileSize: fileSize, duration: duration,
@@ -15,7 +15,7 @@ extension AudiobookFile {
                                      lastModified: modificationDate, codec: codec ?? .aac)
         draft.mediaKind = forIPod ? .audiobook : .music
         let cover = artworkFingerprint == nil ? book.coverFilePath : nil
-        return IPodSyncRequest(sourceURL: fileURL, draft: draft, source: forIPod ? syncSource(book: book) : nil,
+        return SyncRequest(sourceURL: fileURL, draft: draft, source: forIPod ? syncSource(book: book) : nil,
                                kind: .audiobook, coverImageURL: cover.map { URL(filePath: $0) })
     }
 

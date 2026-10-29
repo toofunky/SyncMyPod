@@ -2,9 +2,9 @@ import Testing
 @testable import SyncMyPod
 
 @MainActor
-struct IPodSyncSettingsTests {
+struct DeviceSyncSettingsTests {
     @Test func newDeviceSyncsAllSongsAndNothingElse() {
-        let selection = IPodSyncSettings(deviceID: "new").selection
+        let selection = DeviceSyncSettings(deviceID: "new").selection
         #expect([selection.songs, selection.playlistScope, selection.podcastScope, selection.audiobookScope]
             == [.all, .none, .none, .none])
     }
@@ -31,8 +31,8 @@ struct IPodSyncSettingsTests {
     }
 
     /// Settings saved before per-tab scopes hold `NULL` for every scope.
-    private func oldSettings() -> IPodSyncSettings {
-        let settings = IPodSyncSettings(deviceID: "old")
+    private func oldSettings() -> DeviceSyncSettings {
+        let settings = DeviceSyncSettings(deviceID: "old")
         settings.playlistScopeValue = nil
         settings.podcastScopeValue = nil
         settings.audiobookScopeValue = nil

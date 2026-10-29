@@ -5,7 +5,7 @@ nonisolated struct SyncBatch: Sendable {
     let items: [SyncBatchItem]
     let albumTracks: [IPodAlbumKey: [UInt64]]
     /// `nil` leaves the iPod's playlists alone; otherwise these replace every playlist this app wrote before.
-    let playlists: [IPodPlaylistRequest]?
+    let playlists: [SyncPlaylistRequest]?
     let resolver: PlaylistTrackResolver
     let progress: @Sendable (SyncProgress) async -> Void
 

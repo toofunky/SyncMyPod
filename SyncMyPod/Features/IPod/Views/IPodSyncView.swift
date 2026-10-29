@@ -15,7 +15,7 @@ struct IPodSyncView: View {
     @Query(sort: \LibraryPlaylist.createdAt) private var playlists: [LibraryPlaylist]
     @Query private var podcasts: [Podcast]
     @Query private var audiobooks: [Audiobook]
-    @State private var settings: IPodSyncSettings?
+    @State private var settings: DeviceSyncSettings?
     @State private var onDevice: ITunesDatabase?
     @State private var manifest = LoadedSyncManifest()
     @State private var freeBytes: Int64?
@@ -58,18 +58,18 @@ struct IPodSyncView: View {
 
     private var hasDownloads: Bool { podcasts.contains { $0.episodes.contains(where: \.isDownloaded) } }
 
-    private func library(_ settings: IPodSyncSettings) -> SyncLibrarySnapshot {
+    private func library(_ settings: DeviceSyncSettings) -> SyncLibrarySnapshot {
         SyncLibrarySnapshot(tracks: iPodTracks, playlists: playlists, podcasts: podcasts, audiobooks: audiobooks,
                             forIPod: true, preservingAlbumArtist: settings.preservesAlbumArtist,
                             embeddingLyricsSidecars: embedsLyricsSidecars(settings))
     }
 
-    private func embedsLyricsSidecars(_ settings: IPodSyncSettings) -> Bool {
+    private func embedsLyricsSidecars(_ settings: DeviceSyncSettings) -> Bool {
         settings.syncsLyricsSidecars && device.showsLyrics
     }
 
     private func reload() async {
-        let settings = IPodSyncSettings.settings(for: device.id, in: context)
+        let settings = DeviceSyncSettings.settings(for: device.id, in: context)
         self.settings = settings
         await podcastDownloads?.readMissingAudioDetails(of: podcasts, context: context)
         let library = library(settings)

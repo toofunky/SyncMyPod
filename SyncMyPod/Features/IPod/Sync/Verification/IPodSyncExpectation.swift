@@ -6,7 +6,7 @@ nonisolated struct IPodSyncExpectation: Equatable, Sendable {
     let absentDatabaseIDs: Set<UInt64>
     let playlistIDs: Set<UInt64>
 
-    init(outcome: IPodSyncOutcome, removals: Set<UInt64>, playlists: [IPodPlaylistRequest]?) {
+    init(outcome: IPodSyncOutcome, removals: Set<UInt64>, playlists: [SyncPlaylistRequest]?) {
         presentDatabaseIDs = Set(outcome.addedDatabaseIDs.values)
         absentDatabaseIDs = outcome.removed > 0 ? removals : []
         playlistIDs = Set((playlists ?? []).map(\.id))

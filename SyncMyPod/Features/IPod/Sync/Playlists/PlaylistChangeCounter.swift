@@ -2,7 +2,7 @@ import Foundation
 
 /// Counts the playlists a sync would write or remove because the iPod's copy differs from the library's.
 nonisolated enum PlaylistChangeCounter {
-    static func count(_ playlists: [IPodPlaylistRequest], resolver: PlaylistTrackResolver, onDevice: [ITunesTrack],
+    static func count(_ playlists: [SyncPlaylistRequest], resolver: PlaylistTrackResolver, onDevice: [ITunesTrack],
                       devicePlaylists: [ITunesPlaylist]) -> Int {
         let databaseIDs = Dictionary(onDevice.map { ($0.id, $0.databaseID) }, uniquingKeysWith: { first, _ in first })
         let existing = Dictionary(devicePlaylists.filter { !$0.isMaster }.map { ($0.id, $0) },

@@ -29,13 +29,13 @@ nonisolated struct IPodBatchWriter {
     }
 
     /// Replaces the playlists earlier syncs wrote, pointing at the tracks as they are after this batch.
-    mutating func writePlaylists(_ playlists: [IPodPlaylistRequest], resolver: PlaylistTrackResolver) {
+    mutating func writePlaylists(_ playlists: [SyncPlaylistRequest], resolver: PlaylistTrackResolver) {
         let drafts = playlists.map { resolver.draft(for: $0, synced: outcome.syncedDatabaseIDs) }
         editor.replacePlaylists(drafts, removing: resolver.manifest.playlistIDs)
         outcome.syncedPlaylistCount = drafts.count
     }
 
-    private mutating func add(_ request: IPodSyncRequest) async throws {
+    private mutating func add(_ request: SyncRequest) async throws {
         var draft = try await copy(request)
         let prepared = try await artwork.prepare(coverFrom: request.sourceURL, fallback: request.coverImageURL,
                                                  albumTracks: albumTracks[IPodAlbumKey(draft)] ?? [])
@@ -62,7 +62,7 @@ nonisolated struct IPodBatchWriter {
         outcome.updatedDatabaseIDs[update.request.sourcePath] = update.databaseID
     }
 
-    private mutating func copy(_ request: IPodSyncRequest) async throws -> ITunesTrackDraft {
+    private mutating func copy(_ request: SyncRequest) async throws -> ITunesTrackDraft {
         let file = try copier.copy(request.sourceURL)
         copied.append(file.url)
         var draft = request.draft

@@ -4,7 +4,7 @@ import SwiftUI
 /// A tab for each kind of content, each choosing to sync all, the selected or none of it. Albums and genres share
 /// one scope over songs, and a song syncs when either of them, or a synced playlist, selects it.
 struct SyncSelectionEditor: View {
-    @Bindable var settings: IPodSyncSettings
+    @Bindable var settings: DeviceSyncSettings
     let library: SyncLibrarySnapshot
     var deviceKind = "iPod"
     var includesSpokenWord = false
@@ -83,7 +83,7 @@ struct SyncSelectionEditor: View {
 
 #if DEBUG
 #Preview {
-    let settings = IPodSyncSettings(deviceID: "preview")
+    let settings = DeviceSyncSettings(deviceID: "preview")
     settings.songScope = .selected
     settings.podcastScope = .none
     return SyncSelectionEditor(settings: settings,

@@ -21,8 +21,8 @@ nonisolated struct SyncPlanner {
                                     by: IPodTrackMatchKey.init)
     }
 
-    func plan(selected: [IPodSyncRequest], unselected: [IPodSyncRequest]) -> SyncPlan {
-        var requests: [IPodSyncRequest] = []
+    func plan(selected: [SyncRequest], unselected: [SyncRequest]) -> SyncPlan {
+        var requests: [SyncRequest] = []
         var updates: [IPodTrackUpdate] = []
         for request in selected {
             if let entry = manifest.entry(for: request) {
@@ -37,13 +37,13 @@ nonisolated struct SyncPlanner {
 
     /// `nil` when the file is unchanged, or hasn't been scanned closely enough to tell. An entry without a
     /// source always updates, redrawing the cover since what's on the iPod is unknown.
-    private func update(_ request: IPodSyncRequest, _ entry: SyncManifestEntry) -> IPodTrackUpdate? {
+    private func update(_ request: SyncRequest, _ entry: SyncManifestEntry) -> IPodTrackUpdate? {
         guard let source = request.source, source != entry.source else { return nil }
         let artworkChanged = entry.source.map { $0.artworkFingerprint != source.artworkFingerprint } ?? true
         return IPodTrackUpdate(request: request, databaseID: entry.databaseID, artworkChanged: artworkChanged)
     }
 
-    private func removals(_ unselected: [IPodSyncRequest], keeping selected: [IPodSyncRequest]) -> [ITunesTrack] {
+    private func removals(_ unselected: [SyncRequest], keeping selected: [SyncRequest]) -> [ITunesTrack] {
         let keptIDs = Set(selected.compactMap { manifest.entry(for: $0)?.databaseID })
         let keptKeys = Set(selected.map(\.matchKey))
         var removedIDs = strayDatabaseIDs

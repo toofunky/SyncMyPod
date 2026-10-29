@@ -18,7 +18,7 @@ struct IPodSettingsView: View {
 
     @Environment(\.modelContext) private var context
     @Environment(DeviceSyncModel.self) private var syncModel
-    @State private var settings: IPodSyncSettings?
+    @State private var settings: DeviceSyncSettings?
 
     var body: some View {
         Form {
@@ -43,7 +43,7 @@ struct IPodSettingsView: View {
             }
         }
         .formStyle(.grouped)
-        .task(id: device.id) { settings = IPodSyncSettings.settings(for: device.id, in: context) }
+        .task(id: device.id) { settings = DeviceSyncSettings.settings(for: device.id, in: context) }
     }
 
     private func option(_ title: String, isOn: Binding<Bool>, infoTitle: String, info: String) -> some View {

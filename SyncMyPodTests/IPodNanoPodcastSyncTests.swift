@@ -26,12 +26,12 @@ struct IPodNanoPodcastSyncTests {
         return volume
     }
 
-    private func episode(in volume: TemporaryIPodVolume) throws -> IPodSyncRequest {
+    private func episode(in volume: TemporaryIPodVolume) throws -> SyncRequest {
         let source = try AudioFixtureWriter.writeSilence(to: volume.url.appending(path: "source/Episode.m4a"))
         var draft = ITunesTrackDraft(title: "Episode", album: "Show", fileSize: try Data(contentsOf: source).count)
         draft.mediaKind = .podcast
         draft.releaseDate = Self.released
-        return IPodSyncRequest(sourceURL: source, draft: draft,
+        return SyncRequest(sourceURL: source, draft: draft,
                                source: SyncSource(fileSize: draft.fileSize, modificationDate: .distantPast,
                                                   artworkFingerprint: nil), kind: .podcast)
     }
@@ -44,7 +44,7 @@ struct IPodNanoPodcastSyncTests {
     @Test func episodesArePodcastsInTheNanosLibrary() async throws {
         let volume = try nanoVolume()
         let episode = try episode(in: volume)
-        let podcasts = IPodPlaylistRequest(id: IPodPlaylistRequest.podcastsID, name: "Podcasts", createdAt: .now,
+        let podcasts = SyncPlaylistRequest(id: SyncPlaylistRequest.podcastsID, name: "Podcasts", createdAt: .now,
                                            tracks: [episode], isPodcasts: true)
         _ = try await IPodTrackSyncer(device: nano(on: volume)).sync(adding: [episode], playlists: [podcasts])
 
@@ -65,7 +65,7 @@ struct IPodNanoPodcastSyncTests {
         let source = try AudioFixtureWriter.writeSilence(to: volume.url.appending(path: "source/01.m4a"))
         var draft = ITunesTrackDraft(title: "Letters", album: "Frankenstein", fileSize: try Data(contentsOf: source).count)
         draft.mediaKind = .audiobook
-        let part = IPodSyncRequest(sourceURL: source, draft: draft,
+        let part = SyncRequest(sourceURL: source, draft: draft,
                                    source: SyncSource(fileSize: draft.fileSize, modificationDate: .distantPast,
                                                       artworkFingerprint: nil), kind: .audiobook)
         let book = SyncAudiobookSnapshot(key: "book", title: "Frankenstein", author: "", files: [part],
@@ -85,13 +85,13 @@ struct IPodNanoPodcastSyncTests {
     @Test func theNanosGroupedPodcastsListReadsAsItsEpisodes() async throws {
         let volume = try nanoVolume()
         let episode = try episode(in: volume)
-        let podcasts = IPodPlaylistRequest(id: IPodPlaylistRequest.podcastsID, name: "Podcasts", createdAt: .now,
+        let podcasts = SyncPlaylistRequest(id: SyncPlaylistRequest.podcastsID, name: "Podcasts", createdAt: .now,
                                            tracks: [episode], isPodcasts: true)
         _ = try await IPodTrackSyncer(device: nano(on: volume)).sync(adding: [episode], playlists: [podcasts])
 
         let data = try ITunesCDB.decompress(Data(contentsOf: ITunesDBLoader.compressedDatabaseURL(onVolume: volume.url)))
         let database = try ITunesDBParser(data: data).parse()
-        let list = try #require(database.playlists.first { $0.id == IPodPlaylistRequest.podcastsID })
+        let list = try #require(database.playlists.first { $0.id == SyncPlaylistRequest.podcastsID })
         #expect(list.trackIDs == database.tracks.map(\.id))
     }
 }

@@ -17,8 +17,8 @@ final class DeviceSyncModel {
     @ObservationIgnored private var verificationTask: Task<Void, Never>?
 
     /// Non-`nil` `playlists` replace every playlist earlier syncs wrote.
-    func sync(_ requests: [IPodSyncRequest], removing removals: Set<UInt64> = [],
-              playlists: [IPodPlaylistRequest]? = nil, to device: ConnectedDevice) {
+    func sync(_ requests: [SyncRequest], removing removals: Set<UInt64> = [],
+              playlists: [SyncPlaylistRequest]? = nil, to device: ConnectedDevice) {
         guard !isSyncing, !requests.isEmpty || !removals.isEmpty || playlists != nil else { return }
         switch device {
         case .iPod(let iPod):
@@ -39,7 +39,7 @@ final class DeviceSyncModel {
 
     /// Copies songs chosen in the library, with their covers and lyrics, without removing anything or
     /// touching playlists.
-    private func addToPlayer(_ requests: [IPodSyncRequest], player: AudioPlayerDevice, as device: ConnectedDevice) {
+    private func addToPlayer(_ requests: [SyncRequest], player: AudioPlayerDevice, as device: ConnectedDevice) {
         let syncer = PlayerTrackSyncer(device: player)
         let config = player.config
         start(on: device, total: requests.count) { report in
@@ -56,8 +56,8 @@ final class DeviceSyncModel {
         syncTask?.cancel()
     }
 
-    private func syncIPod(_ iPod: IPodDevice, adding requests: [IPodSyncRequest], removing removals: Set<UInt64>,
-                          playlists: [IPodPlaylistRequest]?, as device: ConnectedDevice) {
+    private func syncIPod(_ iPod: IPodDevice, adding requests: [SyncRequest], removing removals: Set<UInt64>,
+                          playlists: [SyncPlaylistRequest]?, as device: ConnectedDevice) {
         let syncer: IPodTrackSyncer
         do {
             syncer = try IPodTrackSyncer(device: iPod)

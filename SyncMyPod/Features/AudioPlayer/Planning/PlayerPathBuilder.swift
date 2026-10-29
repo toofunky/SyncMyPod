@@ -7,7 +7,7 @@ nonisolated struct PlayerPathBuilder {
     let config: AudioPlayerConfig
 
     /// Relative to the volume.
-    func path(for request: IPodSyncRequest) -> String {
+    func path(for request: SyncRequest) -> String {
         let draft = request.draft
         switch request.kind {
         case .podcast:
@@ -28,13 +28,13 @@ nonisolated struct PlayerPathBuilder {
     }
 
     /// A book's "CD 1" or "Disc 2" folder, kept so the discs' files neither collide nor play out of order.
-    private func discFolder(of request: IPodSyncRequest) -> String {
+    private func discFolder(of request: SyncRequest) -> String {
         let folder = request.sourceURL.deletingLastPathComponent().lastPathComponent
         return AudiobookGrouper.isDiscFolderName(folder) ? PlayerFileNamer.safeComponent(folder, fallback: "") : ""
     }
 
     /// The library file's own name, or "<number> <title>.<ext>" when preserving track sorting.
-    func fileName(for request: IPodSyncRequest) -> String {
+    func fileName(for request: SyncRequest) -> String {
         let original = request.sourceURL.lastPathComponent
         let ext = request.sourceURL.pathExtension.lowercased()
         let originalStem = request.sourceURL.deletingPathExtension().lastPathComponent

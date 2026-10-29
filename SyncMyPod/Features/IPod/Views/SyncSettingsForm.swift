@@ -4,7 +4,7 @@ import SwiftUI
 struct SyncSettingsForm: View {
     private static let listedRemovalLimit = 8
 
-    @Bindable var settings: IPodSyncSettings
+    @Bindable var settings: DeviceSyncSettings
     let library: SyncLibrarySnapshot
     let onDevice: ITunesDatabase
     let manifest: LoadedSyncManifest
@@ -67,7 +67,7 @@ struct SyncSettingsForm: View {
 
 #if DEBUG
 #Preview {
-    SyncSettingsForm(settings: IPodSyncSettings(deviceID: "preview"),
+    SyncSettingsForm(settings: DeviceSyncSettings(deviceID: "preview"),
                      library: SyncLibrarySnapshot(tracks: LibraryTrack.previewTracks, playlists: [.preview],
                                                   preservingAlbumArtist: false),
                      onDevice: .preview, manifest: LoadedSyncManifest(), freeBytes: 38_000_000_000, isSyncing: false,

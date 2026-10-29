@@ -7,10 +7,10 @@ struct IPodAudiobookSyncTests {
                                                                              trackIDs: [])],
                                                  includesAlbumSection: true, includesPodcastSection: true).build()
 
-    private func part(_ name: String, in volume: TemporaryIPodVolume) throws -> IPodSyncRequest {
+    private func part(_ name: String, in volume: TemporaryIPodVolume) throws -> SyncRequest {
         var draft = ITunesTrackDraft(title: name, artist: "Mary Shelley", album: "Frankenstein", fileSize: 1_024)
         draft.mediaKind = .audiobook
-        return IPodSyncRequest(sourceURL: try volume.makeSourceFile(named: name), draft: draft,
+        return SyncRequest(sourceURL: try volume.makeSourceFile(named: name), draft: draft,
                                source: SyncSource(fileSize: 1_024, modificationDate: .distantPast,
                                                   artworkFingerprint: nil), kind: .audiobook)
     }

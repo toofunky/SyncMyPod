@@ -9,7 +9,7 @@ nonisolated struct PlayerSidecarPlanner {
 
     /// `destinations` maps each selected song's library path to its path on the player. With `pruning` off,
     /// as when adding a few songs, sidecars the manifest records for other songs are left alone.
-    func plan(_ requests: [IPodSyncRequest], destinations: [String: String], pruning: Bool,
+    func plan(_ requests: [SyncRequest], destinations: [String: String], pruning: Bool,
               into plan: inout PlayerSyncPlan) {
         let wanted = wantedSidecars(requests, destinations: destinations)
         plan.sidecarCopies = wanted.sorted { $0.key < $1.key }.compactMap { path, source in
@@ -26,7 +26,7 @@ nonisolated struct PlayerSidecarPlanner {
         path.lowercased().hasSuffix(".lrc") ? nil : config.coverPixelLimit
     }
 
-    private func wantedSidecars(_ requests: [IPodSyncRequest], destinations: [String: String]) -> [String: SidecarFile] {
+    private func wantedSidecars(_ requests: [SyncRequest], destinations: [String: String]) -> [String: SidecarFile] {
         var wanted: [String: SidecarFile] = [:]
         let sorted = requests.sorted { $0.sourcePath < $1.sourcePath }
         for request in sorted {
@@ -41,7 +41,7 @@ nonisolated struct PlayerSidecarPlanner {
     }
 
     /// The first library folder with covers, by path, supplies an album folder's covers, named in lowercase.
-    private func addCovers(for request: IPodSyncRequest, at destination: String,
+    private func addCovers(for request: SyncRequest, at destination: String,
                            to wanted: inout [String: SidecarFile]) {
         let folder = (destination as NSString).deletingLastPathComponent
         let covers = sidecars.covers(besideSongAt: request.sourcePath)

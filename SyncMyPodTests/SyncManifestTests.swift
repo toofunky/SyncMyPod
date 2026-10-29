@@ -7,8 +7,8 @@ struct SyncManifestTests {
                                     modificationDate: Date(timeIntervalSinceReferenceDate: 812_345.678),
                                     artworkFingerprint: "abc")
 
-    private func request(_ title: String, path: String? = nil, scanned: Bool = true) -> IPodSyncRequest {
-        IPodSyncRequest(sourceURL: URL(filePath: path ?? "/Music/\(title).m4a"),
+    private func request(_ title: String, path: String? = nil, scanned: Bool = true) -> SyncRequest {
+        SyncRequest(sourceURL: URL(filePath: path ?? "/Music/\(title).m4a"),
                         draft: ITunesTrackDraft(title: title, artist: "A", album: "B", fileSize: 1_024),
                         source: scanned ? source : nil)
     }
