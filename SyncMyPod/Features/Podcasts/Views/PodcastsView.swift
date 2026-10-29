@@ -90,7 +90,7 @@ struct PodcastsView: View {
     PodcastsView(selection: $selection)
         .environment(PodcastsModel())
         .environment(PodcastDownloads())
-        .environment(PodcastFolder.preview)
+        .environment(MediaFolders.preview)
         .modelContainer(.preview)
 }
 
@@ -98,7 +98,7 @@ struct PodcastsView: View {
     PodcastsView(selection: .constant(nil))
         .environment(PodcastsModel())
         .environment(PodcastDownloads())
-        .environment(PodcastFolder.preview)
+        .environment(MediaFolders.preview)
         .modelContainer(.emptyPreview)
 }
 #endif

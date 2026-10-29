@@ -19,8 +19,7 @@ struct SettingsView: View {
 #if DEBUG
 #Preview {
     SettingsView()
-        .environment(PodcastFolder.preview)
-        .environment(AudiobookFolder.preview)
+        .environment(MediaFolders.preview)
         .modelContainer(.preview)
 }
 #endif

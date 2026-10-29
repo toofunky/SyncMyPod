@@ -9,12 +9,15 @@ struct AudiobooksView: View {
     @Binding var selection: UUID?
 
     @Environment(AudiobooksModel.self) private var model
-    @Environment(AudiobookFolder.self) private var folder
+    @Environment(MediaFolders.self) private var mediaFolders
+    @Query private var libraryFolders: [LibraryFolder]
     @Environment(MusicPlayerModel.self) private var player: MusicPlayerModel?
     @Environment(\.modelContext) private var context
     @Query(sort: Audiobook.titleOrder) private var books: [Audiobook]
     @AppStorage("audiobookListWidth") private var listWidth = 240.0
     @State private var isChoosingFolder = false
+
+    private var folder: ManagedFolder { mediaFolders.audiobooks }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -26,7 +29,7 @@ struct AudiobooksView: View {
             content
         }
         .toolbar { toolbarContent }
-        .audiobookFolderChooser(isPresented: $isChoosingFolder)
+        .mediaFolderChooser(.audiobooks, isPresented: $isChoosingFolder, musicFolderPath: libraryFolders.first?.path)
         .task(id: folder.url) {
             if let url = folder.url { model.scanIfNeeded(url, in: context) }
         }
@@ -90,8 +93,7 @@ struct AudiobooksView: View {
     AudiobooksView(selection: $selection)
         .environment(AudiobooksModel())
         .environment(MusicPlayerModel())
-        .environment(AudiobookFolder.preview)
-        .environment(PodcastFolder.preview)
+        .environment(MediaFolders.preview)
         .modelContainer(.preview)
 }
 
@@ -99,8 +101,7 @@ struct AudiobooksView: View {
     AudiobooksView(selection: .constant(nil))
         .environment(AudiobooksModel())
         .environment(MusicPlayerModel())
-        .environment(AudiobookFolder.preview)
-        .environment(PodcastFolder.preview)
+        .environment(MediaFolders.preview)
         .modelContainer(.emptyPreview)
 }
 #endif

@@ -4,8 +4,11 @@ import SwiftUI
 
 /// Chooses the folder audiobooks are scanned from.
 struct AudiobookSettingsView: View {
-    @Environment(AudiobookFolder.self) private var folder
+    @Environment(MediaFolders.self) private var mediaFolders
+    @Query private var libraryFolders: [LibraryFolder]
     @State private var isChoosing = false
+
+    private var folder: ManagedFolder { mediaFolders.audiobooks }
 
     var body: some View {
         Form {
@@ -20,7 +23,7 @@ struct AudiobookSettingsView: View {
             }
         }
         .formStyle(.grouped)
-        .audiobookFolderChooser(isPresented: $isChoosing)
+        .mediaFolderChooser(.audiobooks, isPresented: $isChoosing, musicFolderPath: libraryFolders.first?.path)
     }
 
     private var folderControls: some View {
@@ -43,8 +46,7 @@ struct AudiobookSettingsView: View {
 #if DEBUG
 #Preview {
     AudiobookSettingsView()
-        .environment(AudiobookFolder.preview)
-        .environment(PodcastFolder.preview)
+        .environment(MediaFolders.preview)
         .modelContainer(.preview)
 }
 #endif

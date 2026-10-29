@@ -8,8 +8,7 @@ struct IPodSyncView: View {
     @Environment(\.iTunesDBLoader) private var loader
     @Environment(DeviceSyncModel.self) private var syncModel
     @Environment(PodcastDownloads.self) private var podcastDownloads: PodcastDownloads?
-    @Environment(PodcastFolder.self) private var podcastFolder: PodcastFolder?
-    @Environment(AudiobookFolder.self) private var audiobookFolder: AudiobookFolder?
+    @Environment(MediaFolders.self) private var mediaFolders: MediaFolders?
     @Query private var tracks: [LibraryTrack]
     @Query private var folders: [LibraryFolder]
     @Query(sort: \LibraryPlaylist.createdAt) private var playlists: [LibraryPlaylist]
@@ -104,9 +103,9 @@ struct IPodSyncView: View {
         let downloaded = Set(podcasts.flatMap(\.episodes).compactMap(\.downloadedFilePath))
         let bookFiles = Set(audiobooks.flatMap(\.files).map(\.filePath))
         let entries = loaded.manifest.entries
-        let removed = RemovedSourceFinder(folderPath: podcastFolder?.path)
+        let removed = RemovedSourceFinder(folderPath: mediaFolders?.podcasts.path)
             .missing(entries.keys, known: downloaded)
-            .union(RemovedSourceFinder(folderPath: audiobookFolder?.path)
+            .union(RemovedSourceFinder(folderPath: mediaFolders?.audiobooks.path)
                 .missing(entries.keys, known: bookFiles))
         var updated = loaded
         updated.strayDatabaseIDs.formUnion(removed.compactMap { entries[$0]?.databaseID })
