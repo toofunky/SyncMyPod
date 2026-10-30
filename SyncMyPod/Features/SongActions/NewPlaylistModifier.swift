@@ -1,12 +1,14 @@
 import SwiftData
 import SwiftUI
 
-/// Asks for a name, then makes a playlist of the pending songs; an empty array makes an empty playlist.
+/// Asks for a name, then makes a playlist of the pending songs at the end of the list; an empty array makes an
+/// empty playlist.
 struct NewPlaylistModifier: ViewModifier {
     @Binding var tracks: [LibraryTrack]?
     var onCreate: (LibraryPlaylist) -> Void = { _ in }
 
     @Environment(\.modelContext) private var context
+    @Query private var playlists: [LibraryPlaylist]
     @State private var name = LibraryPlaylist.untitledName
 
     func body(content: Content) -> some View {
@@ -30,6 +32,7 @@ struct NewPlaylistModifier: ViewModifier {
         let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
         let playlist = LibraryPlaylist(name: trimmed.isEmpty ? LibraryPlaylist.untitledName : trimmed,
                                        trackPaths: tracks.map(\.filePath))
+        playlist.sortIndex = LibraryPlaylist.nextSortIndex(after: playlists)
         context.insert(playlist)
         onCreate(playlist)
     }

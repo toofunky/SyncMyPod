@@ -11,6 +11,7 @@ struct PlaylistsView: View {
 
     @Query(sort: LibraryPlaylist.sidebarOrder) private var playlists: [LibraryPlaylist]
     @AppStorage("playlistListWidth") private var listWidth = 200.0
+    @State private var model = PlaylistsModel()
     @State private var isImporting = false
     @State private var exportTarget: LibraryPlaylist?
     @State private var newPlaylistTracks: [LibraryTrack]?
@@ -21,7 +22,8 @@ struct PlaylistsView: View {
             Divider()
             splitView
         }
-        .playlistTransfer(isImporting: $isImporting, exportTarget: $exportTarget, selection: $selection)
+        .playlistTransfer(model: model, isImporting: $isImporting, exportTarget: $exportTarget,
+                          selection: $selection)
         .modifier(NewPlaylistModifier(tracks: $newPlaylistTracks, onCreate: select))
     }
 
@@ -45,7 +47,7 @@ struct PlaylistsView: View {
     private var splitView: some View {
         // Not an HSplitView, which adds the floating sidebar's width to its panes' minimum widths.
         HStack(spacing: 0) {
-            PlaylistListView(selection: $selection) { exportTarget = $0 }
+            PlaylistListView(model: model, selection: $selection) { exportTarget = $0 }
                 .frame(width: listWidth)
             ResizableDivider(width: $listWidth, range: Self.listWidthRange)
             detail
@@ -65,7 +67,6 @@ struct PlaylistsView: View {
     }
 
     private func select(_ playlist: LibraryPlaylist) {
-        playlist.sortIndex = LibraryPlaylist.nextSortIndex(after: playlists)
         selection = playlist.playlistID
     }
 

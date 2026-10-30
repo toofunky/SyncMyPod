@@ -4,11 +4,12 @@ import SwiftData
 extension LibraryPlaylist {
     static let favoritesFilter = #Predicate<LibraryPlaylist> { $0.isFavoritesFlag == true }
 
-    /// Creates the Favorites playlist at the top of the list if the library doesn't have one yet.
+    /// Creates the Favorites playlist at the top of the list if the library doesn't have one yet, and keeps it there.
     @discardableResult
     static func ensureFavorites(in context: ModelContext) -> LibraryPlaylist {
         let descriptor = FetchDescriptor(predicate: favoritesFilter)
         if let existing = try? context.fetch(descriptor).first {
+            repairOrder(in: context)
             return existing
         }
         let favorites = LibraryPlaylist(name: favoritesName)

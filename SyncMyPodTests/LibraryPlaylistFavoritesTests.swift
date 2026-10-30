@@ -1,3 +1,4 @@
+import Foundation
 import SwiftData
 import Testing
 @testable import SyncMyPod
@@ -48,5 +49,36 @@ struct LibraryPlaylistFavoritesTests {
 
     @Test func ordinaryPlaylistsAreNotFavorites() {
         #expect(!LibraryPlaylist(name: "Road Trip").isFavorites)
+    }
+
+    private func sidebar() throws -> [String] {
+        try context.fetch(FetchDescriptor(sortBy: LibraryPlaylist.sidebarOrder)).map(\.name)
+    }
+
+    @Test func droppingAPlaylistAboveFavoritesKeepsFavoritesFirst() throws {
+        LibraryPlaylist.ensureFavorites(in: context)
+        for (index, name) in ["Road Trip", "Gym"].enumerated() {
+            let playlist = LibraryPlaylist(name: name)
+            playlist.sortIndex = index
+            context.insert(playlist)
+        }
+        let playlists = try context.fetch(FetchDescriptor(sortBy: LibraryPlaylist.sidebarOrder))
+        LibraryPlaylist.move(playlists, fromOffsets: [2], toOffset: 0)
+        #expect(try sidebar() == [LibraryPlaylist.favoritesName, "Gym", "Road Trip"])
+    }
+
+    @Test func playlistsWithoutAPositionGoBelowFavoritesInTheOrderTheyWereMade() throws {
+        let favorites = LibraryPlaylist.ensureFavorites(in: context)
+        favorites.sortIndex = 3
+        let ordered = LibraryPlaylist(name: "Ordered")
+        ordered.sortIndex = 0
+        context.insert(ordered)
+        for (offset, name) in ["Older", "Newer"].enumerated() {
+            let playlist = LibraryPlaylist(name: name)
+            playlist.createdAt = .now.addingTimeInterval(Double(offset))
+            context.insert(playlist)
+        }
+        LibraryPlaylist.ensureFavorites(in: context)
+        #expect(try sidebar() == [LibraryPlaylist.favoritesName, "Ordered", "Older", "Newer"])
     }
 }
