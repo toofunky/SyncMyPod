@@ -30,9 +30,9 @@ final class TemporaryPlayerVolume {
         let source = libraryURL.appending(path: file ?? "\(title).m4a")
         try FileManager.default.createDirectory(at: source.deletingLastPathComponent(), withIntermediateDirectories: true)
         try Data(repeating: UInt8(title.count % 256), count: bytes).write(to: source)
-        let draft = ITunesTrackDraft(title: title, artist: artist, album: album, fileSize: bytes, trackNumber: track,
+        let draft = TrackTags(title: title, artist: artist, album: album, fileSize: bytes, trackNumber: track,
                                      discNumber: disc, discCount: discCount)
-        return SyncRequest(sourceURL: source, draft: draft,
+        return SyncRequest(sourceURL: source, tags: draft,
                                source: SyncSource(fileSize: bytes, modificationDate: modified, artworkFingerprint: nil))
     }
 

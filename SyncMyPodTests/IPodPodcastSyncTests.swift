@@ -9,10 +9,9 @@ struct IPodPodcastSyncTests {
                                                  includesAlbumSection: true, includesPodcastSection: true).build()
 
     private func episode(_ title: String, show: String, in volume: TemporaryIPodVolume) throws -> SyncRequest {
-        var draft = ITunesTrackDraft(title: title, artist: "Host", album: show, fileSize: 1_024)
-        draft.mediaKind = .podcast
+        var draft = TrackTags(title: title, artist: "Host", album: show, fileSize: 1_024)
         draft.releaseDate = Self.released
-        return SyncRequest(sourceURL: try volume.makeSourceFile(named: "\(title).mp3"), draft: draft,
+        return SyncRequest(sourceURL: try volume.makeSourceFile(named: "\(title).mp3"), tags: draft,
                                source: SyncSource(fileSize: 1_024, modificationDate: .distantPast,
                                                   artworkFingerprint: nil), kind: .podcast)
     }
@@ -40,7 +39,7 @@ struct IPodPodcastSyncTests {
     @Test func songsKeepTheirMusicMediaType() async throws {
         let volume = try TemporaryIPodVolume(database: fixture)
         let song = SyncRequest(sourceURL: try volume.makeSourceFile(named: "song.m4a"),
-                                   draft: ITunesTrackDraft(title: "Song", fileSize: 1_024))
+                                   tags: TrackTags(title: "Song", fileSize: 1_024))
         _ = try await IPodTrackSyncer(volumeURL: volume.url).sync(adding: [song])
         let mhit = try #require(try list(.tracks, on: volume).first)
         #expect(mhit.uint32(at: 0xD0) == 1 && mhit.uint8(at: 0xA6) == 0 && mhit.uint8(at: 0xB2) == 0)
@@ -89,8 +88,7 @@ struct IPodPodcastSyncTests {
     }
 
     @Test func updatingAnEpisodeKeepsWhetherItWasPlayed() throws {
-        var draft = ITunesTrackDraft(title: "Episode", fileSize: 1)
-        draft.mediaKind = .podcast
+        let draft = ITunesTrackDraft(tags: TrackTags(title: "Episode", fileSize: 1), mediaKind: .podcast)
         let builder = TrackRecordBuilder(headerLength: TrackRecordBuilder.minimumHeaderLength)
         var mhit = builder.build(draft, id: 1, databaseID: 1, albumID: 0)
         mhit.set(TrackRecordBuilder.playedPodcast, at: TrackRecordBuilder.unplayedOffset)
@@ -99,8 +97,7 @@ struct IPodPodcastSyncTests {
     }
 
     @Test func playingAnEpisodeClearsItsUnplayedDot() throws {
-        var draft = ITunesTrackDraft(title: "Episode", fileSize: 1)
-        draft.mediaKind = .podcast
+        let draft = ITunesTrackDraft(tags: TrackTags(title: "Episode", fileSize: 1), mediaKind: .podcast)
         var root = try ITunesDBRecordParser(data: fixture).parse()
         var editor = try ITunesDBEditor(root: root)
         _ = editor.addTrack(draft)

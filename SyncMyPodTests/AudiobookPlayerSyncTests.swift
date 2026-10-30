@@ -37,17 +37,16 @@ struct AudiobookPlayerSyncTests {
 
     @Test func partsAreNumberedInListeningOrder() throws {
         let snapshot = try #require(book("Frankenstein", paths: ["b.mp3", "a.mp3"]).syncSnapshot())
-        #expect(snapshot.files.map(\.draft.title) == ["b.mp3", "a.mp3"])
-        #expect(snapshot.files.map(\.draft.trackNumber) == [1, 2])
+        #expect(snapshot.files.map(\.tags.title) == ["b.mp3", "a.mp3"])
+        #expect(snapshot.files.map(\.tags.trackNumber) == [1, 2])
         #expect(snapshot.files.allSatisfy {
-            $0.kind == .audiobook && $0.source == nil && $0.draft.album == "Frankenstein"
-                && $0.draft.albumArtist == "Mary Shelley" && $0.draft.mediaKind == .music
+            $0.kind == .audiobook && $0.source == nil && $0.tags.album == "Frankenstein" && $0.tags.albumArtist == "Mary Shelley"
         })
     }
 
     @Test func iPodRequestsAreAudiobooksWithASourceAndSkipUnplayableFiles() throws {
         let playable = try #require(book("Emma", author: "Jane Austen", paths: ["1.m4a"]).syncSnapshot(forIPod: true))
-        #expect(playable.files.allSatisfy { $0.draft.mediaKind == .audiobook && $0.source != nil })
+        #expect(playable.files.allSatisfy { $0.kind == .audiobook && $0.source != nil })
         #expect(book("Walden", author: "Thoreau", paths: ["1.flac"], codec: .flac).syncSnapshot(forIPod: true) == nil)
     }
 

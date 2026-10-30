@@ -17,7 +17,7 @@ struct IPodArtworkSyncTests {
             try await AudioFixtureWriter.embedCoverArt(TestImage.pngData(image), from: silence, to: source)
         }
         let size = try Data(contentsOf: source).count
-        return SyncRequest(sourceURL: source, draft: ITunesTrackDraft(title: name, fileSize: size))
+        return SyncRequest(sourceURL: source, tags: TrackTags(title: name, fileSize: size))
     }
 
     private func artworkImages(on volume: TemporaryIPodVolume) throws -> [ITunesDBRecord] {

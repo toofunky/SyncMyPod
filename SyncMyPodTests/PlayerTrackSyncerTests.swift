@@ -80,9 +80,9 @@ struct PlayerTrackSyncerTests {
         let volume = try TemporaryPlayerVolume(config: config)
         let source = try AudioFixtureWriter.writeSilence(to: volume.libraryURL.appending(path: "Song.m4a"))
         try MP4TagWriter().write(TagChanges(title: "Song", artist: "Guest", albumArtist: "Main"), to: source)
-        let draft = ITunesTrackDraft(title: "Song", artist: "Guest", album: "Album", albumArtist: "Main",
+        let draft = TrackTags(title: "Song", artist: "Guest", album: "Album", albumArtist: "Main",
                                      fileSize: 1, codec: .aac)
-        let request = SyncRequest(sourceURL: source, draft: draft.preservingAlbumArtist(),
+        let request = SyncRequest(sourceURL: source, tags: draft.preservingAlbumArtist(),
                                       source: SyncSource(fileSize: 1, modificationDate: .now, artworkFingerprint: nil,
                                                          preservedAlbumArtist: true))
         _ = try await PlayerTrackSyncer(device: volume.device).sync(try await plan(on: volume, selected: [request]))

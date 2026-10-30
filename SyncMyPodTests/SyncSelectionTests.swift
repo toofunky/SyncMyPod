@@ -20,7 +20,7 @@ struct SyncSelectionTests {
     }
 
     private func titles(_ snapshots: [SyncTrackSnapshot]) -> [String] {
-        snapshots.map(\.request.draft.title)
+        snapshots.map(\.request.tags.title)
     }
 
     @Test func allSongsSelectsEverything() {

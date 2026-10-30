@@ -8,5 +8,5 @@ nonisolated struct SyncPodcastSnapshot: Equatable, Sendable {
 
     var name: String { playlist.name }
     var episodes: [SyncRequest] { playlist.tracks }
-    var byteCount: Int64 { episodes.reduce(0) { $0 + Int64($1.draft.fileSize) } }
+    var byteCount: Int64 { episodes.reduce(0) { $0 + Int64($1.tags.fileSize) } }
 }

@@ -38,8 +38,8 @@ struct PodcastPlayerSyncTests {
     @Test func snapshotsHoldOnlyDownloadedEpisodesOldestFirst() throws {
         let show = podcast("Show", episodes: ["First", "Second", "Third"], downloaded: ["Third", "First"])
         let snapshot = try #require(show.syncSnapshot())
-        #expect(snapshot.episodes.map(\.draft.title) == ["First", "Third"])
-        #expect(snapshot.episodes.allSatisfy { $0.kind == .podcast && $0.source == nil && $0.draft.album == "Show" })
+        #expect(snapshot.episodes.map(\.tags.title) == ["First", "Third"])
+        #expect(snapshot.episodes.allSatisfy { $0.kind == .podcast && $0.source == nil && $0.tags.album == "Show" })
         #expect(podcast("Empty", episodes: ["Only"], downloaded: []).syncSnapshot() == nil)
     }
 

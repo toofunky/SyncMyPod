@@ -22,8 +22,8 @@ struct LyricsSidecarSyncTests {
     @Test func embedsTheLyricFileOnlyWhenTurnedOn() {
         let off = track(lyricFile: true).syncRequest(preservingAlbumArtist: false)
         let on = track(lyricFile: true).syncRequest(preservingAlbumArtist: false, embeddingLyricsSidecar: true)
-        #expect(!off.embedsLyricsSidecar && !off.draft.hasLyrics && off.source?.hasLyrics == nil)
-        #expect(on.embedsLyricsSidecar && on.draft.hasLyrics)
+        #expect(!off.embedsLyricsSidecar && !off.tags.hasLyrics && off.source?.hasLyrics == nil)
+        #expect(on.embedsLyricsSidecar && on.tags.hasLyrics)
         #expect(on.source?.hasLyrics == true && on.source?.lyricsSidecarDate == lyricsDate)
         #expect(on.source != off.source)
     }
@@ -32,8 +32,8 @@ struct LyricsSidecarSyncTests {
         let plain = track(lyricFile: false).syncRequest(preservingAlbumArtist: false, embeddingLyricsSidecar: true)
         let sung = track(lyricFile: true, embedded: true)
             .syncRequest(preservingAlbumArtist: false, embeddingLyricsSidecar: true)
-        #expect(!plain.embedsLyricsSidecar && !plain.draft.hasLyrics)
-        #expect(!sung.embedsLyricsSidecar && sung.draft.hasLyrics && sung.source?.lyricsSidecarDate == nil)
+        #expect(!plain.embedsLyricsSidecar && !plain.tags.hasLyrics)
+        #expect(!sung.embedsLyricsSidecar && sung.tags.hasLyrics && sung.source?.lyricsSidecarDate == nil)
     }
 
     @Test(arguments: ["Clocks.mp3", "Clocks.m4a"])
@@ -69,9 +69,9 @@ struct LyricsSidecarSyncTests {
         }
         try await LyricsFile.write(lyrics, forSongAt: source.path(percentEncoded: false))
         let size = try #require(try source.resourceValues(forKeys: [.fileSizeKey]).fileSize)
-        let draft = ITunesTrackDraft(title: "Clocks", fileSize: size, codec: name.hasSuffix(".mp3") ? .mp3 : .aac,
+        let draft = TrackTags(title: "Clocks", fileSize: size, codec: name.hasSuffix(".mp3") ? .mp3 : .aac,
                                      hasLyrics: true)
-        return SyncRequest(sourceURL: source, draft: draft, embedsLyricsSidecar: true)
+        return SyncRequest(sourceURL: source, tags: draft, embedsLyricsSidecar: true)
     }
 
     private func trackRecords(on volume: TemporaryIPodVolume) throws -> [ITunesDBRecord] {

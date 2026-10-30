@@ -9,7 +9,7 @@ struct SyncManifestTests {
 
     private func request(_ title: String, path: String? = nil, scanned: Bool = true) -> SyncRequest {
         SyncRequest(sourceURL: URL(filePath: path ?? "/Music/\(title).m4a"),
-                        draft: ITunesTrackDraft(title: title, artist: "A", album: "B", fileSize: 1_024),
+                        tags: TrackTags(title: title, artist: "A", album: "B", fileSize: 1_024),
                         source: scanned ? source : nil)
     }
 

@@ -10,8 +10,8 @@ nonisolated struct IPodAlbumKey: Hashable, Sendable {
         self.album = album.lowercased()
     }
 
-    init(_ draft: ITunesTrackDraft) {
-        self.init(artist: draft.artist, albumArtist: draft.albumArtist, album: draft.album)
+    init(_ tags: TrackTags) {
+        self.init(artist: tags.artist, albumArtist: tags.albumArtist, album: tags.album)
     }
 
     init(_ track: ITunesTrack) {
