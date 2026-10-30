@@ -3,7 +3,7 @@ import SwiftUI
 struct SyncSummaryBar: View {
     /// `nil` until the first plan has been worked out.
     let totals: SyncPlanTotals?
-    var deviceKind = "iPod"
+    var deviceKind = DeviceKind.iPod
     let isCalculating: Bool
     let freeBytes: Int64?
     let isSyncing: Bool
@@ -40,7 +40,7 @@ struct SyncSummaryBar: View {
     private var headline: String {
         guard let totals else { return "Calculating…" }
         guard !totals.isEmpty else {
-            return totals.selectedCount == 0 ? "Nothing selected" : "The \(deviceKind) is up to date"
+            return totals.selectedCount == 0 ? "Nothing selected" : "The \(deviceKind.name) is up to date"
         }
         var parts: [String] = []
         if totals.addCount > 0 { parts.append("\(songs(totals.addCount)) to add · \(bytes(totals.addBytes))") }
@@ -64,9 +64,9 @@ struct SyncSummaryBar: View {
 
     private var detail: String {
         let free = freeBytes.map { "\(bytes($0)) free" } ?? "Free space unknown"
-        guard fits else { return "Not enough space on the \(deviceKind) · \(free)" }
+        guard fits else { return "Not enough space on the \(deviceKind.name) · \(free)" }
         guard let totals else { return free }
-        return "\(totals.alreadyOnDeviceCount) already on the \(deviceKind) · \(free)"
+        return "\(totals.alreadyOnDeviceCount) already on the \(deviceKind.name) · \(free)"
     }
 
     private func songs(_ count: Int) -> String { "\(count) \(count == 1 ? "song" : "songs")" }
@@ -82,7 +82,7 @@ struct SyncSummaryBar: View {
 }
 
 #Preview("Up to date") {
-    SyncSummaryBar(totals: SyncPlanTotals(selectedCount: 3), deviceKind: "Player", isCalculating: false,
+    SyncSummaryBar(totals: SyncPlanTotals(selectedCount: 3), deviceKind: .player, isCalculating: false,
                    freeBytes: 38_000_000_000, isSyncing: false, onSync: {})
 }
 

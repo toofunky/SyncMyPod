@@ -25,10 +25,10 @@ struct PlayerSyncForm: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            SyncSelectionEditor(settings: settings, library: library, deviceKind: "player", includesSpokenWord: true)
+            SyncSelectionEditor(settings: settings, library: library, deviceKind: .player, includesSpokenWord: true)
             Divider()
             let input = planInput
-            SyncSummaryBar(totals: plan?.totals, deviceKind: "player", isCalculating: plannedInput != input,
+            SyncSummaryBar(totals: plan?.totals, deviceKind: .player, isCalculating: plannedInput != input,
                            freeBytes: freeBytes, isSyncing: isSyncing) { plan.map(start) }
                 .task(id: input) { await replan(input) }
         }
@@ -61,7 +61,7 @@ struct PlayerSyncForm: View {
         let episodes = count(removals, in: config.podcastPath)
         let books = config.audiobookPath == config.podcastPath ? 0 : count(removals, in: config.audiobookPath)
         return SyncRemovalWording.title(songs: removals.count - episodes - books, episodes: episodes,
-                                        audiobookFiles: books, deviceKind: "player")
+                                        audiobookFiles: books, deviceKind: .player)
     }
 
     private func count(_ removals: [PlayerFileRemoval], in folder: String) -> Int {

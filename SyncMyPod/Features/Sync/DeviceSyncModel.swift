@@ -10,7 +10,7 @@ final class DeviceSyncModel {
     private(set) var isCancelling = false
     private(set) var isSyncing = false
     private(set) var syncingDeviceID: String?
-    private(set) var syncingDeviceKind = "iPod"
+    private(set) var syncingDeviceKind = DeviceKind.iPod
     var result: DeviceSyncResult?
 
     @ObservationIgnored private var syncTask: Task<Void, Never>?
@@ -37,7 +37,7 @@ final class DeviceSyncModel {
     }
 
     /// For a sync that couldn't be set up, so never started.
-    func recordFailure(_ error: any Error, deviceKind: String) {
+    func recordFailure(_ error: any Error, deviceKind: DeviceKind) {
         result = .failed(error.localizedDescription, deviceKind: deviceKind)
     }
 

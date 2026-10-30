@@ -23,6 +23,7 @@ final class IPodSyncTabModel {
     /// Reads the iPod and matches what's on it to the library.
     func reload(_ sources: SyncLibrarySources, from device: IPodDevice, loader: ITunesDBLoader,
                 context: ModelContext) async {
+        await sources.readMissingEpisodeDetails(context: context)
         let settings = DeviceSyncSettings.settings(for: device.id, in: context)
         self.settings = settings
         let library = library(from: sources, for: device, settings: settings)

@@ -47,10 +47,10 @@ nonisolated enum ConnectedDevice: Identifiable, Equatable, Sendable {
         }
     }
 
-    var kindName: String {
+    var kind: DeviceKind {
         switch self {
-        case .iPod: "iPod"
-        case .audioPlayer: "player"
+        case .iPod: .iPod
+        case .audioPlayer: .player
         }
     }
 

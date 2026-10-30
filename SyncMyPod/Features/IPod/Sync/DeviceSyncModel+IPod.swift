@@ -9,7 +9,7 @@ extension DeviceSyncModel {
             run(IPodSyncJob(syncer: try IPodTrackSyncer(device: iPod), deviceID: iPod.id, requests: requests,
                             removals: removals, playlists: playlists))
         } catch {
-            recordFailure(error, deviceKind: "iPod")
+            recordFailure(error, deviceKind: .iPod)
         }
     }
 }

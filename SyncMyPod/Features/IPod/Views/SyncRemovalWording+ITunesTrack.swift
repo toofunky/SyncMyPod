@@ -1,7 +1,7 @@
 import Foundation
 
 nonisolated extension SyncRemovalWording {
-    static func title(removing tracks: [ITunesTrack], deviceKind: String) -> String {
+    static func title(removing tracks: [ITunesTrack], deviceKind: DeviceKind) -> String {
         let episodes = tracks.count { ($0.mediaType ?? 0) & TrackRecordBuilder.podcastMediaType != 0 }
         let books = tracks.count { ($0.mediaType ?? 0) & TrackRecordBuilder.audiobookMediaType != 0 }
         return title(songs: tracks.count - episodes - books, episodes: episodes, audiobookFiles: books,

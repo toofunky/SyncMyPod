@@ -9,28 +9,28 @@ struct DeviceSyncResultTests {
         outcome.wasCancelled = true
         let summary = SyncSummary(outcome)
         #expect(summary == SyncSummary(added: 2, updated: 1, removed: 5, skipped: 4, syncedPlaylistCount: 1,
-                                       wasCancelled: true, deviceKind: "iPod"))
+                                       wasCancelled: true, deviceKind: .iPod))
         #expect(summary.changedCount == 9)
     }
 
     @Test func finishedMessageNamesTheDeviceKind() {
-        let result = DeviceSyncResult.finished(SyncSummary(added: 1, skipped: 2, deviceKind: "Player"))
+        let result = DeviceSyncResult.finished(SyncSummary(added: 1, skipped: 2, deviceKind: .player))
         #expect(result.title == "Sync Complete")
-        #expect(result.message == "Added 1 song. 2 already on the Player. Eject the Player before unplugging it.")
+        #expect(result.message == "Added 1 song. 2 already on the player. Eject the player before unplugging it.")
     }
 
     @Test func unchangedSyncDoesNotAskForAnEject() {
-        let result = DeviceSyncResult.finished(SyncSummary(skipped: 3, deviceKind: "iPod"))
+        let result = DeviceSyncResult.finished(SyncSummary(skipped: 3, deviceKind: .iPod))
         #expect(result.message == "Added 0 songs. 3 already on the iPod.")
     }
 
     @Test func foldersInsideADriveAreNotEjected() {
-        let result = DeviceSyncResult.finished(SyncSummary(added: 1, deviceKind: "player", suggestsEject: false))
+        let result = DeviceSyncResult.finished(SyncSummary(added: 1, deviceKind: .player, suggestsEject: false))
         #expect(result.message == "Added 1 song.")
     }
 
     @Test func failureAndCancellationTitles() {
-        #expect(DeviceSyncResult.failed("Disk full", deviceKind: "iPod").title == "Couldn't Sync iPod")
-        #expect(DeviceSyncResult.finished(SyncSummary(wasCancelled: true, deviceKind: "iPod")).title == "Sync Cancelled")
+        #expect(DeviceSyncResult.failed("Disk full", deviceKind: .iPod).title == "Couldn't Sync iPod")
+        #expect(DeviceSyncResult.finished(SyncSummary(wasCancelled: true, deviceKind: .iPod)).title == "Sync Cancelled")
     }
 }

@@ -7,7 +7,6 @@ struct IPodSyncView: View {
     @Environment(\.modelContext) private var context
     @Environment(\.iTunesDBLoader) private var loader
     @Environment(DeviceSyncModel.self) private var syncModel
-    @Environment(PodcastDownloads.self) private var podcastDownloads: PodcastDownloads?
     @Environment(MediaFolders.self) private var mediaFolders: MediaFolders?
     @Query private var tracks: [LibraryTrack]
     @Query private var folders: [LibraryFolder]
@@ -19,7 +18,9 @@ struct IPodSyncView: View {
 
     var body: some View {
         content
-            .task(id: "\(device.id)#\(syncModel.completedSyncCount)") { await reload() }
+            .task(id: "\(device.id)#\(syncModel.completedSyncCount)") {
+                await model.reload(sources, from: device, loader: loader, context: context)
+            }
             .sheet(isPresented: $isManagingStorage) { ManageStorageSheet(device: device) }
             .syncProgressSheet(isEnabled: !isManagingStorage)
     }
@@ -51,12 +52,6 @@ struct IPodSyncView: View {
         SyncLibrarySources(tracks: tracks, playlists: playlists, podcasts: podcasts, audiobooks: audiobooks,
                            musicFolderPath: folders.first?.path, podcastFolderPath: mediaFolders?.podcasts.path,
                            audiobookFolderPath: mediaFolders?.audiobooks.path)
-    }
-
-    /// Episodes downloaded before their file details were read get them first, so they're listed correctly.
-    private func reload() async {
-        await podcastDownloads?.readMissingAudioDetails(of: podcasts, context: context)
-        await model.reload(sources, from: device, loader: loader, context: context)
     }
 }
 

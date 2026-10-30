@@ -6,7 +6,7 @@ import SwiftUI
 struct SyncSelectionEditor: View {
     @Bindable var settings: DeviceSyncSettings
     let library: SyncLibrarySnapshot
-    var deviceKind = "iPod"
+    var deviceKind = DeviceKind.iPod
     var includesSpokenWord = false
 
     @State private var category = SyncCategory.albums
