@@ -38,7 +38,7 @@ struct IPodSyncTabModelTests {
     @Test func aRemovedDownloadIsMarkedForRemovalFromTheIPod() async throws {
         let volume = try TemporaryIPodVolume(database: database)
         let episode = try volume.makeSourceFile(named: "Downloads/Episode.mp3")
-        let request = SyncRequest(sourceURL: episode, draft: ITunesTrackDraft(title: "Episode", fileSize: 1_024),
+        let request = SyncRequest(sourceURL: episode, tags: TrackTags(title: "Episode", fileSize: 1_024),
                                   source: SyncSource(fileSize: 1_024, modificationDate: .now, artworkFingerprint: nil),
                                   kind: .podcast)
         let outcome = try await IPodTrackSyncer(volumeURL: volume.url).sync(adding: [request])

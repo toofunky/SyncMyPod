@@ -26,7 +26,7 @@ struct PlayerSyncTabModelTests {
         try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
         let episode = folder.appending(path: "Episode.mp3")
         try Data(repeating: 1, count: 512).write(to: episode)
-        let request = SyncRequest(sourceURL: episode, draft: ITunesTrackDraft(title: "Episode", fileSize: 512),
+        let request = SyncRequest(sourceURL: episode, tags: TrackTags(title: "Episode", fileSize: 512),
                                   source: SyncSource(fileSize: 512, modificationDate: .now, artworkFingerprint: nil),
                                   kind: .podcast)
         let contents = await PlayerDeviceContents.load(from: try volume.device)
