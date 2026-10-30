@@ -13,7 +13,7 @@ nonisolated struct PlayerTrackSyncer {
         try ensureFreeSpace(for: plan.totals)
         var state = PlayerSyncState(manifest: device.controlFiles.manifest(),
                                     summary: SyncSummary(skipped: plan.totals.alreadyOnDeviceCount - plan.moves.count,
-                                                         deviceKind: "player", suggestsEject: device.isEjectable))
+                                                         deviceKind: .player, suggestsEject: device.isEjectable))
         defer { finish(state) }
         remove(plan.removals, state: &state)
         removeSidecars(plan.sidecarRemovals, state: &state)

@@ -9,7 +9,7 @@ nonisolated struct IPodSyncJob: DeviceSyncJob {
     /// Non-`nil` playlists replace every playlist earlier syncs wrote.
     let playlists: [SyncPlaylistRequest]?
 
-    var deviceKind: String { "iPod" }
+    var deviceKind: DeviceKind { .iPod }
     var total: Int { requests.count }
 
     func run(progress: @escaping @Sendable (SyncProgress) async -> Void) async throws -> DeviceSyncCompletion {

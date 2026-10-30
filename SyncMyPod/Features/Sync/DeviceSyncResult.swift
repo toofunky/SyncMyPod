@@ -2,7 +2,7 @@ import Foundation
 
 nonisolated enum DeviceSyncResult: Equatable, Sendable {
     case finished(SyncSummary)
-    case failed(String, deviceKind: String)
+    case failed(String, deviceKind: DeviceKind)
     /// Another app replaced the iPod's database after the sync finished.
     case overwritten
 
@@ -10,7 +10,7 @@ nonisolated enum DeviceSyncResult: Equatable, Sendable {
         switch self {
         case .finished(let summary) where summary.wasCancelled: "Sync Cancelled"
         case .finished: "Sync Complete"
-        case .failed(_, let deviceKind): "Couldn't Sync \(deviceKind.deviceKindTitle)"
+        case .failed(_, let deviceKind): "Couldn't Sync \(deviceKind.title)"
         case .overwritten: "iPod Changes Were Undone"
         }
     }
@@ -36,8 +36,8 @@ nonisolated enum DeviceSyncResult: Equatable, Sendable {
         if summary.sidecarChangeCount > 0 {
             parts.append("Updated \(count(summary.sidecarChangeCount, "cover and lyric file")).")
         }
-        if summary.skipped > 0 { parts.append("\(summary.skipped) already on the \(summary.deviceKind).") }
-        if summary.changedCount > 0, summary.suggestsEject { parts.append("Eject the \(summary.deviceKind) before unplugging it.") }
+        if summary.skipped > 0 { parts.append("\(summary.skipped) already on the \(summary.deviceKind.name).") }
+        if summary.changedCount > 0, summary.suggestsEject { parts.append("Eject the \(summary.deviceKind.name) before unplugging it.") }
         return parts.joined(separator: " ")
     }
 

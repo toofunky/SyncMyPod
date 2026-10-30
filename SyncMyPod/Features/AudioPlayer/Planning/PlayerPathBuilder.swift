@@ -30,7 +30,7 @@ nonisolated struct PlayerPathBuilder {
     /// A book's "CD 1" or "Disc 2" folder, kept so the discs' files neither collide nor play out of order.
     private func discFolder(of request: SyncRequest) -> String {
         let folder = request.sourceURL.deletingLastPathComponent().lastPathComponent
-        return AudiobookGrouper.isDiscFolderName(folder) ? PlayerFileNamer.safeComponent(folder, fallback: "") : ""
+        return folder.isDiscFolderName ? PlayerFileNamer.safeComponent(folder, fallback: "") : ""
     }
 
     /// The library file's own name, or "<number> <title>.<ext>" when preserving track sorting.

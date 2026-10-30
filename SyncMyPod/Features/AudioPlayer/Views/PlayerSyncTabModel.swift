@@ -21,6 +21,7 @@ final class PlayerSyncTabModel {
     /// Copies whose library file, download or audiobook file is gone for good are removed; ones on an unplugged
     /// drive are kept.
     func reload(_ sources: SyncLibrarySources, from device: AudioPlayerDevice, context: ModelContext) async {
+        await sources.readMissingEpisodeDetails(context: context)
         settings = DeviceSyncSettings.settings(for: device.id, in: context)
         let loaded = await PlayerDeviceContents.load(from: device)
         let synced = loaded.manifest.entries.keys

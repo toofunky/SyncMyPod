@@ -54,7 +54,7 @@ struct SyncSettingsForm: View {
     }
 
     private var removalTitle: String {
-        SyncRemovalWording.title(removing: pendingRemoval?.removals ?? [], deviceKind: "iPod")
+        SyncRemovalWording.title(removing: pendingRemoval?.removals ?? [], deviceKind: .iPod)
     }
 
     private func removalMessage(_ plan: SyncPlan) -> String {

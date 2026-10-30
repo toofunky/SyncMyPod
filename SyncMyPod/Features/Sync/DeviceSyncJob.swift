@@ -4,7 +4,7 @@ import Foundation
 nonisolated protocol DeviceSyncJob: Sendable {
     var deviceID: String { get }
     /// "iPod", for example, as shown in the result's title and message.
-    var deviceKind: String { get }
+    var deviceKind: DeviceKind { get }
     /// How many files the progress bar counts.
     var total: Int { get }
 

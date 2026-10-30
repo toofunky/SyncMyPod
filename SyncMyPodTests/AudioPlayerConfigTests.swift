@@ -43,7 +43,7 @@ struct AudioPlayerConfigTests {
         let device = await ConnectedDevice.scan(volumeAt: volume.volumeURL)
         #expect(device?.id == config.id)
         #expect(device?.displayName == "FiiO")
-        #expect(device?.kindName == "player")
+        #expect(device?.kind == .player)
     }
 
     @Test func foldersWithoutAConfigAreIgnored() async throws {
@@ -64,8 +64,8 @@ struct AudioPlayerConfigTests {
         #expect(!ConnectedDevice.audioPlayer(folder).isEjectable)
     }
 
-    @Test func deviceKindTitlesCapitalizeWordsButNotIPod() {
-        #expect("player".deviceKindTitle == "Player")
-        #expect("iPod".deviceKindTitle == "iPod")
+    @Test func deviceKindTitlesCapitalizePlayerButNotIPod() {
+        #expect(DeviceKind.player.title == "Player")
+        #expect(DeviceKind.iPod.title == "iPod")
     }
 }

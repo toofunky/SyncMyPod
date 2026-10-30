@@ -26,7 +26,7 @@ nonisolated struct PlayerSyncJob: DeviceSyncJob {
     }
 
     var deviceID: String { device.id }
-    var deviceKind: String { "player" }
+    var deviceKind: DeviceKind { .player }
 
     func run(progress: @escaping @Sendable (SyncProgress) async -> Void) async throws -> DeviceSyncCompletion {
         let summary = try await PlayerTrackSyncer(device: device).sync(await plan(), progress: progress)

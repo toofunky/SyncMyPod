@@ -3,10 +3,10 @@ import Foundation
 /// The question a sync asks before removing songs, podcast episodes and audiobook files from a device.
 nonisolated enum SyncRemovalWording {
     /// "Remove 2 songs and 1 episode from the iPod?"
-    static func title(songs: Int, episodes: Int, audiobookFiles: Int = 0, deviceKind: String) -> String {
+    static func title(songs: Int, episodes: Int, audiobookFiles: Int = 0, deviceKind: DeviceKind) -> String {
         let counts = [count(songs, "song"), count(episodes, "episode"), count(audiobookFiles, "audiobook file")]
             .compactMap { $0 }
-        return "Remove \(counts.isEmpty ? "0 songs" : counts.joined(separator: " and ")) from the \(deviceKind)?"
+        return "Remove \(counts.isEmpty ? "0 songs" : counts.joined(separator: " and ")) from the \(deviceKind.name)?"
     }
 
     private static func count(_ number: Int, _ noun: String) -> String? {

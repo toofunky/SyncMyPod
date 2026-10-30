@@ -5,7 +5,7 @@ struct SyncProgressSheet: View {
 
     let progress: SyncProgress?
     let result: DeviceSyncResult?
-    var deviceKind = "iPod"
+    var deviceKind = DeviceKind.iPod
     let isCancelling: Bool
     let onCancel: () -> Void
     let onDone: () -> Void
@@ -24,7 +24,7 @@ struct SyncProgressSheet: View {
 
     @ViewBuilder
     private func progressContent(_ progress: SyncProgress) -> some View {
-        Text("Syncing \(deviceKind.deviceKindTitle)")
+        Text("Syncing \(deviceKind.title)")
             .font(.headline)
         ProgressView(value: progress.fractionCompleted) {
             Text(progress.currentTitle.map { "Copying “\($0)”" } ?? finishingMessage)
@@ -42,7 +42,7 @@ struct SyncProgressSheet: View {
     }
 
     private var finishingMessage: String {
-        deviceKind == "iPod" ? "Updating iPod database…" : "Writing playlists…"
+        deviceKind == .iPod ? "Updating iPod database…" : "Writing playlists…"
     }
 
     @ViewBuilder
@@ -73,7 +73,7 @@ struct SyncProgressSheet: View {
 
 #Preview("Finished") {
     SyncProgressSheet(progress: nil,
-                      result: .finished(SyncSummary(added: 2, skipped: 3, deviceKind: "iPod")),
+                      result: .finished(SyncSummary(added: 2, skipped: 3, deviceKind: .iPod)),
                       isCancelling: false, onCancel: {}, onDone: {})
 }
 
@@ -83,6 +83,6 @@ struct SyncProgressSheet: View {
 
 #Preview("Failed") {
     SyncProgressSheet(progress: nil,
-                      result: .failed("The iPod's iTunesDB has no master playlist.", deviceKind: "iPod"),
+                      result: .failed("The iPod's iTunesDB has no master playlist.", deviceKind: .iPod),
                       isCancelling: false, onCancel: {}, onDone: {})
 }

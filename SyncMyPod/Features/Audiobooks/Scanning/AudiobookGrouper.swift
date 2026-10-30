@@ -6,8 +6,6 @@ import Foundation
 /// only .m4b files, or the audiobook folder itself, holds a book per album tag, or per file when untagged, so a
 /// lone .m4b is a book of its own while several .m4b parts sharing an album stay together.
 nonisolated struct AudiobookGrouper {
-    private static let discFolderPattern = /^(cd|disc|disk)[\s_-]*\d+$/.ignoresCase()
-
     let rootPath: String
 
     init(rootPath: String) {
@@ -49,12 +47,7 @@ nonisolated struct AudiobookGrouper {
     }
 
     private func isDiscFolder(_ folder: String) -> Bool {
-        Self.isDiscFolderName(name(of: folder))
-    }
-
-    /// "CD 1", "Disc2" or "disk_3": a folder holding one disc of a book.
-    static func isDiscFolderName(_ name: String) -> Bool {
-        name.wholeMatch(of: discFolderPattern) != nil
+        name(of: folder).isDiscFolderName
     }
 
     /// The parent folder's name, which is usually the author's, unless the parent is the audiobook folder.

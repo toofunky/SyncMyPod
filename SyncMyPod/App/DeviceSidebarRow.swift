@@ -15,7 +15,7 @@ struct DeviceSidebarRow: View {
                 ejectButton
             }
         }
-        .alert("Couldn't Eject \(device.kindName.deviceKindTitle)", isPresented: isShowingError, presenting: ejectError) { _ in
+        .alert("Couldn't Eject \(device.kind.title)", isPresented: isShowingError, presenting: ejectError) { _ in
             Button("OK") {}
         } message: { message in
             Text(message)

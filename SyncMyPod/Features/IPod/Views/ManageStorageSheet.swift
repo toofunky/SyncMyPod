@@ -16,7 +16,7 @@ struct ManageStorageSheet: View {
         LibraryView(device: device, reloadID: syncModel.completedSyncCount, onRemove: { pendingRemoval = $0 },
                     onDone: { dismiss() })
             .frame(minWidth: Self.minWidth, minHeight: Self.minHeight)
-            .confirmationDialog(SyncRemovalWording.title(removing: pendingRemoval, deviceKind: "iPod"),
+            .confirmationDialog(SyncRemovalWording.title(removing: pendingRemoval, deviceKind: .iPod),
                                 isPresented: isConfirmingRemoval) {
                 Button("Remove", role: .destructive, action: remove)
             } message: {

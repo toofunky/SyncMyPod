@@ -105,7 +105,7 @@ struct AudiobookPlayerSyncTests {
     }
 
     @Test func removalsCountAudiobookFiles() {
-        #expect(SyncRemovalWording.title(songs: 1, episodes: 0, audiobookFiles: 2, deviceKind: "iPod")
+        #expect(SyncRemovalWording.title(songs: 1, episodes: 0, audiobookFiles: 2, deviceKind: .iPod)
                 == "Remove 1 song and 2 audiobook files from the iPod?")
     }
 }

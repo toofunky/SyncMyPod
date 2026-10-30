@@ -4,7 +4,7 @@ import SwiftUI
 struct SyncScopeNotice: View {
     let category: SyncCategory
     let scope: SyncScope
-    var deviceKind = "iPod"
+    var deviceKind = DeviceKind.iPod
 
     var body: some View {
         ContentUnavailableView(title, systemImage: category.systemImage, description: Text(description))
@@ -17,9 +17,9 @@ struct SyncScopeNotice: View {
 
     private var description: String {
         let contents = category.contentTitle.lowercased()
-        guard scope == .none else { return "Every one of your \(contents) will be copied to the \(deviceKind)." }
+        guard scope == .none else { return "Every one of your \(contents) will be copied to the \(deviceKind.name)." }
         let exception = [.albums, .genres].contains(category) ? ", except songs in synced playlists" : ""
-        return "No \(contents) will be copied to the \(deviceKind)\(exception)."
+        return "No \(contents) will be copied to the \(deviceKind.name)\(exception)."
     }
 }
 
