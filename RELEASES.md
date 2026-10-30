@@ -1,3 +1,7 @@
+SyncMyPod-1.13.3
+- Refactor code to improve modularity.
+- Minor behavior changes, such as keeping the Favorites playlist at the top of the list.
+
 SyncMyPod-1.13.2
 - Fix application crashing when using smaller window sizes.
 - Fix bug where a view would show outdated library files after a refresh.
