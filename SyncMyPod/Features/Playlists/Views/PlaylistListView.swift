@@ -24,6 +24,7 @@ struct PlaylistListView: View {
             ForEach(playlists) { playlist in
                 Label(playlist.name, systemImage: playlist.isFavorites ? "heart.fill" : "music.note.list")
                     .tag(playlist.playlistID)
+                    .moveDisabled(playlist.isFavorites)
                     .contextMenu {
                         if let export {
                             Button("Export Playlist…", systemImage: "square.and.arrow.up") { export(playlist) }
