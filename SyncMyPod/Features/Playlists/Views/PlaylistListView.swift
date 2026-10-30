@@ -2,6 +2,7 @@ import SwiftData
 import SwiftUI
 
 struct PlaylistListView: View {
+    let model: PlaylistsModel
     @Binding var selection: UUID?
     var export: ((LibraryPlaylist) -> Void)?
 
@@ -43,14 +44,14 @@ struct PlaylistListView: View {
 
     private func delete(_ playlist: LibraryPlaylist) {
         if selection == playlist.playlistID { selection = nil }
-        context.delete(playlist)
+        model.delete(playlist, context: context)
     }
 }
 
 #if DEBUG
 #Preview {
     @Previewable @State var selection: UUID?
-    PlaylistListView(selection: $selection)
+    PlaylistListView(model: PlaylistsModel(), selection: $selection)
         .modelContainer(.preview)
 }
 #endif
