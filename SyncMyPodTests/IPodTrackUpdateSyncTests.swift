@@ -13,7 +13,7 @@ struct IPodTrackUpdateSyncTests {
         let size = try Data(contentsOf: source).count
         let details = SyncSource(fileSize: size, modificationDate: Date(timeIntervalSinceReferenceDate: Double(version)),
                                  artworkFingerprint: fingerprint)
-        return SyncRequest(sourceURL: source, draft: ITunesTrackDraft(title: title, album: "Album", fileSize: size),
+        return SyncRequest(sourceURL: source, tags: TrackTags(title: title, album: "Album", fileSize: size),
                                source: details)
     }
 
@@ -106,12 +106,12 @@ struct IPodTrackUpdateSyncTests {
         let volume = try TemporaryIPodVolume(database: database)
         let syncer = IPodTrackSyncer(volumeURL: volume.url)
         let source = try volume.makeSourceFile()
-        let original = ITunesTrackDraft(title: "The Sign", artist: "Ace of Base", album: "The Sign",
+        let original = TrackTags(title: "The Sign", artist: "Ace of Base", album: "The Sign",
                                         fileSize: 1_024, duration: 192.445)
-        _ = try await syncer.sync(adding: [SyncRequest(sourceURL: source, draft: original)])
+        _ = try await syncer.sync(adding: [SyncRequest(sourceURL: source, tags: original)])
         var retagged = original
         retagged.artist = "Ace of Base Test"
-        let edited = SyncRequest(sourceURL: source, draft: retagged,
+        let edited = SyncRequest(sourceURL: source, tags: retagged,
                                      source: SyncSource(fileSize: 1_024, modificationDate: .now, artworkFingerprint: nil))
         let files = IPodControlFiles(volumeURL: volume.url)
         var manifest = files.manifest()

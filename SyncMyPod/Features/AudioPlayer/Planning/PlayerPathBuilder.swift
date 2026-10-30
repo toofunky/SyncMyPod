@@ -8,22 +8,22 @@ nonisolated struct PlayerPathBuilder {
 
     /// Relative to the volume.
     func path(for request: SyncRequest) -> String {
-        let draft = request.draft
+        let tags = request.tags
         switch request.kind {
         case .podcast:
-            let show = PlayerFileNamer.safeComponent(draft.album, fallback: "Podcast")
+            let show = PlayerFileNamer.safeComponent(tags.album, fallback: "Podcast")
             let file = PlayerFileNamer.safeComponent(request.sourceURL.lastPathComponent, fallback: "Episode")
             return AudioPlayerConfig.join(config.podcastPath, show, file)
         case .audiobook:
-            let author = PlayerFileNamer.safeComponent(draft.albumListArtist, fallback: "Unknown Author")
-            let book = PlayerFileNamer.safeComponent(draft.album, fallback: "Audiobook")
+            let author = PlayerFileNamer.safeComponent(tags.albumListArtist, fallback: "Unknown Author")
+            let book = PlayerFileNamer.safeComponent(tags.album, fallback: "Audiobook")
             let file = PlayerFileNamer.safeComponent(request.sourceURL.lastPathComponent, fallback: "Part")
             return AudioPlayerConfig.join(config.audiobookPath, author, book, discFolder(of: request), file)
         case .music:
             break
         }
-        let artist = PlayerFileNamer.safeComponent(draft.albumListArtist, fallback: LibraryTrack.unknownArtist)
-        let album = PlayerFileNamer.safeComponent(draft.album, fallback: LibraryTrack.unknownAlbum)
+        let artist = PlayerFileNamer.safeComponent(tags.albumListArtist, fallback: LibraryTrack.unknownArtist)
+        let album = PlayerFileNamer.safeComponent(tags.album, fallback: LibraryTrack.unknownAlbum)
         return AudioPlayerConfig.join(config.musicPath, artist, album, fileName(for: request))
     }
 
@@ -39,10 +39,10 @@ nonisolated struct PlayerPathBuilder {
         let ext = request.sourceURL.pathExtension.lowercased()
         let originalStem = request.sourceURL.deletingPathExtension().lastPathComponent
         guard config.preserveTrackSorting else { return PlayerFileNamer.safeComponent(original, fallback: "Track") }
-        let draft = request.draft
-        let title = PlayerFileNamer.safeComponent(draft.title, fallback: originalStem)
-        let prefix = PlayerFileNamer.numberPrefix(disc: draft.discNumber, discCount: draft.discCount,
-                                                  track: draft.trackNumber, trackCount: draft.trackCount)
+        let tags = request.tags
+        let title = PlayerFileNamer.safeComponent(tags.title, fallback: originalStem)
+        let prefix = PlayerFileNamer.numberPrefix(disc: tags.discNumber, discCount: tags.discCount,
+                                                  track: tags.trackNumber, trackCount: tags.trackCount)
         let stem = prefix.map { "\($0) \(title)" } ?? title
         return ext.isEmpty ? stem : "\(stem).\(ext)"
     }

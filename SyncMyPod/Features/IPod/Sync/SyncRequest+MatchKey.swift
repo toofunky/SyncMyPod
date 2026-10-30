@@ -1,5 +1,5 @@
 import Foundation
 
 nonisolated extension SyncRequest {
-    var matchKey: IPodTrackMatchKey { IPodTrackMatchKey(draft) }
+    var matchKey: IPodTrackMatchKey { IPodTrackMatchKey(tags) }
 }

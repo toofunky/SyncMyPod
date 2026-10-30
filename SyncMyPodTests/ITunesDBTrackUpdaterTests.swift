@@ -10,10 +10,10 @@ struct ITunesDBTrackUpdaterTests {
                                                       ITunesStringField.sortComposer.rawValue: "Bono",
                                                       ITunesStringField.comment.rawValue: "Single",
                                                       ITunesStringField.sortArtist.rawValue: "U2, The"])
-    private let retagged = ITunesTrackDraft(title: "Vertigo (Live)", artist: "U2", album: "Live in Dublin",
-                                            composer: "U2", genre: "Rock", location: ":iPod_Control:Music:F02:WXYZ.m4a",
-                                            fileSize: 6_000_000, trackNumber: 3, year: 2005, bitrate: 256,
-                                            sampleRate: 44_100)
+    private let retagged = ITunesTrackDraft(
+        tags: TrackTags(title: "Vertigo (Live)", artist: "U2", album: "Live in Dublin", composer: "U2", genre: "Rock",
+                        fileSize: 6_000_000, trackNumber: 3, year: 2005, bitrate: 256, sampleRate: 44_100),
+        location: ":iPod_Control:Music:F02:WXYZ.m4a")
 
     private var fixture: Data {
         ITunesDBFixtureBuilder(tracks: [vertigo], playlists: [

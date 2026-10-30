@@ -7,7 +7,7 @@ struct LooseTrackMatchTests {
                          path: String = "/Music/Main/04 The Sign.m4a") -> SyncRequest {
         let source = SyncSource(fileSize: 6_088_211, modificationDate: .distantPast, artworkFingerprint: "cover")
         return SyncRequest(sourceURL: URL(filePath: path),
-                               draft: ITunesTrackDraft(title: title, artist: artist, album: album,
+                               tags: TrackTags(title: title, artist: artist, album: album,
                                                        fileSize: 6_088_211, duration: duration),
                                source: source)
     }

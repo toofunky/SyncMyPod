@@ -10,7 +10,7 @@ nonisolated struct SyncAudiobookSnapshot: Equatable, Sendable {
     var playlistID: UInt64 = 0
     var createdAt = Date.distantPast
 
-    var byteCount: Int64 { files.reduce(0) { $0 + Int64($1.draft.fileSize) } }
+    var byteCount: Int64 { files.reduce(0) { $0 + Int64($1.tags.fileSize) } }
 
     /// The book's files in listening order, so the iPod or player plays one book at a time instead of mixing
     /// every book's parts together.

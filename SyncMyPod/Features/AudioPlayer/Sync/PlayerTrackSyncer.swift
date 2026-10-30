@@ -58,7 +58,7 @@ nonisolated struct PlayerTrackSyncer {
     private func write(_ plan: PlayerSyncPlan, state: inout PlayerSyncState,
                        progress: @Sendable (SyncProgress) async -> Void) async throws {
         for (index, copy) in plan.writes.enumerated() {
-            await progress(SyncProgress(completed: index, total: plan.writes.count, currentTitle: copy.request.draft.title))
+            await progress(SyncProgress(completed: index, total: plan.writes.count, currentTitle: copy.request.tags.title))
             guard !Task.isCancelled else {
                 state.summary.wasCancelled = true
                 return

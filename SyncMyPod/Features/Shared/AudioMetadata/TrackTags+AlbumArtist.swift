@@ -1,6 +1,6 @@
 import Foundation
 
-nonisolated extension ITunesTrackDraft {
+nonisolated extension TrackTags {
     var artistDiffersFromAlbumArtist: Bool {
         let artist = artist.trimmingCharacters(in: .whitespacesAndNewlines)
         let albumArtist = albumArtist.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -9,13 +9,13 @@ nonisolated extension ITunesTrackDraft {
 
     /// Moves a guest artist into the title, e.g. "Die With A Smile — Bruno Mars" by Lady Gaga, so the iPod
     /// lists the song under its album artist.
-    func preservingAlbumArtist() -> ITunesTrackDraft {
+    func preservingAlbumArtist() -> TrackTags {
         guard artistDiffersFromAlbumArtist else { return self }
-        var draft = self
-        draft.title = "\(title) — \(artist)"
-        draft.artist = albumArtist
-        if !sortTitle.isEmpty { draft.sortTitle = "\(sortTitle) — \(artist)" }
-        draft.sortArtist = sortAlbumArtist
-        return draft
+        var tags = self
+        tags.title = "\(title) — \(artist)"
+        tags.artist = albumArtist
+        if !sortTitle.isEmpty { tags.sortTitle = "\(sortTitle) — \(artist)" }
+        tags.sortArtist = sortAlbumArtist
+        return tags
     }
 }

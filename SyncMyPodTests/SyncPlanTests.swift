@@ -36,7 +36,7 @@ struct SyncPlanTests {
     }
 
     @Test func matchKeyIgnoresCaseAndSurroundingSpaces() {
-        let draft = ITunesTrackDraft(title: " Clocks", artist: "COLDPLAY", album: "A Rush", fileSize: 10)
+        let draft = TrackTags(title: " Clocks", artist: "COLDPLAY", album: "A Rush", fileSize: 10)
         let onDevice = ITunesTrack.preview(id: 1, title: "clocks", artist: "Coldplay", album: "a rush ", duration: 0)
         #expect(IPodTrackMatchKey(draft) == IPodTrackMatchKey(title: "clocks", artist: "coldplay", album: "a rush",
                                                               fileSize: 10))
@@ -57,14 +57,14 @@ struct SyncPlanTests {
         let plan = SyncPlan.make(tracks: tracks, songs: .all, selectedAlbums: [], onDevice: onDevice)
         #expect(plan.requests.count == 4)
         #expect(plan.alreadyOnDeviceCount == 1)
-        #expect(!plan.requests.map(\.draft.title).contains("Clocks"))
+        #expect(!plan.requests.map(\.tags.title).contains("Clocks"))
     }
 
     @Test func customPlansOnlySelectedAlbums() {
         let tracks = library
         let selected: Set = [tracks[0].syncAlbumKey, tracks[2].syncAlbumKey]
         let plan = SyncPlan.make(tracks: tracks, songs: .selected, selectedAlbums: selected, onDevice: [])
-        #expect(plan.requests.map(\.draft.title) == ["Clocks", "Hey Ya!"])
+        #expect(plan.requests.map(\.tags.title) == ["Clocks", "Hey Ya!"])
         #expect(plan.byteCount == 13_000)
     }
 
@@ -78,7 +78,7 @@ struct SyncPlanTests {
         let tracks = library
         let plan = SyncPlan.make(tracks: tracks, songs: .selected, selectedAlbums: [tracks[2].syncAlbumKey],
                                  selectedGenres: ["Rock", "Hip-Hop"], onDevice: [])
-        #expect(plan.requests.map(\.draft.title) == ["Clocks", "Yellow", "Hey Ya!"])
+        #expect(plan.requests.map(\.tags.title) == ["Clocks", "Yellow", "Hey Ya!"])
     }
 
     @Test func customPlanWithNothingSelectedIsEmpty() {
@@ -172,7 +172,7 @@ struct SyncPlanTests {
         #expect(!plan.isEmpty)
         #expect(plan.alreadyOnDeviceCount == 0)
         #expect(plan.updatedByteCount == Int64(clocks.fileSize))
-        #expect(plan.syncRequests.map(\.draft.title) == ["Clocks"])
+        #expect(plan.syncRequests.map(\.tags.title) == ["Clocks"])
     }
 
     @Test func strayTracksAreRemovedEvenWhenSyncingAllSongs() {
@@ -220,7 +220,7 @@ struct SyncPlanTests {
         let tracks = library
         let plan = SyncPlan.make(tracks: tracks, songs: .selected, selectedAlbums: [], playlists: [playlist([tracks[2]])],
                                  onDevice: [])
-        #expect(plan.requests.map(\.draft.title) == ["Hey Ya!"])
+        #expect(plan.requests.map(\.tags.title) == ["Hey Ya!"])
         #expect(plan.playlistChangeCount == 1)
     }
 

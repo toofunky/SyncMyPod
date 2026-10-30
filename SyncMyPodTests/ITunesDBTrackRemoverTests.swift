@@ -48,9 +48,9 @@ struct ITunesDBTrackRemoverTests {
 
     @Test func prunesAlbumEntriesNoTrackUses() throws {
         var editor = try ITunesDBEditor(root: ITunesDBRecordParser(data: fixture).parse())
-        let keep = editor.addTrack(ITunesTrackDraft(title: "One", album: "Shared", location: ":a"))
-        let drop = editor.addTrack(ITunesTrackDraft(title: "Two", album: "Shared", location: ":b"))
-        let lone = editor.addTrack(ITunesTrackDraft(title: "Three", album: "Lonely", location: ":c"))
+        let keep = editor.addTrack(ITunesTrackDraft(tags: TrackTags(title: "One", album: "Shared"), location: ":a"))
+        let drop = editor.addTrack(ITunesTrackDraft(tags: TrackTags(title: "Two", album: "Shared"), location: ":b"))
+        let lone = editor.addTrack(ITunesTrackDraft(tags: TrackTags(title: "Three", album: "Lonely"), location: ":c"))
         _ = editor.removeTracks(databaseIDs: [drop, lone])
         let root = try ITunesDBRecordParser(data: editor.serialized()).parse()
         let albums = try #require(root.children.first { $0.isSection(.albums) }?.children.first).children

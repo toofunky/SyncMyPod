@@ -8,7 +8,7 @@ struct IPodSyncVerifierTests {
     ], includesAlbumSection: true).build()
 
     private func request(_ source: URL) -> SyncRequest {
-        SyncRequest(sourceURL: source, draft: ITunesTrackDraft(title: "One", fileSize: 1_024),
+        SyncRequest(sourceURL: source, tags: TrackTags(title: "One", fileSize: 1_024),
                         source: SyncSource(fileSize: 1_024, modificationDate: .now, artworkFingerprint: nil))
     }
 

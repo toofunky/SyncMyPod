@@ -38,7 +38,7 @@ struct AudiobookIPodSyncPlanTests {
         let playlist = try #require(plan.playlists.first)
         #expect(plan.playlists.count == 1)
         #expect(playlist.id == chosen.syncPlaylistID && playlist.name == "Frankenstein" && !playlist.isPodcasts)
-        #expect(playlist.tracks.map(\.draft.title) == ["1.m4a", "2.m4a"])
+        #expect(playlist.tracks.map(\.tags.title) == ["1.m4a", "2.m4a"])
     }
 
     @Test func playlistsCanBeTurnedOff() async {

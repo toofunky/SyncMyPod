@@ -11,5 +11,5 @@ nonisolated struct SyncTrackSnapshot: Equatable, Sendable {
     let genre: String
     let request: SyncRequest
 
-    var byteCount: Int64 { Int64(request.draft.fileSize) }
+    var byteCount: Int64 { Int64(request.tags.fileSize) }
 }

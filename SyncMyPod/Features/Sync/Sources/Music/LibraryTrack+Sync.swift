@@ -4,13 +4,13 @@ extension LibraryTrack {
     /// `preservingAlbumArtist` and `embeddingLyricsSidecar` change only the copy on the iPod, never the file.
     /// A lyric file is embedded only in songs without lyrics of their own.
     func syncRequest(preservingAlbumArtist: Bool, embeddingLyricsSidecar: Bool = false) -> SyncRequest {
-        let preserves = preservingAlbumArtist && draft.artistDiffersFromAlbumArtist
+        let preserves = preservingAlbumArtist && tags.artistDiffersFromAlbumArtist
         let embeds = embeddingLyricsSidecar && hasLyrics && !hasEmbeddedLyrics
-        var draft = preserves ? draft.preservingAlbumArtist() : draft
-        draft.hasLyrics = hasEmbeddedLyrics || embeds
-        return SyncRequest(sourceURL: URL(filePath: filePath), draft: draft,
-                               source: syncSource(preservedAlbumArtist: preserves, embeddedLyricsSidecar: embeds),
-                               embedsLyricsSidecar: embeds)
+        var tags = preserves ? tags.preservingAlbumArtist() : tags
+        tags.hasLyrics = hasEmbeddedLyrics || embeds
+        return SyncRequest(sourceURL: URL(filePath: filePath), tags: tags,
+                           source: syncSource(preservedAlbumArtist: preserves, embeddedLyricsSidecar: embeds),
+                           embedsLyricsSidecar: embeds)
     }
 
     private func syncSource(preservedAlbumArtist: Bool, embeddedLyricsSidecar: Bool) -> SyncSource? {
@@ -22,8 +22,8 @@ extension LibraryTrack {
                           lyricsSidecarDate: embeddedLyricsSidecar ? lyricsFileDate : nil)
     }
 
-    private var draft: ITunesTrackDraft {
-        ITunesTrackDraft(title: title, artist: artist, album: album, albumArtist: albumArtist,
+    private var tags: TrackTags {
+        TrackTags(title: title, artist: artist, album: album, albumArtist: albumArtist,
                          composer: composer, genre: genre,
                          fileSize: fileSize, duration: duration, trackNumber: trackNumber,
                          trackCount: trackCount, discNumber: discNumber, discCount: discCount, year: year,
