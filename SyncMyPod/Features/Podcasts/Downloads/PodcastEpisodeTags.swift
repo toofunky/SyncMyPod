@@ -2,8 +2,6 @@ import Foundation
 
 /// What a downloaded episode is tagged with, so players file it under its show rather than as loose songs.
 nonisolated struct PodcastEpisodeTags: Equatable, Sendable {
-    static let genre = "Podcast"
-
     let title: String
     let show: String
     let author: String
@@ -18,7 +16,7 @@ nonisolated struct PodcastEpisodeTags: Equatable, Sendable {
         changes.artist = author.isEmpty ? show : author
         changes.albumArtist = changes.artist
         changes.album = show
-        changes.genre = Self.genre
+        changes.genre = TrackTags.podcastGenre
         changes.year = publishedAt.map { Calendar(identifier: .gregorian).component(.year, from: $0) }
         changes.track = episodeNumber.map { TagNumberPair(number: $0) }
         return changes

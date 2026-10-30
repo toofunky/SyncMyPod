@@ -30,9 +30,9 @@ struct SyncAudiobookListView: View {
 #Preview {
     @Previewable @State var selection: Set<String> = []
     let part = SyncRequest(sourceURL: URL(filePath: "/Audiobooks/Mary Shelley/Frankenstein/01.m4a"),
-                               tags: TrackTags(title: "Letters 1–4", album: "Frankenstein",
-                                                       fileSize: 38_000_000),
-                               kind: .audiobook)
+                           tags: TrackTags(title: "Letters 1–4", album: "Frankenstein",
+                                           fileSize: 38_000_000),
+                           kind: .audiobook)
     SyncAudiobookListView(audiobooks: [
         SyncAudiobookSnapshot(key: "book", title: "Frankenstein", author: "Mary Shelley", files: [part])
     ], selection: $selection)

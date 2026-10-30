@@ -19,10 +19,10 @@ extension PodcastEpisode {
         let artist = author.isEmpty ? show : author
         let year = publishedAt.map { Calendar(identifier: .gregorian).component(.year, from: $0) } ?? 0
         var tags = TrackTags(title: title, artist: artist, album: show, albumArtist: artist,
-                                     genre: PodcastEpisodeTags.genre, fileSize: Int(clamping: byteCount ?? 0),
-                                     duration: duration ?? 0, trackNumber: episodeNumber ?? 0, year: year,
-                                     bitrate: bitrate ?? 0, sampleRate: sampleRate ?? 0,
-                                     dateAdded: downloadedAt ?? .now, lastModified: downloadedAt ?? .now)
+                             genre: TrackTags.podcastGenre, fileSize: Int(clamping: byteCount ?? 0),
+                             duration: duration ?? 0, trackNumber: episodeNumber ?? 0, year: year,
+                             bitrate: bitrate ?? 0, sampleRate: sampleRate ?? 0,
+                             dateAdded: downloadedAt ?? .now, lastModified: downloadedAt ?? .now)
         tags.releaseDate = publishedAt
         return tags
     }

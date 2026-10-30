@@ -15,7 +15,7 @@ nonisolated extension SyncRequest {
         guard var source, source.artworkFingerprint != nil else { return self }
         source.artworkPixelLimit = pixelLimit
         return SyncRequest(sourceURL: sourceURL, tags: tags, source: source,
-                               embedsLyricsSidecar: embedsLyricsSidecar, kind: kind,
-                               coverImageURL: coverImageURL)
+                           embedsLyricsSidecar: embedsLyricsSidecar, kind: kind,
+                           coverImageURL: coverImageURL)
     }
 }

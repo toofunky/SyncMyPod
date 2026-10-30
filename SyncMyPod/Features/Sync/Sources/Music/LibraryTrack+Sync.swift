@@ -9,8 +9,8 @@ extension LibraryTrack {
         var tags = preserves ? tags.preservingAlbumArtist() : tags
         tags.hasLyrics = hasEmbeddedLyrics || embeds
         return SyncRequest(sourceURL: URL(filePath: filePath), tags: tags,
-                               source: syncSource(preservedAlbumArtist: preserves, embeddedLyricsSidecar: embeds),
-                               embedsLyricsSidecar: embeds)
+                           source: syncSource(preservedAlbumArtist: preserves, embeddedLyricsSidecar: embeds),
+                           embedsLyricsSidecar: embeds)
     }
 
     private func syncSource(preservedAlbumArtist: Bool, embeddedLyricsSidecar: Bool) -> SyncSource? {

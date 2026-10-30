@@ -2,6 +2,8 @@ import Foundation
 
 /// A track as any device lists it: its tags, format and dates.
 nonisolated struct TrackTags: Equatable, Sendable {
+    static let podcastGenre = "Podcast"
+
     var title: String
     var artist = ""
     var album = ""
