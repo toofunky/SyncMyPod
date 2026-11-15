@@ -15,6 +15,7 @@ struct SyncMyPodApp: App {
     @AppStorage(AppAppearance.storageKey) private var appearance = AppAppearance.system
 
     init() {
+        _syncModel = State(initialValue: DeviceSyncModel(context: modelContainer.mainContext))
         LibraryFolderAccess.shared.open(in: modelContainer.mainContext)
         LibraryPlaylist.ensureFavorites(in: modelContainer.mainContext)
     }

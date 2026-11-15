@@ -7,6 +7,7 @@ struct SyncSummaryBar: View {
     let isCalculating: Bool
     let freeBytes: Int64?
     let isSyncing: Bool
+    var lastSyncDate: Date?
     let onSync: () -> Void
     /// Shows a Manage Storage button when set.
     var onManageStorage: (() -> Void)?
@@ -30,9 +31,16 @@ struct SyncSummaryBar: View {
                 Button("Manage Storage", systemImage: "internaldrive", action: onManageStorage)
                     .disabled(isSyncing)
             }
-            Button("Sync Now", systemImage: "arrow.triangle.2.circlepath", action: onSync)
-                .buttonStyle(.borderedProminent)
-                .disabled(totals?.isEmpty ?? true || isCalculating || isSyncing || !fits)
+            VStack(alignment: .trailing) {
+                Button("Sync Now", systemImage: "arrow.triangle.2.circlepath", action: onSync)
+                    .buttonStyle(.borderedProminent)
+                    .disabled(totals?.isEmpty ?? true || isCalculating || isSyncing || !fits)
+                if let lastSyncDate {
+                    Text("Last synced \(lastSyncDate.formatted(date: .abbreviated, time: .shortened))")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
         }
         .padding()
     }
@@ -77,8 +85,8 @@ struct SyncSummaryBar: View {
 #Preview("Adding and removing") {
     SyncSummaryBar(totals: SyncPlanTotals(addCount: 1, addBytes: 8_000_000, moveCount: 2, removeCount: 1,
                                           removeBytes: 6_000_000, selectedCount: 3),
-                   isCalculating: false, freeBytes: 38_000_000_000, isSyncing: false, onSync: {},
-                   onManageStorage: {})
+                   isCalculating: false, freeBytes: 38_000_000_000, isSyncing: false,
+                   lastSyncDate: .now.addingTimeInterval(-86_400), onSync: {}, onManageStorage: {})
 }
 
 #Preview("Up to date") {
