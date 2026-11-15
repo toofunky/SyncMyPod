@@ -1,3 +1,6 @@
+SyncMyPod-1.13.4
+- Add last synced date/time per device.
+
 SyncMyPod-1.13.3
 - Refactor code to improve modularity.
 - Minor behavior changes, such as keeping the Favorites playlist at the top of the list.

@@ -28,7 +28,8 @@ struct SyncSettingsForm: View {
             Divider()
             let input = planInput
             SyncSummaryBar(totals: plan?.totals, isCalculating: plannedInput != input, freeBytes: freeBytes,
-                           isSyncing: isSyncing, onSync: { plan.map(start) }, onManageStorage: onManageStorage)
+                           isSyncing: isSyncing, lastSyncDate: settings.lastSyncDate, onSync: { plan.map(start) },
+                           onManageStorage: onManageStorage)
                 .task(id: input) { await replan(input) }
         }
         .confirmationDialog(removalTitle, isPresented: isConfirmingRemoval, presenting: pendingRemoval) { plan in

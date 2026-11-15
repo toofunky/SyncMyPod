@@ -29,7 +29,8 @@ struct PlayerSyncForm: View {
             Divider()
             let input = planInput
             SyncSummaryBar(totals: plan?.totals, deviceKind: .player, isCalculating: plannedInput != input,
-                           freeBytes: freeBytes, isSyncing: isSyncing) { plan.map(start) }
+                           freeBytes: freeBytes, isSyncing: isSyncing,
+                           lastSyncDate: settings.lastSyncDate) { plan.map(start) }
                 .task(id: input) { await replan(input) }
         }
         .confirmationDialog(removalTitle, isPresented: isConfirmingRemoval, presenting: pendingRemoval) { plan in

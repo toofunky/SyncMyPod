@@ -27,6 +27,8 @@ nonisolated final class IPodSyncSettings {
     var syncLyricsSidecarValue: Bool?
     /// Optional, like `preserveAlbumArtistValue`, because settings saved before this option existed hold `NULL`.
     var makeAudiobookPlaylistsValue: Bool?
+    /// When a sync to this device last finished without being cancelled.
+    var lastSyncDate: Date?
 
     init(deviceID: String) {
         self.deviceID = deviceID

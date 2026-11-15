@@ -1,5 +1,6 @@
 import Foundation
 import Observation
+import SwiftData
 
 /// Runs one sync at a time, to whichever connected device asked for it.
 @Observable
@@ -15,6 +16,12 @@ final class DeviceSyncModel {
 
     @ObservationIgnored private var syncTask: Task<Void, Never>?
     @ObservationIgnored private var verificationTask: Task<Void, Never>?
+    @ObservationIgnored private let context: ModelContext?
+
+    /// Without a `context`, as in previews, finished syncs aren't dated.
+    init(context: ModelContext? = nil) {
+        self.context = context
+    }
 
     /// Shows progress, runs the job and records its result.
     func run(_ job: some DeviceSyncJob) {
@@ -28,6 +35,7 @@ final class DeviceSyncModel {
             do {
                 let completion = try await job.run { update in await self.report(update) }
                 result = .finished(completion.summary)
+                recordSyncDate(for: job.deviceID, summary: completion.summary)
                 if let wasOverwritten = completion.wasOverwritten { verify(wasOverwritten) }
             } catch {
                 result = .failed(error.localizedDescription, deviceKind: job.deviceKind)
@@ -63,6 +71,12 @@ final class DeviceSyncModel {
             result = .overwritten
             completedSyncCount += 1
         }
+    }
+
+    private func recordSyncDate(for deviceID: String, summary: SyncSummary) {
+        guard let context, !summary.wasCancelled else { return }
+        DeviceSyncSettings.settings(for: deviceID, in: context).lastSyncDate = .now
+        try? context.save()
     }
 
     private func report(_ update: SyncProgress) {
