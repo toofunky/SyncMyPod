@@ -13,12 +13,14 @@ struct AlbumTracksInspector: View {
     @State private var lyricsTrack: LibraryTrack?
     @State private var lyricsTrackToRemove: LibraryTrack?
     @State private var newPlaylistTracks: [LibraryTrack]?
+    @State private var duplicateAddition: PlaylistAddition?
 
     var body: some View {
         content
             .modifier(TagEditingModifier(tracks: $tagsTracks))
             .modifier(LyricsEditingModifier(editing: $lyricsTrack, removing: $lyricsTrackToRemove))
             .modifier(NewPlaylistModifier(tracks: $newPlaylistTracks))
+            .modifier(DuplicatePlaylistSongsModifier(addition: $duplicateAddition))
             .onChange(of: albumID, initial: true) { updateAlbumTracks() }
             .onChange(of: tracks) { updateAlbumTracks() }
             .onModelContextSave { updateAlbumTracks() }
@@ -60,7 +62,7 @@ struct AlbumTracksInspector: View {
     private var songActions: SongMenuActions {
         SongMenuActions(editTags: { tagsTracks = $0 }, editLyrics: { lyricsTrack = $0 },
                         removeLyrics: { lyricsTrackToRemove = $0 }, newPlaylist: { newPlaylistTracks = $0 },
-                        showPlaylist: showPlaylist)
+                        confirmDuplicates: { duplicateAddition = $0 }, showPlaylist: showPlaylist)
     }
 
     private var discNumbers: [Int] {

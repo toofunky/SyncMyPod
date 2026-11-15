@@ -21,6 +21,7 @@ struct LibraryTrackTableView: View {
     @State private var lyricsTrack: LibraryTrack?
     @State private var lyricsTrackToRemove: LibraryTrack?
     @State private var newPlaylistTracks: [LibraryTrack]?
+    @State private var duplicateAddition: PlaylistAddition?
     @AppStorage("libraryTableColumns") private var columnCustomization = TableColumnCustomization<LibraryTrack>()
 
     var body: some View {
@@ -61,6 +62,7 @@ struct LibraryTrackTableView: View {
         .modifier(TagEditingModifier(tracks: $tagsTracks))
         .modifier(LyricsEditingModifier(editing: $lyricsTrack, removing: $lyricsTrackToRemove))
         .modifier(NewPlaylistModifier(tracks: $newPlaylistTracks))
+        .modifier(DuplicatePlaylistSongsModifier(addition: $duplicateAddition))
         .onChange(of: tracks) {
             sortKeys = LibraryTrack.sortKeys(for: tracks)
             updateRows()
@@ -161,7 +163,7 @@ struct LibraryTrackTableView: View {
     private var songActions: SongMenuActions {
         SongMenuActions(editTags: { tagsTracks = $0 }, editLyrics: { lyricsTrack = $0 },
                         removeLyrics: { lyricsTrackToRemove = $0 }, newPlaylist: { newPlaylistTracks = $0 },
-                        showPlaylist: showPlaylist)
+                        confirmDuplicates: { duplicateAddition = $0 }, showPlaylist: showPlaylist)
     }
 
     /// Plays the first double-clicked song, then the ones after it in the order shown.

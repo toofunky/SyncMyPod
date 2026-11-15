@@ -28,12 +28,17 @@ struct LibraryTrackContextMenu: View {
         return playlists.filter { !paths.isDisjoint(with: $0.trackPaths) }
     }
 
-    /// `nil` asks for a name for a new playlist of the songs.
+    /// `nil` asks for a name for a new playlist of the songs; songs already in the playlist ask first.
     private func addToPlaylist(_ playlist: LibraryPlaylist?) {
-        if let playlist {
-            playlist.append(tracks)
-        } else {
+        guard let playlist else {
             actions.newPlaylist(tracks)
+            return
+        }
+        let addition = PlaylistAddition(tracks: tracks, playlist: playlist)
+        if addition.duplicates.isEmpty {
+            addition.addAll()
+        } else {
+            actions.confirmDuplicates(addition)
         }
     }
 
