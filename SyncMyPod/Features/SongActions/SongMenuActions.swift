@@ -7,5 +7,6 @@ struct SongMenuActions {
     var editLyrics: (LibraryTrack) -> Void = { _ in }
     var removeLyrics: (LibraryTrack) -> Void = { _ in }
     var newPlaylist: ([LibraryTrack]) -> Void = { _ in }
+    var confirmDuplicates: (PlaylistAddition) -> Void = { $0.addAll() }
     var showPlaylist: ((LibraryPlaylist) -> Void)?
 }

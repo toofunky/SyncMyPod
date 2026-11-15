@@ -14,6 +14,7 @@ struct ArtistAlbumsView: View {
     @State private var lyricsTrack: LibraryTrack?
     @State private var lyricsTrackToRemove: LibraryTrack?
     @State private var newPlaylistTracks: [LibraryTrack]?
+    @State private var duplicateAddition: PlaylistAddition?
 
     var body: some View {
         VStack(spacing: 0) {
@@ -23,12 +24,13 @@ struct ArtistAlbumsView: View {
         .modifier(TagEditingModifier(tracks: $tagsTracks))
         .modifier(LyricsEditingModifier(editing: $lyricsTrack, removing: $lyricsTrackToRemove))
         .modifier(NewPlaylistModifier(tracks: $newPlaylistTracks))
+        .modifier(DuplicatePlaylistSongsModifier(addition: $duplicateAddition))
     }
 
     private var songActions: SongMenuActions {
         SongMenuActions(editTags: { tagsTracks = $0 }, editLyrics: { lyricsTrack = $0 },
                         removeLyrics: { lyricsTrackToRemove = $0 }, newPlaylist: { newPlaylistTracks = $0 },
-                        showPlaylist: showPlaylist)
+                        confirmDuplicates: { duplicateAddition = $0 }, showPlaylist: showPlaylist)
     }
 
     private var header: some View {

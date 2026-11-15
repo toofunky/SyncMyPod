@@ -1,5 +1,6 @@
 SyncMyPod-1.13.4
 - Add last synced date/time per device.
+- Warn before adding a song to a playlist if it is already in the playlist.
 
 SyncMyPod-1.13.3
 - Refactor code to improve modularity.
